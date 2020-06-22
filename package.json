@@ -6,6 +6,7 @@
     "android": "react-native run-android --variant=privDebug",
     "ios": "react-native run-ios",
     "start": "react-native start",
+    "build-android": "./build_android_release.sh",
     "test": "jest",
     "lint": "eslint ."
   },
