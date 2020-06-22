@@ -2,5 +2,7 @@
   "welcome": "Welcome aboard Zion",
   "login_homeserver": "Homeserver",
   "login_username": "Username",
-  "login_password": "Password"
+  "login_password": "Password",
+  "login_login": "Log In",
+  "login_help": "What's Matrix?"
 }

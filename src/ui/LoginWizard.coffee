@@ -68,13 +68,13 @@ export default LoginWizard = () ->
             style={{ flex: 1 }}
             compact={true}
             onPress={() ->}>
-            { "What's Matrix?" }
+            {translate "login_help"}
           </Button>
           <Button
             style={{ flex: 1}}
             compact={true}
             onPress={() ->}>
-            Log In
+            {translate "login_login"}
           </Button>
         </View>
       </View>
