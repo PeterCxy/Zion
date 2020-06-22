@@ -135,6 +135,25 @@ android {
         versionCode 1
         versionName "1.0"
     }
+
+    flavorDimensions "flavor"
+
+    // To build release, use bundlePubRelease / assemblePubRelease
+    // The priv flavor is what should be used for React Native CLI
+    // because it somehow insists on using the "com.zion" package
+    // name.
+    productFlavors {
+        priv {
+            dimension "flavor"
+            applicationId "com.zion"
+        }
+
+        pub {
+            dimension "flavor"
+            applicationId "im.angry.zion"
+        }
+    }
+
     splits {
         abi {
             reset()
