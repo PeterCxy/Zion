@@ -4969,6 +4969,13 @@ react-native-safe-area-view@^0.14.9:
   dependencies:
     hoist-non-react-statics "^2.3.1"
 
+"react-native-v8@>=0.62.2-patch.0 <0.62.3":
+  version "0.62.2-patch.1"
+  resolved "https://registry.npm.taobao.org/react-native-v8/download/react-native-v8-0.62.2-patch.1.tgz#016a932ed5e60f6bca6803fbdf6c746fe1b55bf5"
+  integrity sha1-AWqTLtXmD2vKaAP732x0b+G1W/U=
+  dependencies:
+    v8-android "~8.80.1"
+
 react-native-vector-icons@^6.6.0:
   version "6.6.0"
   resolved "https://registry.npm.taobao.org/react-native-vector-icons/download/react-native-vector-icons-6.6.0.tgz#66cf004918eb05d90778d64bd42077c1800d481b"
@@ -6088,6 +6095,11 @@ uuid@^3.3.2:
   version "3.4.0"
   resolved "https://registry.npm.taobao.org/uuid/download/uuid-3.4.0.tgz?cache=0&sync_timestamp=1590000998251&other_urls=https%3A%2F%2Fregistry.npm.taobao.org%2Fuuid%2Fdownload%2Fuuid-3.4.0.tgz#b23e4358afa8a202fe7a100af1f5f883f02007ee"
   integrity sha1-sj5DWK+oogL+ehAK8fX4g/AgB+4=
+
+v8-android@~8.80.1:
+  version "8.80.1"
+  resolved "https://registry.npm.taobao.org/v8-android/download/v8-android-8.80.1.tgz#ec4c9be7656445377e6c080ebc39b1ab7e95fbce"
+  integrity sha1-7Eyb52VkRTd+bAgOvDmxq36V+84=
 
 v8-compile-cache@^2.0.3:
   version "2.1.1"
