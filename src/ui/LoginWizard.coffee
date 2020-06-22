@@ -1,14 +1,24 @@
-import React, { useState } from "react"
+import React, { useState, useEffect } from "react"
 import { View, Text } from "react-native"
 import { Button, TextInput } from "react-native-paper"
 import StatusBarColor from "../components/StatusBarColor"
 import * as theme from "../theme/default"
 import { translate } from "../util/i18n"
+import SoftInputMode from "../util/SoftInputMode"
 
 export default LoginWizard = () ->
   [homeserver, setHomeserver] = useState 'matrix.org'
   [userName, setUserName] = useState ''
   [password, setPassword] = useState ''
+
+  # In this UI we need to use ADJUST_PAN
+  useEffect ->
+    SoftInputMode.setSoftInputMode SoftInputMode.ADJUST_PAN
+
+    # Reset to ADJUST_RESIZE when unmounted
+    () ->
+      SoftInputMode.setSoftInputMode SoftInputMode.ADJUST_RESIZE
+  , []
 
   <View style={styleWrapper}>
     <StatusBarColor
