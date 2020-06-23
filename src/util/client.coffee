@@ -88,12 +88,20 @@ class ExtraIndexedDBBackend extends LocalIndexedDBStoreBackend
     pos = 1
     data = ""
     while true
-      chunk = await @_loadSyncDataChunk pos
+      chunk = null
+      try
+        chunk = await @_loadSyncDataChunk pos
+      catch err
+        return {}
       data += chunk
       if chunk.length < CHUNK_SIZE
         break
       pos += CHUNK_SIZE
-    JSON.parse data
+
+    if data == ""
+      return {}
+    else
+      JSON.parse data
 
   _loadSyncDataChunk: (pos) ->
     new Promise (resolve, reject) =>
@@ -101,6 +109,11 @@ class ExtraIndexedDBBackend extends LocalIndexedDBStoreBackend
         txn.executeSql(
           "SELECT substr(data, :pos, :chunk_size) FROM sync",
           [pos, CHUNK_SIZE],
-          (_, res) -> resolve Object.values(res.rows.item(0))[0],
+          (_, res) ->
+            if res.rows.length > 0
+              resolve Object.values(res.rows.item(0))[0]
+            else
+              resolve ""
+          ,
           (err) -> reject err
         )
