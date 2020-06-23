@@ -5,5 +5,7 @@
   "login_username": "Username",
   "login_password": "Password",
   "login_login": "Log In",
-  "login_help": "What's Matrix?"
+  "login_help": "What's Matrix?",
+  "err_failed_login": "Failed to log in. Please check your credentials.",
+  "ok": "OK"
 }

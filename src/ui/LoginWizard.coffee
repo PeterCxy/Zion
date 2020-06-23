@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react"
 import { View, Text } from "react-native"
-import { Button, TextInput, ProgressBar } from "react-native-paper"
+import { Button, TextInput, ProgressBar, Snackbar } from "react-native-paper"
 import AsyncStorage from '@react-native-community/async-storage'
 import StatusBarColor from "../components/StatusBarColor"
 import * as theme from "../theme/default"
@@ -13,6 +13,7 @@ export default LoginWizard = ({onLogin}) ->
   [userName, setUserName] = useState ''
   [password, setPassword] = useState ''
   [loading, setLoading] = useState false
+  [failure, setFailure] = useState false
 
   # In this UI we need to use ADJUST_PAN
   useEffect ->
@@ -43,7 +44,7 @@ export default LoginWizard = ({onLogin}) ->
         # Notify the main page to switch
         onLogin client  
     catch err
-      # TODO: actually show the error
+      setFailure true
       setLoading false
   , [homeserver, userName, password]
 
@@ -81,14 +82,14 @@ export default LoginWizard = ({onLogin}) ->
           label={translate "login_homeserver"}
           value={homeserver}
           onChangeText={setHomeserver}
-          disabled={loading}
+          disabled={loading or failure}
           style={styleTextInput}/>
         <TextInput
           mode="outlined"
           label={translate "login_username"}
           value={userName}
           onChangeText={setUserName}
-          disabled={loading}
+          disabled={loading or failure}
           style={styleTextInput}/>
         <TextInput
           mode="outlined"
@@ -96,7 +97,7 @@ export default LoginWizard = ({onLogin}) ->
           label={translate "login_password"}
           value={password}
           onChangeText={setPassword}
-          disabled={loading}
+          disabled={loading or failure}
           style={styleTextInput}/>
         {
           # Button bar
@@ -105,14 +106,14 @@ export default LoginWizard = ({onLogin}) ->
           <Button
             style={{ flex: 1 }}
             compact={true}
-            disabled={loading}
+            disabled={loading or failure}
             onPress={() ->}>
             {translate "login_help"}
           </Button>
           <Button
             style={{ flex: 1}}
             compact={true}
-            disabled={loading}
+            disabled={loading or failure}
             onPress={doLogin}>
             {translate "login_login"}
           </Button>
@@ -123,6 +124,18 @@ export default LoginWizard = ({onLogin}) ->
       }
       <View style={{ flex: 1 }}/>
     </View>
+    {
+      # Failure toast
+    }
+    <Snackbar
+      visible={failure and not loading}
+      onDismiss={() -> setFailure false}
+      action={{
+        label: translate "ok"
+        onPress: () -> setFailure false
+      }}>
+      {translate "err_failed_login"}
+    </Snackbar>
   </View>
 
 styleWrapper =
