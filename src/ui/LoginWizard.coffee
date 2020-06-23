@@ -1,15 +1,18 @@
-import React, { useState, useEffect } from "react"
+import React, { useState, useEffect, useCallback } from "react"
 import { View, Text } from "react-native"
-import { Button, TextInput } from "react-native-paper"
+import { Button, TextInput, ProgressBar } from "react-native-paper"
+import AsyncStorage from '@react-native-community/async-storage'
 import StatusBarColor from "../components/StatusBarColor"
 import * as theme from "../theme/default"
 import { translate } from "../util/i18n"
 import SoftInputMode from "../util/SoftInputMode"
+import { createLoginMatrixClient, createMatrixClient } from "../util/client"
 
-export default LoginWizard = () ->
+export default LoginWizard = ({onLogin}) ->
   [homeserver, setHomeserver] = useState 'matrix.org'
   [userName, setUserName] = useState ''
   [password, setPassword] = useState ''
+  [loading, setLoading] = useState false
 
   # In this UI we need to use ADJUST_PAN
   useEffect ->
@@ -20,6 +23,30 @@ export default LoginWizard = () ->
       SoftInputMode.setSoftInputMode SoftInputMode.ADJUST_RESIZE
   , []
 
+  # The login function
+  doLogin = useCallback ->
+    setLoading true
+    baseUrl = "https://#{homeserver}"
+    tmpClient = createLoginMatrixClient baseUrl
+    try
+      resp = await tmpClient.login "m.login.password",
+        user: userName
+        password: password
+      if resp.access_token
+        # Write them to async storage
+        await AsyncStorage.setItem "@base_url", baseUrl
+        await AsyncStorage.setItem "@access_token", resp.access_token
+        await AsyncStorage.setItem "@user_id", resp.user_id
+        # Create the real client
+        client = await createMatrixClient baseUrl, resp.access_token, resp.user_id
+        await client.startClient()
+        # Notify the main page to switch
+        onLogin client  
+    catch err
+      # TODO: actually show the error
+      setLoading false
+  , [homeserver, userName, password]
+
   <View style={styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_PRIMARY}/>
@@ -29,6 +56,14 @@ export default LoginWizard = () ->
     <View style={styleHeader}>
       <Text style={styleTitle}>{translate "welcome"}</Text>
     </View>
+    {
+      # Progress bar
+    }
+    <ProgressBar
+      style={styleProgress}
+      indeterminate={true}
+      color={theme.COLOR_ACCENT}
+      visible={loading}/>
     {
       # Content area
     }
@@ -73,7 +108,7 @@ export default LoginWizard = () ->
           <Button
             style={{ flex: 1}}
             compact={true}
-            onPress={() ->}>
+            onPress={doLogin}>
             {translate "login_login"}
           </Button>
         </View>
@@ -103,6 +138,12 @@ styleTitle =
   fontSize: 30
   marginStart: 15
   marginBottom: 10
+
+styleProgress =
+  width: 'auto'
+  height: 2
+  alignSelf: 'stretch'
+  backgroundColor: theme.COLOR_BACKGROUND
 
 styleBody =
   flex: 1

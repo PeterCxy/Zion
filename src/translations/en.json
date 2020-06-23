@@ -1,4 +1,5 @@
 {
+  "app_name": "Zion",
   "welcome": "Welcome aboard Zion",
   "login_homeserver": "Homeserver",
   "login_username": "Username",
