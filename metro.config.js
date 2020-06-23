@@ -19,6 +19,6 @@ module.exports = {
   },
   resolver: {
     extraNodeModules: require('node-libs-react-native'),
-    sourceExts: ['js', 'coffee']
+    sourceExts: ['js', 'coffee', 'ts', 'tsx']
   }
 };

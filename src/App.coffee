@@ -5,6 +5,7 @@ import AsyncStorage from '@react-native-community/async-storage'
 import * as theme from "./theme/default"
 import LoginWizard from "./ui/LoginWizard"
 import SplashScreen from "./ui/SplashScreen"
+import Home from "./ui/Home"
 import { reloadI18n } from "./util/i18n"
 import { createMatrixClient, MatrixClientContext } from "./util/client"
 
@@ -49,6 +50,11 @@ export default App = () ->
         <SplashScreen/>
       else if not client?
         <LoginWizard onLogin={(client) -> setClient client}/>
+      else
+        <MatrixClientContext.Provider
+          value={client}>
+          <Home/>
+        </MatrixClientContext.Provider>
     }
   </PaperProvider>
 
