@@ -81,12 +81,14 @@ export default LoginWizard = ({onLogin}) ->
           label={translate "login_homeserver"}
           value={homeserver}
           onChangeText={setHomeserver}
+          disabled={loading}
           style={styleTextInput}/>
         <TextInput
           mode="outlined"
           label={translate "login_username"}
           value={userName}
           onChangeText={setUserName}
+          disabled={loading}
           style={styleTextInput}/>
         <TextInput
           mode="outlined"
@@ -94,6 +96,7 @@ export default LoginWizard = ({onLogin}) ->
           label={translate "login_password"}
           value={password}
           onChangeText={setPassword}
+          disabled={loading}
           style={styleTextInput}/>
         {
           # Button bar
@@ -102,12 +105,14 @@ export default LoginWizard = ({onLogin}) ->
           <Button
             style={{ flex: 1 }}
             compact={true}
+            disabled={loading}
             onPress={() ->}>
             {translate "login_help"}
           </Button>
           <Button
             style={{ flex: 1}}
             compact={true}
+            disabled={loading}
             onPress={doLogin}>
             {translate "login_login"}
           </Button>
