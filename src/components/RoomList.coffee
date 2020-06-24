@@ -48,6 +48,8 @@ eventToDescription = (ev) ->
           translate("room_event_join").replace "%", content.displayname
         else
           content.membership
+    when 'm.room.name'
+      translate("room_event_name_changed").replace "%", ev.sender.name
     else translate("room_event_unknown").replace "%", ev.getType()
 
 messageToDescription = (content) ->
