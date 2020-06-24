@@ -35,12 +35,13 @@ eventToDescription = (ev) ->
       translate "room_event_created"
     when 'm.sticker'
       translate("room_event_sticker").replace "%", ev.sender.name
-    else '...'
+    else translate("room_event_unknown").replace "%", ev.getType()
 
 messageToDescription = (content) ->
   #console.log "msgType = #{content.msgtype}"
   switch content.msgtype
     when "m.text" then content.body
+    else translate("room_msg_unknown").replace "%", content.msgtype
 
 renderRoom = (theme, styles, {item}) ->
   <TouchableRipple
