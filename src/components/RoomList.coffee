@@ -58,11 +58,10 @@ messageToDescription = (content) ->
     when "m.text" then content.body
     else translate("room_msg_unknown").replace "%", content.msgtype
 
-renderRoom = (navigation, theme, styles, {item}) ->
+renderRoom = (onEnterRoom, theme, styles, {item}) ->
   <TouchableRipple
     onPress={->
-      navigation.navigate 'Chat',
-        roomId: item.key
+      onEnterRoom item.key
     }
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
@@ -78,7 +77,7 @@ renderRoom = (navigation, theme, styles, {item}) ->
     </View>
   </TouchableRipple>
 
-export default RoomList = ({navigation}) ->
+export default RoomList = ({onEnterRoom}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [rooms, setRooms] = useState []
@@ -106,7 +105,7 @@ export default RoomList = ({navigation}) ->
   <>
     <FlatList
       data={rooms}
-      renderItem={(data) -> renderRoom navigation, theme, styles, data}/>
+      renderItem={(data) -> renderRoom onEnterRoom, theme, styles, data}/>
   </>
 
 buildStyles = (theme) ->

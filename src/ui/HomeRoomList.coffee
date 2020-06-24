@@ -9,5 +9,5 @@ export default HomeRoomList = ({navigation}) ->
     <Appbar.Header>
       <Appbar.Content title={translate "app_name"} />
     </Appbar.Header>
-    <RoomList navigation={navigation}/>
+    <RoomList onEnterRoom={(roomId) -> navigation.navigate "Chat", roomId: roomId}/>
   </>
