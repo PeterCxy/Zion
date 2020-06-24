@@ -41,7 +41,7 @@ export default Avatar = ({name, url, style}) ->
       info = resp.info()
       if info.status == 200
         dUrl = "data:" + info.headers["content-type"] + ";base64," + await resp.base64()
-        memoryCache[dUrl] = dUrl
+        memoryCache[url] = dUrl
         
         # Play animation first
         Animated.timing fadeAnim,
