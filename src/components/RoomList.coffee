@@ -35,6 +35,16 @@ eventToDescription = (ev) ->
       translate "room_event_created"
     when 'm.sticker'
       translate("room_event_sticker").replace "%", ev.sender.name
+    when 'm.room.member'
+      content = ev.getContent()
+      switch content.membership
+        when 'invite'
+          translate("room_event_invite").replace "%a", ev.sender.name
+            .replace "%b", content.displayname
+        when 'join'
+          translate("room_event_join").replace "%", content.displayname
+        else
+          content.membership
     else translate("room_event_unknown").replace "%", ev.getType()
 
 messageToDescription = (content) ->
