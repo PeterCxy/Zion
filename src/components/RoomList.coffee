@@ -12,8 +12,11 @@ transformRooms = (client, rooms) ->
   rooms.map (room) ->
     [ts, desc] = getLatestMessage room
 
+    # We should NOT keep track of the original Room object
+    # because they are mutable.
+    # Instead, we always build our own immutable state
+    # out of the original object.
     return
-      _room: room
       key: room.roomId
       name: room.name
       avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
@@ -57,7 +60,7 @@ renderRoom = (navigation, theme, styles, {item}) ->
   <TouchableRipple
     onPress={->
       navigation.navigate 'Chat',
-        roomId: item._room.roomId
+        roomId: item.key
     }
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
