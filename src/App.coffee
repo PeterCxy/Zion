@@ -41,7 +41,7 @@ export default App = () ->
 
   # Load log-in information
   useEffect ->
-    doLoad = ->
+    do ->
       baseUrl = await AsyncStorage.getItem "@base_url"
       token = await AsyncStorage.getItem "@access_token"
       uid = await AsyncStorage.getItem "@user_id"
@@ -56,7 +56,6 @@ export default App = () ->
         await client.startClient()
         setClient client
         setLoaded true
-    doLoad()
     return
   , []
 
