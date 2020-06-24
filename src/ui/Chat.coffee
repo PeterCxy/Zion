@@ -25,8 +25,9 @@ export default Chat = ({route, navigation}) ->
   # Listen to room name updates
   useEffect ->
     onNameChange = (room) ->
+      return if room.roomId != roomId
       setName room.name
-      
+
     client.on 'Room.name', onNameChange
 
     return ->
