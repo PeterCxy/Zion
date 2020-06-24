@@ -23,6 +23,7 @@ export default Chat = ({route, navigation}) ->
   [avatar, setAvatar] = useState initialAvatar
 
   # Listen to room name updates
+  # TODO: also implement room avatar updates?
   useEffect ->
     onNameChange = (room) ->
       return if room.roomId != roomId
