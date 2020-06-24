@@ -29,11 +29,13 @@ export MatrixClientContext = React.createContext null
 
 export createMatrixClient = (baseUrl, token, uid) ->
   initGlobals()
-  m.createClient
+  client = m.createClient
     baseUrl: baseUrl
     accessToken: token
     userId: uid
     store: await initIndexedDBStore()
+  await client.startClient()
+  client
 
 export createLoginMatrixClient = (baseUrl) ->
   initGlobals()

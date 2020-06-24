@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Image, FlatList, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
 import Avatar from "./Avatar"
@@ -23,7 +23,7 @@ transformRooms = (client, rooms) ->
 
 getLatestMessage = (room) ->
   events = room.getLiveTimeline().getEvents()
-  latest = events[0]
+  latest = events[events.length - 1]
   [latest.getTs(), eventToDescription(latest)]
 
 eventToDescription = (ev) ->
@@ -64,10 +64,24 @@ export default RoomList = () ->
   [theme, styles] = useStyles buildStyles
   [rooms, setRooms] = useState []
 
-  # Load rooms on mount
-  useEffect ->
+  refreshRooms = useCallback ->
     newRooms = transformRooms client, client.getRooms()
     setRooms newRooms
+  , []
+
+  # Load rooms on mount
+  useEffect ->
+    refreshRooms()
+  , []
+
+  # Install sync listener to refresh rooms
+  useEffect ->
+    # TODO: maybe this is too much of work to update all rooms on all sync events?
+    #       maybe we can do better?
+    client.on 'sync', refreshRooms
+    
+    return ->
+      client.removeListener 'sync', refreshRooms
   , []
 
   <>

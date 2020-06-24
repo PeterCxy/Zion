@@ -52,8 +52,6 @@ export default App = () ->
       else
         # We have the full information to construct client
         client = await createMatrixClient baseUrl, token, uid
-        # Inialize the client
-        await client.startClient()
         setClient client
         setLoaded true
     return
