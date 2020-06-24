@@ -4,6 +4,7 @@ import { NavigationContainer } from "@react-navigation/native"
 import { createStackNavigator } from '@react-navigation/stack'
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
+import Chat from "./Chat"
 import ThemeContext from "../theme"
 
 Stack = createStackNavigator()
@@ -20,6 +21,9 @@ export default Home = () ->
         <Stack.Screen
           name="HomeRoomList"
           component={HomeRoomList}/>
+        <Stack.Screen
+          name="Chat"
+          component={Chat}/>
       </Stack.Navigator>
     </NavigationContainer>
   </View>
