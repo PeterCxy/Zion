@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Animated, Image, Text, View } from "react-native"
 import RNFetchBlob from 'rn-fetch-blob'
-import * as theme from "../theme/default"
+import { useStyles } from "../theme"
 
 # A cache of URL vs fetched image (data URL)
 memoryCache = {}
@@ -27,6 +27,7 @@ extractCapitals = (name) ->
 # Generated from the name
 # Otherwise show the fetched image after it gets fully loaded
 export default Avatar = ({name, url, style}) ->
+  [theme, styles] = useStyles buildStyles
   [dataURL, setDataURL] = useState memoryCache[url]
   fadeAnim = useRef(new Animated.Value 1).current
 
@@ -58,16 +59,16 @@ export default Avatar = ({name, url, style}) ->
   , []
 
   if not dataURL
-    <Animated.View style={Object.assign {}, styleTextBackground, style, { opacity: fadeAnim }}>
-      <Text style={styleText}>{extractCapitals name}</Text>
+    <Animated.View style={Object.assign {}, styles.styleTextBackground, style, { opacity: fadeAnim }}>
+      <Text style={styles.styleText}>{extractCapitals name}</Text>
     </Animated.View>
   else
     <Animated.Image style={Object.assign {}, style, { opacity: fadeAnim }} source={{ uri: dataURL }}/>
 
-styleTextBackground =
-  alignItems: "center"
-  justifyContent: "center"
-  backgroundColor: theme.COLOR_PRIMARY
-
-styleText =
-  color: theme.COLOR_TEXT_PRIMARY
+buildStyles = (theme) ->
+    styleTextBackground:
+      alignItems: "center"
+      justifyContent: "center"
+      backgroundColor: theme.COLOR_PRIMARY
+    styleText:
+      color: theme.COLOR_TEXT_PRIMARY

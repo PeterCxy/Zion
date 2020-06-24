@@ -1,14 +1,16 @@
-import React from "react"
+import React, { useContext } from "react"
 import { View } from "react-native"
 import { NavigationContainer } from "@react-navigation/native"
 import { createStackNavigator } from '@react-navigation/stack'
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
-import * as theme from "../theme/default"
+import ThemeContext from "../theme"
 
 Stack = createStackNavigator()
 
 export default Home = () ->
+  {theme} = useContext ThemeContext
+
   <View style={styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_SECONDARY}/>

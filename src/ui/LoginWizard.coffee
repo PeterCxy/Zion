@@ -3,12 +3,13 @@ import { View, Text } from "react-native"
 import { Button, TextInput, ProgressBar, Snackbar } from "react-native-paper"
 import AsyncStorage from '@react-native-community/async-storage'
 import StatusBarColor from "../components/StatusBarColor"
-import * as theme from "../theme/default"
+import { useStyles } from "../theme"
 import { translate } from "../util/i18n"
 import SoftInputMode from "../util/SoftInputMode"
 import { createLoginMatrixClient, createMatrixClient } from "../util/client"
 
 export default LoginWizard = ({onLogin}) ->
+  [theme, styles] = useStyles buildStyles
   [homeserver, setHomeserver] = useState 'matrix.org'
   [userName, setUserName] = useState ''
   [password, setPassword] = useState ''
@@ -48,27 +49,27 @@ export default LoginWizard = ({onLogin}) ->
       setLoading false
   , [homeserver, userName, password]
 
-  <View style={styleWrapper}>
+  <View style={styles.styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_PRIMARY}/>
     {
       # Expanded title area
     }
-    <View style={styleHeader}>
-      <Text style={styleTitle}>{translate "welcome"}</Text>
+    <View style={styles.styleHeader}>
+      <Text style={styles.styleTitle}>{translate "welcome"}</Text>
     </View>
     {
       # Progress bar
     }
     <ProgressBar
-      style={styleProgress}
+      style={styles.styleProgress}
       indeterminate={true}
       color={theme.COLOR_ACCENT}
       visible={loading}/>
     {
       # Content area
     }
-    <View style={styleBody}>
+    <View style={styles.styleBody}>
       {
         # Spacer
       }
@@ -83,14 +84,14 @@ export default LoginWizard = ({onLogin}) ->
           value={homeserver}
           onChangeText={setHomeserver}
           disabled={loading or failure}
-          style={styleTextInput}/>
+          style={styles.styleTextInput}/>
         <TextInput
           mode="outlined"
           label={translate "login_username"}
           value={userName}
           onChangeText={setUserName}
           disabled={loading or failure}
-          style={styleTextInput}/>
+          style={styles.styleTextInput}/>
         <TextInput
           mode="outlined"
           secureTextEntry={true}
@@ -98,11 +99,11 @@ export default LoginWizard = ({onLogin}) ->
           value={password}
           onChangeText={setPassword}
           disabled={loading or failure}
-          style={styleTextInput}/>
+          style={styles.styleTextInput}/>
         {
           # Button bar
         }
-        <View style={styleButtonBar}>
+        <View style={styles.styleButtonBar}>
           <Button
             style={{ flex: 1 }}
             compact={true}
@@ -138,41 +139,36 @@ export default LoginWizard = ({onLogin}) ->
     </Snackbar>
   </View>
 
-styleWrapper =
-  flexDirection: 'column'
-  alignSelf: 'stretch'
-  flex: 1
-
-styleHeader =
-  flexDirection: 'row'
-  elevation: 5
-  flex: 1
-  backgroundColor: theme.COLOR_PRIMARY
-
-styleTitle =
-  alignSelf: 'flex-end'
-  fontFamily: 'sans-serif-condensed-light'
-  color: theme.COLOR_TEXT_PRIMARY
-  fontSize: 30
-  marginStart: 15
-  marginBottom: 10
-
-styleProgress =
-  width: 'auto'
-  height: 2
-  alignSelf: 'stretch'
-  backgroundColor: theme.COLOR_BACKGROUND
-
-styleBody =
-  flex: 1
-  alignSelf: 'stretch'
-  flexDirection: 'row'
-
-styleTextInput =
-  marginTop: 20
-
-styleButtonBar =
-  flexDirection: 'row'
-  alignSelf: 'flex-end'
-  marginTop: 'auto'
-  marginBottom: 20
+buildStyles = (theme) ->
+  styleWrapper:
+    flexDirection: 'column'
+    alignSelf: 'stretch'
+    flex: 1
+  styleHeader:
+    flexDirection: 'row'
+    elevation: 5
+    flex: 1
+    backgroundColor: theme.COLOR_PRIMARY
+  styleTitle:
+    alignSelf: 'flex-end'
+    fontFamily: 'sans-serif-condensed-light'
+    color: theme.COLOR_TEXT_PRIMARY
+    fontSize: 30
+    marginStart: 15
+    marginBottom: 10
+  styleProgress:
+    width: 'auto'
+    height: 2
+    alignSelf: 'stretch'
+    backgroundColor: theme.COLOR_BACKGROUND
+  styleBody:
+    flex: 1
+    alignSelf: 'stretch'
+    flexDirection: 'row'
+  styleTextInput:
+    marginTop: 20
+  styleButtonBar:
+    flexDirection: 'row'
+    alignSelf: 'flex-end'
+    marginTop: 'auto'
+    marginBottom: 20

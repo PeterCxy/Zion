@@ -1,8 +1,9 @@
-import React, { useState, useEffect } from "react"
+import React, { useCallback, useMemo, useState, useEffect } from "react"
 import { YellowBox } from "react-native"
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper'
 import AsyncStorage from '@react-native-community/async-storage'
-import * as theme from "./theme/default"
+import ThemeContext from "./theme"
+import * as defTheme from "./theme/default"
 import LoginWizard from "./ui/LoginWizard"
 import SplashScreen from "./ui/SplashScreen"
 import Home from "./ui/Home"
@@ -18,6 +19,21 @@ export default App = () ->
   [i18nLoaded, setI18nLoaded] = useState false
   [loaded, setLoaded] = useState false
   [client, setClient] = useState null
+  [curTheme, setCurTheme] = useState defTheme
+  setCurTheme = useCallback setCurTheme, []
+
+  paperTheme = useMemo ->
+    {
+      ...DefaultTheme,
+      colors: {
+        ...DefaultTheme.colors,
+        background: curTheme.COLOR_BACKGROUND,
+        primary: curTheme.COLOR_PRIMARY,
+        secondary: curTheme.COLOR_SECONDARY,
+        accent: curTheme.COLOR_ACCENT
+      }
+    }
+  , [curTheme]
 
   if not i18nLoaded
     reloadI18n()
@@ -44,27 +60,18 @@ export default App = () ->
     return
   , []
 
-  <PaperProvider theme={paperTheme}>
-    {
-      if not loaded
-        <SplashScreen/>
-      else if not client?
-        <LoginWizard onLogin={(client) -> setClient client}/>
-      else
-        <MatrixClientContext.Provider
-          value={client}>
-          <Home/>
-        </MatrixClientContext.Provider>
-    }
-  </PaperProvider>
-
-paperTheme = {
-  ...DefaultTheme,
-  colors: {
-    ...DefaultTheme.colors,
-    background: theme.COLOR_BACKGROUND,
-    primary: theme.COLOR_PRIMARY,
-    secondary: theme.COLOR_SECONDARY,
-    accent: theme.COLOR_ACCENT
-  }
-}
+  <ThemeContext.Provider value={{ theme: curTheme, setTheme: setCurTheme }}>
+    <PaperProvider theme={paperTheme}>
+      {
+        if not loaded
+          <SplashScreen/>
+        else if not client?
+          <LoginWizard onLogin={(client) -> setClient client}/>
+        else
+          <MatrixClientContext.Provider
+            value={client}>
+            <Home/>
+          </MatrixClientContext.Provider>
+      }
+    </PaperProvider>
+  </ThemeContext.Provider>

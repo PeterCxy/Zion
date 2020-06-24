@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useState } from "react"
 import { Image, FlatList, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
 import Avatar from "./Avatar"
-import * as theme from "../theme/default"
+import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 
 # Transform a list of rooms received from the SDK
@@ -14,25 +14,26 @@ transformRooms = (client, rooms) ->
       name: room.name
       avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
 
-renderRoom = ({item}) ->
+renderRoom = (theme, styles, {item}) ->
   <TouchableRipple
     onPress={->}
     rippleColor={theme.COLOR_RIPPLE}
-    style={styleRoomItem}>
-    <View style={styleRoomItem}>
+    style={styles.styleRoomItem}>
+    <View style={styles.styleRoomItem}>
       <Avatar
-        style={styleRoomAvatar}
+        style={styles.styleRoomAvatar}
         name={item.name}
         url={item.avatar}/>
-      <View style={styleTextContainer}>
-        <Text numberOfLines={1} style={styleTextTitle}>{item.name}</Text>
-        <Text numberOfLines={1} style={styleTextSummary}>Lorem Ipsum</Text>
+      <View style={styles.styleTextContainer}>
+        <Text numberOfLines={1} style={styles.styleTextTitle}>{item.name}</Text>
+        <Text numberOfLines={1} style={styles.styleTextSummary}>Lorem Ipsum</Text>
       </View>
     </View>
   </TouchableRipple>
 
 export default RoomList = () ->
   client = useContext MatrixClientContext
+  [theme, styles] = useStyles buildStyles
   [rooms, setRooms] = useState []
 
   # Load rooms on mount
@@ -44,33 +45,30 @@ export default RoomList = () ->
   <>
     <FlatList
       data={rooms}
-      renderItem={renderRoom}/>
+      renderItem={(data) -> renderRoom theme, styles, data}/>
   </>
 
-styleRoomItem =
-  flex: 1
-  flexDirection: "row"
-  alignSelf: "stretch"
-
-styleRoomAvatar =
-  width: 56
-  height: 56
-  borderRadius: 28
-  margin: 16
-
-styleTextContainer =
-  flexDirection: "column"
-  alignSelf: "stretch"
-  marginTop: 16
-  marginStart: 6
-  marginBottom: 16
-
-styleTextTitle =
-  fontSize: 16
-  fontWeight: "bold"
-  color: theme.COLOR_TEXT_ON_BACKGROUND
-
-styleTextSummary =
-  fontSize: 14
-  marginTop: 8
-  color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+buildStyles = (theme) ->
+    styleRoomItem:
+      flex: 1
+      flexDirection: "row"
+      alignSelf: "stretch"
+    styleRoomAvatar:
+      width: 56
+      height: 56
+      borderRadius: 28
+      margin: 16
+    styleTextContainer:
+      flexDirection: "column"
+      alignSelf: "stretch"
+      marginTop: 16
+      marginStart: 6
+      marginBottom: 16
+    styleTextTitle:
+      fontSize: 16
+      fontWeight: "bold"
+      color: theme.COLOR_TEXT_ON_BACKGROUND
+    styleTextSummary:
+      fontSize: 14
+      marginTop: 8
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
