@@ -62,6 +62,7 @@ export default RoomTimeline = ({roomId}) ->
 
   <>
     <FlatList
+      inverted
       data={events}
       renderItem={(data) -> renderEvent data.item}/>
   </>
