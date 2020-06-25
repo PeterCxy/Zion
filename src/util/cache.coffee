@@ -8,8 +8,11 @@ import { sha1 } from 'react-native-sha1'
 # This should only be used for avatars / thumbnails
 memCache = new LRUMap 128
 
+# FS cache path
+FS_CACHE_PATH = "#{RNFS.DocumentDirectoryPath}/cache"
+
 fsCachePath = (url) ->
-  "#{RNFS.DocumentDirectoryPath}/#{await sha1 url}"
+  "#{FS_CACHE_PATH}/#{await sha1 url}"
 
 # Fetch only from memory cache
 export fetchMemCache = (url) ->
@@ -23,6 +26,8 @@ export cachedFetchAsDataURL = (url) ->
   # Check the memory cache first
   if memCache.has url
     return Promise.resolve memCache.get url
+  # Ensure FS dir exists
+  await RNFS.mkdir FS_CACHE_PATH
   # Then check fs cache
   fsPath = await fsCachePath url
   if await RNFS.exists fsPath
