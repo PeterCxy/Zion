@@ -1,7 +1,8 @@
-import React, { useContext } from "react"
+import React, { useContext, useEffect, useMemo } from "react"
 import { View } from "react-native"
-import { NavigationContainer } from "@react-navigation/native"
+import { NavigationContainer, DefaultTheme as NavDefTheme } from "@react-navigation/native"
 import { createStackNavigator } from '@react-navigation/stack'
+import changeNavigationBarColor from "react-native-navigation-bar-color"
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
 import Chat from "./Chat"
@@ -12,10 +13,24 @@ Stack = createStackNavigator()
 export default Home = () ->
   {theme} = useContext ThemeContext
 
+  NavTheme = useMemo ->
+    {
+      ...NavDefTheme,
+      colors: {
+        ...NavDefTheme.colors,
+        background: theme.COLOR_BACKGROUND
+      }
+    }
+  , [theme]
+
+  useEffect ->
+    changeNavigationBarColor theme.COLOR_BACKGROUND
+  , []
+
   <View style={styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_SECONDARY}/>
-    <NavigationContainer>
+    <NavigationContainer theme={NavTheme}>
       <Stack.Navigator
         screenOptions={{ headerShown: false }}>
         <Stack.Screen

@@ -1,12 +1,17 @@
-import React from "react"
+import React, { useEffect } from "react"
 import { View, Text } from "react-native"
 import { ProgressBar } from "react-native-paper"
+import changeNavigationBarColor from "react-native-navigation-bar-color"
 import StatusBarColor from "../components/StatusBarColor"
 import { useStyles } from "../theme"
 import { translate } from "../util/i18n"
 
 export default SplashScreen = () ->
   [theme, styles] = useStyles buildStyles
+
+  useEffect ->
+    changeNavigationBarColor theme.COLOR_PRIMARY
+  , []
 
   <View style={styles.styleWrapper}>
     <StatusBarColor
