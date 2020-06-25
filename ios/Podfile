@@ -83,6 +83,8 @@ target 'Zion' do
 
   pod 'rn-fetch-blob', :path => '../node_modules/rn-fetch-blob'
 
+  pod 'RNFS', :path => '../node_modules/react-native-fs'
+
   target 'ZionTests' do
     inherit! :complete
     # Pods for testing

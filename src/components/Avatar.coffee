@@ -1,10 +1,7 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Animated, Image, Text, View } from "react-native"
-import RNFetchBlob from 'rn-fetch-blob'
+import { cachedFetchAsDataURL, fetchMemCache } from "../util/cache"
 import { useStyles } from "../theme"
-
-# A cache of URL vs fetched image (data URL)
-memoryCache = {}
 
 extractCapital = (word) ->
   word = word.trim()
@@ -28,21 +25,16 @@ extractCapitals = (name) ->
 # Otherwise show the fetched image after it gets fully loaded
 export default Avatar = ({name, url, style}) ->
   [theme, styles] = useStyles buildStyles
-  [dataURL, setDataURL] = useState memoryCache[url]
+  [dataURL, setDataURL] = useState fetchMemCache url
   fadeAnim = useRef(new Animated.Value 1).current
 
   useEffect ->
     return if dataURL or not url
 
     do -> 
-      resp = await RNFetchBlob.config
-        fileCache: true
-      .fetch 'GET', url
-      info = resp.info()
-      if info.status == 200
-        dUrl = "data:" + info.headers["content-type"] + ";base64," + await resp.base64()
-        memoryCache[url] = dUrl
-        
+      dUrl = await cachedFetchAsDataURL url
+      
+      if dUrl
         # Play animation first
         Animated.timing fadeAnim,
           toValue: 0
