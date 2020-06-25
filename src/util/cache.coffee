@@ -39,7 +39,7 @@ export cachedFetchAsDataURL = (url) ->
   if info.status != 200
     resp.flush()
     return null
-  dUrl = "data:" + info.headers["content-type"] + ";base64," + await resp.base64()
+  dUrl = "data:" + info.headers["content-type"].split(";")[0].trim() + ";base64," + await resp.base64()
   resp.flush()
 
   # Write to both mem and fs cache
