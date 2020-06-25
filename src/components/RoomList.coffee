@@ -35,9 +35,9 @@ eventToDescription = (ev) ->
   #console.log "type = #{ev.getType()}"
   switch ev.getType()
     when 'm.room.message'
-      "#{ev.sender.name}: #{messageToDescription ev.getContent()}"
+      translate "room_event_message", ev.sender.name, messageToDescription ev.getContent()
     when 'm.reaction'
-      "#{ev.sender.name}: #{ev.getContent()["m.relates_to"]["key"]}"
+      translate "room_event_message", ev.sender.name, ev.getContent()["m.relates_to"]["key"]
     when 'm.room.create'
       translate "room_event_created"
     when 'm.sticker'

@@ -6,6 +6,7 @@
   "login_password": "Password",
   "login_login": "Log In",
   "login_help": "What's Matrix?",
+  "room_event_message": "%a: %b",
   "room_event_created": "Room was created",
   "room_event_sticker": "% sent a sticker",
   "room_event_invite": "%a invited %b",
