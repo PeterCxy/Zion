@@ -24,7 +24,7 @@ transformRooms = (client, rooms) ->
         avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
         summary: desc
         timestamp: ts
-  .sort (x, y) -> y.timestamp - x.timestamp
+    .sort (x, y) -> y.timestamp - x.timestamp
 
 getLatestMessage = (room) ->
   events = room.getLiveTimeline().getEvents()
