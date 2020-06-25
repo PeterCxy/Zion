@@ -50,6 +50,8 @@ eventToDescription = (ev) ->
           content.membership
     when 'm.room.name'
       translate("room_event_name_changed").replace "%", ev.sender.name
+    when 'm.room.server_acl'
+      translate("room_event_server_acl_changed").replace "%", ev.sender.name
     else translate("room_event_unknown").replace "%", ev.getType()
 
 messageToDescription = (content) ->
