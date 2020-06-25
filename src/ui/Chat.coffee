@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useMemo, useState } from "react"
 import { Appbar } from "react-native-paper"
 import Avatar from "../components/Avatar"
+import RoomTimeline from "../components/RoomTimeline"
 import { MatrixClientContext } from "../util/client"
 
 export default Chat = ({route, navigation}) ->
@@ -44,6 +45,7 @@ export default Chat = ({route, navigation}) ->
         style={styleAvatar}/>
       <Appbar.Content title={name} />
     </Appbar.Header>
+    <RoomTimeline roomId={roomId}/>
   </>
 
 styleAvatar =
