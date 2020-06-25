@@ -9,19 +9,21 @@ import { translate } from "../util/i18n"
 # Transform a list of rooms received from the SDK
 # to a list that we can use
 transformRooms = (client, rooms) ->
-  rooms.map (room) ->
-    [ts, desc] = getLatestMessage room
+  rooms
+    .filter (room) -> room.getMyMembership(client.getUserId()) == "join"
+    .map (room) ->
+      [ts, desc] = getLatestMessage room
 
-    # We should NOT keep track of the original Room object
-    # because they are mutable.
-    # Instead, we always build our own immutable state
-    # out of the original object.
-    return
-      key: room.roomId
-      name: room.name
-      avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
-      summary: desc
-      timestamp: ts
+      # We should NOT keep track of the original Room object
+      # because they are mutable.
+      # Instead, we always build our own immutable state
+      # out of the original object.
+      return
+        key: room.roomId
+        name: room.name
+        avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
+        summary: desc
+        timestamp: ts
   .sort (x, y) -> y.timestamp - x.timestamp
 
 getLatestMessage = (room) ->
