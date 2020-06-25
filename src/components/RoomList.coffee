@@ -41,28 +41,27 @@ eventToDescription = (ev) ->
     when 'm.room.create'
       translate "room_event_created"
     when 'm.sticker'
-      translate("room_event_sticker").replace "%", ev.sender.name
+      translate "room_event_sticker", ev.sender.name
     when 'm.room.member'
       content = ev.getContent()
       switch content.membership
         when 'invite'
-          translate("room_event_invite").replace "%a", ev.sender.name
-            .replace "%b", content.displayname
+          translate "room_event_invite", ev.sender.name, content.displayname
         when 'join'
-          translate("room_event_join").replace "%", content.displayname
+          translate "room_event_join", content.displayname
         else
           content.membership
     when 'm.room.name'
-      translate("room_event_name_changed").replace "%", ev.sender.name
+      translate "room_event_name_changed", ev.sender.name
     when 'm.room.server_acl'
-      translate("room_event_server_acl_changed").replace "%", ev.sender.name
-    else translate("room_event_unknown").replace "%", ev.getType()
+      translate "room_event_server_acl_changed", ev.sender.name
+    else translate "room_event_unknown", ev.getType()
 
 messageToDescription = (content) ->
   #console.log "msgType = #{content.msgtype}"
   switch content.msgtype
     when "m.text" then content.body
-    else translate("room_msg_unknown").replace "%", content.msgtype
+    else translate "room_msg_unknown", content.msgtype
 
 renderRoom = (onEnterRoom, theme, styles, {item}) ->
   <TouchableRipple
