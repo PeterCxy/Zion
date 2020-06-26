@@ -49,6 +49,8 @@ eventToDescription = (ev) ->
           translate "room_event_invite", ev.sender.name, content.displayname
         when 'join'
           translate "room_event_join", content.displayname
+        when 'leave'
+          translate "room_event_leave", content.displayname
         else
           content.membership
     when 'm.room.name'
