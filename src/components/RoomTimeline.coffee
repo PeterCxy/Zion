@@ -57,15 +57,34 @@ renderEvent = (styles, ev) ->
   </View>
 
 renderTxtMsg = (styles, msg) ->
+  date = new Date msg.ts
+
   <>
     <Avatar
       style={if msg.self then styles.styleMsgAvatarReverse else styles.styleMsgAvatar}
       name={msg.sender.name}
       url={msg.sender.avatar}/>
-    <Text
+    <View
       style={if msg.self then styles.styleMsgBubbleReverse else styles.styleMsgBubble}>
-      {msg.text}
-    </Text>
+      {
+        if not msg.self
+          <Text
+            numberOfLines={1}
+            style={styles.styleMsgSender}>
+            {msg.sender.name}
+          </Text>
+      }
+      <Text
+        style={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}>
+        {msg.text}
+      </Text>
+      <Text
+        style={styles.styleMsgTime}>
+        {translate "time_format_hour_minute",
+          ('' + date.getHours()).padStart(2, '0'),
+          ('' + date.getMinutes()).padStart(2, '0')}
+      </Text>
+    </View>
   </>
 
 renderUnknown = (ev) ->
@@ -132,14 +151,28 @@ buildStyles = (theme) ->
       marginEnd: 0
     styleMsgBubble:
       backgroundColor: theme.COLOR_CHAT_BUBBLE
-      color: theme.COLOR_CHAT_TEXT
       maxWidth: '80%'
-      padding: 10
+      paddingStart: 10
+      paddingEnd: 10
       borderRadius: 8
-      fontSize: 14
     styleMsgBubbleReverse:
       backgroundColor: theme.COLOR_PRIMARY
+    styleMsgText:
+      fontSize: 14
+      color: theme.COLOR_CHAT_TEXT
+    styleMsgTextReverse:
       color: theme.COLOR_TEXT_PRIMARY
+    styleMsgSender:
+      fontSize: 12
+      fontWeight: 'bold'
+      marginTop: 5
+      marginBottom: 5
+      color: theme.COLOR_SECONDARY
+    styleMsgTime:
+      fontSize: 12
+      marginTop: 5
+      marginBottom: 5
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
 
   styles.styleLineWrapperReverse =
     Object.assign {}, styles.styleLineWrapper, styles.styleLineWrapperReverse
@@ -147,5 +180,7 @@ buildStyles = (theme) ->
     Object.assign {}, styles.styleMsgAvatar, styles.styleMsgAvatarReverse
   styles.styleMsgBubbleReverse =
     Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
+  styles.styleMsgTextReverse =
+    Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
 
   styles
