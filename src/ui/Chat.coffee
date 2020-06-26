@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Appbar } from "react-native-paper"
 import Avatar from "../components/Avatar"
 import RoomTimeline from "../components/RoomTimeline"
