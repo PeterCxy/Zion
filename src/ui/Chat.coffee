@@ -7,21 +7,16 @@ import { MatrixClientContext } from "../util/client"
 export default Chat = ({route, navigation}) ->
   {roomId} = route.params
   client = useContext MatrixClientContext
-  # Because rooms are mutable, they are not compatible with React
-  # So we need to first extract the initial state and keep them
-  # as-is. DO NOT use initialRoom anymore.
-  initialRoom = useMemo ->
-    client.getRoom roomId
-  , [roomId]
-  initialName = useMemo ->
-    initialRoom.name
-  , [roomId]
-  initialAvatar = useMemo ->
-    initialRoom.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
-  , [roomId]
 
-  [name, setName] = useState initialName
-  [avatar, setAvatar] = useState initialAvatar
+  # Set initial states
+  # Note that the room objects themselves are mutable,
+  # so we should NOT keep references to them and depend
+  # on their internal state. Instead, we should only
+  # update the state based on events.
+  [name, setName] = useState -> client.getRoom(roomId).name
+  [avatar, setAvatar] = useState ->
+    client.getRoom roomId
+      .getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
 
   # Listen to room name updates
   # TODO: also implement room avatar updates?
