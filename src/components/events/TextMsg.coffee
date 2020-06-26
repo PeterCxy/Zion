@@ -15,6 +15,10 @@ htmlRenderers =
       </View>
     </View>
 
+# Workaround: <https://github.com/archriss/react-native-render-html/issues/216>
+fixHtml = (html) ->
+  html.replace /> </g, '><span style="color:transparent;">-</span><'
+
 # A text (or formatted text, i.e. HTML) message
 export default TextMsg = ({ev}) ->
   [theme, styles] = useStyles buildStyles
@@ -39,14 +43,12 @@ export default TextMsg = ({ev}) ->
           {ev.text}
         </Text>
       else if ev.html
+        fixedHtml = useMemo ->
+          fixHtml ev.html
+        , [ev.html]
+
         <HTML
-          html={
-            # Workaround: <https://github.com/archriss/react-native-render-html/issues/216>
-            useMemo ->
-              ev.html.replace /> </g,
-                '><span style="color:transparent;">-</span><'
-            , [ev.html]
-          }
+          html={fixedHtml}
           renderersProps={{
             styles: styles
           }}
