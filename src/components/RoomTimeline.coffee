@@ -103,7 +103,7 @@ renderTxtOrHtmlMsg = (styles, msg) ->
                 </View>
             }}
             style={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}
-            baseTextStyle={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+            baseFontStyle={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
       }
       <Text
         style={if msg.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
