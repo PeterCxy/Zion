@@ -40,7 +40,13 @@ export default TextMsg = ({ev}) ->
         </Text>
       else if ev.html
         <HTML
-          html={ev.html}
+          html={
+            # Workaround: <https://github.com/archriss/react-native-render-html/issues/216>
+            useMemo ->
+              ev.html.replace /> </g,
+                '><span style="color:transparent;">-</span><'
+            , [ev.html]
+          }
           renderersProps={{
             styles: styles
           }}
