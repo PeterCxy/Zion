@@ -202,7 +202,8 @@ buildStyles = (theme) ->
       marginBottom: 5
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
     styleMsgTimeReverse:
-      color: theme.COLOR_SECONDARY
+      color: theme.COLOR_TEXT_PRIMARY
+      opacity: 0.4
     styleMsgQuoteWrapper:
       flexDirection: 'row'
       marginBottom: 10
