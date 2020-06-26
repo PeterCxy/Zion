@@ -1,12 +1,14 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Appbar } from "react-native-paper"
+import { Appbar, ProgressBar } from "react-native-paper"
 import Avatar from "../components/Avatar"
 import RoomTimeline from "../components/RoomTimeline"
+import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 
 export default Chat = ({route, navigation}) ->
   {roomId} = route.params
   client = useContext MatrixClientContext
+  [theme, styles] = useStyles buildStyles
 
   # Set initial states
   # Note that the room objects themselves are mutable,
@@ -17,6 +19,7 @@ export default Chat = ({route, navigation}) ->
   [avatar, setAvatar] = useState ->
     client.getRoom roomId
       .getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
+  [loading, setLoading] = useState true
 
   # Listen to room name updates
   # TODO: also implement room avatar updates?
@@ -37,14 +40,27 @@ export default Chat = ({route, navigation}) ->
       <Avatar
         name={name}
         url={avatar}
-        style={styleAvatar}/>
+        style={styles.styleAvatar}/>
       <Appbar.Content title={name} />
     </Appbar.Header>
-    <RoomTimeline roomId={roomId}/>
+    <ProgressBar
+      style={styles.styleProgress}
+      indeterminate={true}
+      color={theme.COLOR_ACCENT}
+      visible={loading}/>
+    <RoomTimeline
+      roomId={roomId}
+      onLoadingStateChange={setLoading}/>
   </>
 
-styleAvatar =
-  width: 40
-  height: 40
-  borderRadius: 20
-  marginLeft: 10
+buildStyles = (theme) ->
+    styleAvatar:
+      width: 40
+      height: 40
+      borderRadius: 20
+      marginLeft: 10
+    styleProgress:
+      width: 'auto'
+      height: 2
+      alignSelf: 'stretch'
+      backgroundColor: theme.COLOR_BACKGROUND

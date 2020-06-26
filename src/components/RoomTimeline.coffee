@@ -49,7 +49,7 @@ unknownEvent = (ev) ->
     type: 'unknown'
     ev_type: ev.getType()
 
-export default RoomTimeline = ({roomId}) ->
+export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
   client = useContext MatrixClientContext
 
   # The TimelineWindow object
@@ -67,7 +67,11 @@ export default RoomTimeline = ({roomId}) ->
   # enough for rendering
   [events, setEvents] = useState []
   # Initialize to the loading state
-  [loading, setLoading] = useState true
+  [loading, _setLoading] = useState true
+  setLoading = useCallback (newValue) ->
+    _setLoading newValue
+    onLoadingStateChange newValue
+  , [onLoadingStateChange]
 
   # Callback to update events
   updateEvents = useCallback ->
@@ -79,6 +83,7 @@ export default RoomTimeline = ({roomId}) ->
     do ->
       await getTlWindow().load()
       updateEvents()
+      setLoading false
 
       # TODO: register timeline update event listener
     return
