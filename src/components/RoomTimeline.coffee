@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { FlatList, Text, View } from "react-native"
 import { EventTimeline, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
@@ -75,16 +75,15 @@ export default RoomTimeline = ({roomId}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
 
-  # The Room object
-  # this is internally mutable
-  mutRoom = useMemo ->
-    client.getRoom roomId
-  , [roomId]
-
   # The TimelineWindow object
   # this is internally mutable
-  mutTlWindow = useMemo ->
-    new TimelineWindow client, mutRoom.getUnfilteredTimelineSet()
+  tlWindowRef = useRef null
+  getTlWindow = useCallback ->
+    if not tlWindowRef.current?
+      tlWindowRef.current =
+        new TimelineWindow client, client.getRoom(roomId).getUnfilteredTimelineSet()
+    tlWindowRef.current
+  , []
 
   # These  should be transformed events
   # that are immutable and contain information
@@ -95,13 +94,13 @@ export default RoomTimeline = ({roomId}) ->
 
   # Callback to update events
   updateEvents = useCallback ->
-    setEvents transformEvents client, mutTlWindow.getEvents()
+    setEvents transformEvents client, getTlWindow().getEvents()
   , []
 
   # Initialize the timeline window
   useEffect ->
     do ->
-      await mutTlWindow.load()
+      await getTlWindow().load()
       updateEvents()
 
       # TODO: register timeline update event listener
