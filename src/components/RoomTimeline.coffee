@@ -183,6 +183,7 @@ buildStyles = (theme) ->
       paddingEnd: 10
       borderRadius: 8
     styleMsgBubbleReverse:
+      paddingTop: 5
       backgroundColor: theme.COLOR_PRIMARY
     styleMsgText:
       fontSize: 14
