@@ -106,7 +106,7 @@ renderTxtOrHtmlMsg = (styles, msg) ->
             baseTextStyle={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
       }
       <Text
-        style={styles.styleMsgTime}>
+        style={if msg.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
         {translate "time_format_hour_minute",
           ('' + date.getHours()).padStart(2, '0'),
           ('' + date.getMinutes()).padStart(2, '0')}
@@ -200,6 +200,8 @@ buildStyles = (theme) ->
       marginTop: 5
       marginBottom: 5
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleMsgTimeReverse:
+      color: theme.COLOR_SECONDARY
     styleMsgQuoteWrapper:
       flexDirection: 'row'
       marginBottom: 10
@@ -219,5 +221,7 @@ buildStyles = (theme) ->
     Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
   styles.styleMsgTextReverse =
     Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
+  styles.styleMsgTimeReverse =
+    Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
 
   styles
