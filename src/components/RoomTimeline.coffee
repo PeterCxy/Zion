@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { FlatList, Text, View } from "react-native"
+import HTML from 'react-native-render-html'
 import { EventTimeline, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
 import { useStyles } from "../theme"
@@ -30,8 +31,14 @@ messageEvent = (client, ev) ->
   content = ev.getContent()
   switch content.msgtype
     when "m.text"
-      ret.type = 'msg_text'
-      ret.text = content.body
+      #console.log content
+      switch content.format
+        when 'org.matrix.custom.html'
+          ret.type = 'msg_html'
+          ret.html = content.formatted_body
+        else
+          ret.type = 'msg_text'
+          ret.text = content.body
     else
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
@@ -51,12 +58,13 @@ renderEvent = (styles, ev) ->
   <View style={lineStyle}>
   {
     switch ev.type
-      when 'msg_text' then renderTxtMsg styles, ev
+      when 'msg_text' then renderTxtOrHtmlMsg styles, ev
+      when 'msg_html' then renderTxtOrHtmlMsg styles, ev
       when 'unknown' then renderUnknown ev
   }
   </View>
 
-renderTxtMsg = (styles, msg) ->
+renderTxtOrHtmlMsg = (styles, msg) ->
   date = new Date msg.ts
 
   <>
@@ -74,10 +82,27 @@ renderTxtMsg = (styles, msg) ->
             {msg.sender.name}
           </Text>
       }
-      <Text
-        style={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}>
-        {msg.text}
-      </Text>
+      {  
+        if msg.text
+          <Text
+            style={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}>
+            {msg.text}
+          </Text>
+        else if msg.html
+          <HTML
+            html={msg.html}
+            renderers={{
+              blockquote: (_, children, __, passProps) ->
+                <View style={styles.styleMsgQuoteWrapper} key={passProps.key}>
+                  <View style={styles.styleMsgQuoteLine}/>
+                  <View style={styles.styleMsgQuoteContent}>
+                    {children}
+                  </View>
+                </View>
+            }}
+            style={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}
+            baseTextStyle={if msg.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+      }
       <Text
         style={styles.styleMsgTime}>
         {translate "time_format_hour_minute",
@@ -173,6 +198,16 @@ buildStyles = (theme) ->
       marginTop: 5
       marginBottom: 5
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleMsgQuoteWrapper:
+      flexDirection: 'row'
+      marginBottom: 10
+    styleMsgQuoteLine:
+      width: 2
+      height: '100%'
+      backgroundColor: theme.COLOR_CHAT_QUOTE_LINE
+    styleMsgQuoteContent:
+      marginStart: 10
+      opacity: 0.5
 
   styles.styleLineWrapperReverse =
     Object.assign {}, styles.styleLineWrapper, styles.styleLineWrapperReverse

@@ -8,3 +8,4 @@ export COLOR_TEXT_SECONDARY_ON_BACKGROUND = "#777777" # Secondary text on backgr
 export COLOR_RIPPLE = "rgba(0, 0, 0, .1)"
 export COLOR_CHAT_BUBBLE = "#EFEFEF"
 export COLOR_CHAT_TEXT = "#111111"
+export COLOR_CHAT_QUOTE_LINE = "#AAAAAA"
