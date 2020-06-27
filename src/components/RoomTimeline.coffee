@@ -17,6 +17,7 @@ transformEvents = (client, events) ->
       ts: ev.getTs()
       self: ev.sender.userId == client.getUserId()
       sent: (not ev.status?) or (ev.status == EventStatus.SENT)
+      # TODO: handle errored pending events
   .reverse() # The FlatList itself has been inverted, so we have to invert again
 
 transformEvent = (client, ev) ->
