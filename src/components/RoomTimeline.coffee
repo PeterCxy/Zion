@@ -73,6 +73,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   # Record scroll position using a mutable ref
   scrollPosRef = useRef 0
 
+  # Ref to the flat list
+  flatListRef = useRef null
+
   # The TimelineWindow object
   # this is internally mutable
   tlWindowRef = useRef null
@@ -116,12 +119,12 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   # Load all events that are present in memory until cannot load anymore
   # makes no API request. If there is a need for request, we show the
   # FAB to let the user reload the timeline.
-  loadUntilLatest = useCallback ->
+  loadUntilLatest = useCallback (ignoreScrollPos = false) ->
     # If the user is scrolling back, tell the user that the latest position
     # must be jumped over using the button
-    if scrollPosRef.current != 0
+    if (not ignoreScrollPos) and scrollPosRef.current != 0
       setHasNewerEvents true
-      return
+      return Promise.resolve false
     # Do not make requests -- if we need to make requests, it means that
     # we have missed a lot of messages in between, in which case
     # the user should be responsible for jumping to the latest
@@ -133,9 +136,10 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       # and have to fetch from API
       # Therefore, show the FAB to jump to current timeline
       setHasNewerEvents true
-      return
+      return Promise.resolve false
     setHasNewerEvents false
     updateEvents()
+    return Promise.resolve true
   , []
 
   # Register timeline update event listener
@@ -174,9 +178,23 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       loadUntilLatest()
   , []
 
+  # The jump-to-latest button
+  onJumpToLatest = useCallback ->
+    if not await loadUntilLatest true
+      # If there are messages that we need to fetch from API
+      # we need to force reload this screen to jump to the
+      # latest live timeline
+      forceReload()
+    else
+      # Otherwise, if everything we need for latest is in memory,
+      # just scroll to the start.
+      flatListRef.current.scrollToOffset 0
+  , []
+
   <>
     <FlatList
       inverted
+      ref={flatListRef}
       style={style}
       data={events}
       onEndReached={onEndReached}
@@ -193,5 +211,5 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       }}
       visible={hasNewerEvents}
       icon="arrow-down"
-      onPress={forceReload}/>
+      onPress={onJumpToLatest}/>
   </>
