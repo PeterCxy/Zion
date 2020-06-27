@@ -26,7 +26,7 @@ extractCapitals = (name) ->
 export default Avatar = ({name, url, style}) ->
   [theme, styles] = useStyles buildStyles
   fadeAnim = useRef(new Animated.Value 1).current
-  dataURL = useCachedFetch url, (dUrl, callback) ->
+  [dataURL, _] = useCachedFetch url, (dUrl, callback) ->
     # Play animation first
     Animated.timing fadeAnim,
       toValue: 0

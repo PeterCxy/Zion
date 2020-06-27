@@ -11,14 +11,18 @@ export default ImageThumbnail = ({url, width, height}) ->
   # We show nothing when we start
   fadeAnim = useRef(new Animated.Value 0).current
   # Lazy fetch
-  dataURL = useCachedFetch url, (dUrl, callback) ->
+  [dataURL, immediatelyAvailable] = useCachedFetch url, (dUrl, callback) ->
     callback()
     Animated.timing fadeAnim,
       toValue: 1
       duration: 200
       useNativeDriver: true
     .start()
-  animatedStyles = Object.assign {}, styles, { opacity: fadeAnim }
+
+  animatedStyles = if not immediatelyAvailable
+    Object.assign {}, styles, { opacity: fadeAnim }
+  else
+    Object.assign {}, styles, { opacity: 1 }
 
   if not dataURL
     <Animated.View style={animatedStyles}/>

@@ -57,8 +57,11 @@ export cachedFetchAsDataURL = (url) ->
 # A React hook for using cached dataURL
 export useCachedFetch = (url, onFetched) ->
   [dataURL, setDataURL] = useState fetchMemCache url
+  [immediatelyAvailable, setImmediatelyAvailable] = useState false
 
   useEffect ->
+    if dataURL and url
+      setImmediatelyAvailable true
     return if dataURL or not url
 
     unmounted = false
@@ -74,4 +77,4 @@ export useCachedFetch = (url, onFetched) ->
       unmounted = true
   , []
 
-  dataURL
+  [dataURL, immediatelyAvailable]
