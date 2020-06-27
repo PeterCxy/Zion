@@ -50,7 +50,18 @@ unknownEvent = (ev) ->
     type: 'unknown'
     ev_type: ev.getType()
 
-export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
+export default RoomTimeline = (props) ->
+  # We can force reload RoomTimelineInner by incrementing the key
+  # This is used when the user clicks on the FAB to force
+  # load the latest timeline state.
+  [key, setKey] = useState 0
+
+  <RoomTimelineInner
+    key={key}
+    forceReload={-> setKey key + 1}
+    {...props}/>
+
+RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   client = useContext MatrixClientContext
 
   # Record the current onLoadingStateChange callback
@@ -181,5 +192,6 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
         elevation: 10
       }}
       visible={hasNewerEvents}
-      icon="arrow-down"/>
+      icon="arrow-down"
+      onPress={forceReload}/>
   </>
