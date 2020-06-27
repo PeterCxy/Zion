@@ -3,7 +3,7 @@ import { FlatList } from "react-native"
 import { FAB } from "react-native-paper"
 import linkifyHtml from 'linkifyjs/html'
 import linkifyStr from 'linkifyjs/string'
-import { EventTimeline, TimelineWindow } from "matrix-js-sdk"
+import { EventTimeline, EventStatus, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
 import EventComponent from "./events/Event"
 import { MatrixClientContext } from "../util/client"
@@ -16,6 +16,7 @@ transformEvents = (client, events) ->
       key: ev.getId()
       ts: ev.getTs()
       self: ev.sender.userId == client.getUserId()
+      sent: (not ev.status?) or (ev.status == EventStatus.SENT)
   .reverse() # The FlatList itself has been inverted, so we have to invert again
 
 transformEvent = (client, ev) ->
@@ -153,9 +154,11 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       loadUntilLatest()
 
     client.on 'Room.timeline', onTimelineUpdate
+    client.on 'Room.localEchoUpdated', onTimelineUpdate # For message sent status
 
     return ->
       client.removeListener 'Room.timeline', onTimelineUpdate
+      client.removeListener 'Room.localEchoUpdated', onTimelineUpdate
   , [initialized]
 
   # Detect scroll to end

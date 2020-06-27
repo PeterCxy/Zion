@@ -9,13 +9,15 @@ import { useStyles } from "../../theme"
 export default Event = ({ev}) ->
   [theme, styles] = useStyles buildStyles
 
+  wrapperStyle = if ev.self
+    styles.styleLineWrapperReverse
+  else
+    styles.styleLineWrapper
+  if not ev.sent
+    wrapperStyle = Object.assign {}, wrapperStyle, { opacity: 0.5 }
+
   <View
-    style={
-      if ev.self
-        styles.styleLineWrapperReverse
-      else
-        styles.styleLineWrapper
-    }>
+    style={wrapperStyle}>
     {
       switch ev.type
         when 'msg_text', 'msg_html'

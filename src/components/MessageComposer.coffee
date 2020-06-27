@@ -1,10 +1,12 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useContext, useState } from "react"
 import { View, TextInput } from "react-native"
 import { IconButton, Snackbar } from "react-native-paper"
 import { useStyles } from "../theme"
 import { translate } from "../util/i18n"
+import { MatrixClientContext } from "../util/client"
 
-export default MessageComposer = () ->
+export default MessageComposer = ({roomId}) ->
+  client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [text, setText] = useState ""
   [showTextEmptyPrompt, setShowTextEmptyPrompt] = useState false
@@ -13,8 +15,11 @@ export default MessageComposer = () ->
     toSend = text.trim()
     if toSend is ""
       setShowTextEmptyPrompt true
-    # TODO: actually implement this
-  , [text]
+    client.sendEvent roomId, "m.room.message",
+      msgtype: 'm.text'
+      body: text
+    setText ""
+  , [text, roomId]
 
   <>
     <View style={styles.styleWrapper}>

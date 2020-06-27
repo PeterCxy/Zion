@@ -56,7 +56,8 @@ export default Chat = ({route, navigation}) ->
         color={theme.COLOR_ACCENT}
         visible={loading}/>
     </View>
-    <MessageComposer/>
+    <MessageComposer
+      roomId={roomId}/>
   </>
 
 buildStyles = (theme) ->
