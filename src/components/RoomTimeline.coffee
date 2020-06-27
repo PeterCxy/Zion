@@ -102,30 +102,38 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
     return
   , []
 
+  # Load all events that are present in memory until cannot load anymore
+  # makes no API request. If there is a need for request, we show the
+  # FAB to let the user reload the timeline.
+  loadUntilLatest = useCallback ->
+    # If the user is scrolling back, tell the user that the latest position
+    # must be jumped over using the button
+    if scrollPosRef.current != 0
+      setHasNewerEvents true
+      return
+    # Do not make requests -- if we need to make requests, it means that
+    # we have missed a lot of messages in between, in which case
+    # the user should be responsible for jumping to the latest
+    while getTlWindow().canPaginate EventTimeline.FORWARDS
+      if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
+        break
+    if getTlWindow().canPaginate EventTimeline.FORWARDS
+      # We have missed some events between the latest and the last loaded one
+      # and have to fetch from API
+      # Therefore, show the FAB to jump to current timeline
+      setHasNewerEvents true
+      return
+    setHasNewerEvents false
+    updateEvents()
+  , []
+
   # Register timeline update event listener
   useEffect ->
     return if not initialized
 
     onTimelineUpdate = (_, room) ->
       return if not room or room.roomId != roomId
-      # If the user is scrolling back, tell the user that the latest position
-      # must be jumped over using the button
-      if scrollPosRef.current != 0
-        setHasNewerEvents true
-        return
-      # Do not make requests -- if we need to make requests, it means that
-      # we have missed a lot of messages in between, in which case
-      # the user should be responsible for jumping to the latest
-      while getTlWindow().canPaginate EventTimeline.FORWARDS
-        if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
-          break
-      if getTlWindow().canPaginate EventTimeline.FORWARDS
-        # We have missed some events between the latest and the last loaded one
-        # and have to fetch from API
-        # Therefore, show the FAB to jump to current timeline
-        setHasNewerEvents true
-        return
-      updateEvents()
+      loadUntilLatest()
 
     client.on 'Room.timeline', onTimelineUpdate
 
@@ -146,7 +154,13 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
 
   # Other scroll events
   onScroll = useCallback (scrollEv) ->
+    lastY = scrollPosRef.current
     scrollPosRef.current = scrollEv.nativeEvent.contentOffset.y
+    if lastY != 0 and scrollPosRef.current == 0
+      # If the user has scrolled back to bottom,
+      # we try to load back events that may be present in memory
+      # If we fail, we keep showing the jump-to-latest FAB
+      loadUntilLatest()
   , []
 
   <>
