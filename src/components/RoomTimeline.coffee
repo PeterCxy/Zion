@@ -72,6 +72,7 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
   # that are immutable and contain information
   # enough for rendering
   [events, setEvents] = useState []
+  [initialized, setInitialized] = useState false
   # Initialize to the loading state
   [loading, _setLoading] = useState true
   setLoading = useCallback (newValue) ->
@@ -89,11 +90,34 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
     do ->
       await getTlWindow().load()
       updateEvents()
+      setInitialized true
       setLoading false
-
-      # TODO: register timeline update event listener
     return
   , []
+
+  # Register timeline update event listener
+  useEffect ->
+    return if not initialized
+
+    onTimelineUpdate = (_, room) ->
+      return if not room or room.roomId != roomId
+      # TODO: if the user is scrolling back, notice the user that there are new
+      # content available instead of updating immediately
+      # Do not make requests -- if we need to make requests, it means that
+      # we have missed a lot of messages in between, in which case
+      # the user should be responsible for jumping to the latest
+      while getTlWindow().canPaginate EventTimeline.FORWARDS
+        if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
+          break
+      # TODO: if still canPaginate forwards, it means that we have missed content
+      # show a prompt to let the user jump to latest in that case.
+      updateEvents()
+
+    client.on 'Room.timeline', onTimelineUpdate
+
+    return ->
+      client.removeListener 'Room.timeline', onTimelineUpdate
+  , [initialized]
 
   # Detect scroll to end
   onEndReached = useCallback ->
