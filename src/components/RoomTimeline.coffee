@@ -129,6 +129,7 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     # we have missed a lot of messages in between, in which case
     # the user should be responsible for jumping to the latest
     while getTlWindow().canPaginate EventTimeline.FORWARDS
+      # Note: Since we are making no requests, this "await" is actually synchronous
       if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
         break
     if getTlWindow().canPaginate EventTimeline.FORWARDS
