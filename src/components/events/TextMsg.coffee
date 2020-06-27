@@ -26,8 +26,19 @@ export default TextMsg = ({ev}) ->
     new Date ev.ts
   , [ev.ts]
 
+  bubbleStyle = if ev.self
+    styles.styleMsgBubbleReverse
+  else
+    styles.styleMsgBubble
+
+  if ev.html? and ev.html.indexOf('<li>') != -1
+    # There is a weird bug about lists in react-native-render-html
+    # that causes the view, when in auto width, wrapping at each character
+    # for now, let's fix it by making the width constant
+    bubbleStyle = Object.assign {}, bubbleStyle, { width: '80%' }
+
   <View
-    style={if ev.self then styles.styleMsgBubbleReverse else styles.styleMsgBubble}>
+    style={bubbleStyle}>
     {
       if not ev.self
         <Text
