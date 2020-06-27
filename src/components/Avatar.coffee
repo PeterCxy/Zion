@@ -31,23 +31,28 @@ export default Avatar = ({name, url, style}) ->
   useEffect ->
     return if dataURL or not url
 
+    unmounted = false
+
     do -> 
       dUrl = await cachedFetchAsDataURL url
       
-      if dUrl
+      if dUrl and not unmounted
         # Play animation first
         Animated.timing fadeAnim,
           toValue: 0
           duration: 200
           useNativeDriver: true
         .start ->
+          return if unmounted
           setDataURL dUrl
           Animated.timing fadeAnim,
             toValue: 1
             duration: 200
             useNativeDriver: true
           .start()
-    return
+
+    return ->
+      unmounted = true
   , []
 
   if not dataURL
