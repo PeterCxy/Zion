@@ -186,6 +186,8 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       # If there are messages that we need to fetch from API
       # we need to force reload this screen to jump to the
       # latest live timeline
+      # But first we need to reset the loading status on the parent
+      setLoading true
       forceReload()
     else
       # Otherwise, if everything we need for latest is in memory,
