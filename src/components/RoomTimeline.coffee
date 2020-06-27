@@ -49,7 +49,7 @@ unknownEvent = (ev) ->
     type: 'unknown'
     ev_type: ev.getType()
 
-export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
+export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
   client = useContext MatrixClientContext
 
   # Record the current onLoadingStateChange callback
@@ -108,6 +108,7 @@ export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
 
   <FlatList
     inverted
+    style={style}
     data={events}
     onEndReached={onEndReached}
     onEndReachedThreshold={1}

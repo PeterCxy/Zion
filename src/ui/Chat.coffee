@@ -1,4 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
+import { View } from "react-native"
 import { Appbar, ProgressBar } from "react-native-paper"
 import Avatar from "../components/Avatar"
 import RoomTimeline from "../components/RoomTimeline"
@@ -43,24 +44,32 @@ export default Chat = ({route, navigation}) ->
         style={styles.styleAvatar}/>
       <Appbar.Content title={name} />
     </Appbar.Header>
-    <ProgressBar
-      style={styles.styleProgress}
-      indeterminate={true}
-      color={theme.COLOR_ACCENT}
-      visible={loading}/>
-    <RoomTimeline
-      roomId={roomId}
-      onLoadingStateChange={setLoading}/>
+    <View style={styles.styleContentWrapper}>
+      <RoomTimeline
+        style={styles.styleTimeline}
+        roomId={roomId}
+        onLoadingStateChange={setLoading}/>
+      <ProgressBar
+        style={styles.styleProgress}
+        indeterminate={true}
+        color={theme.COLOR_ACCENT}
+        visible={loading}/>
+    </View>
   </>
 
 buildStyles = (theme) ->
+    styleContentWrapper:
+      flex: 1
+      flexDirection: 'column-reverse' # To make sure ProgressBar always appear on top
+      alignSelf: 'stretch'
     styleAvatar:
       width: 40
       height: 40
       borderRadius: 20
       marginLeft: 10
     styleProgress:
-      width: 'auto'
+      width: '100%'
       height: 2
-      alignSelf: 'stretch'
-      backgroundColor: theme.COLOR_BACKGROUND
+      backgroundColor: 'rgba(0, 0, 0, 0)'
+    styleTimeline:
+      marginTop: -2 # Make progress bar overlay the timeline itself
