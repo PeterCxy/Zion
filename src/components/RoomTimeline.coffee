@@ -52,6 +52,12 @@ unknownEvent = (ev) ->
 export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
   client = useContext MatrixClientContext
 
+  # Record the current onLoadingStateChange callback
+  # For all of our asynchronous operations
+  # (because the callback may change when async operations finish)
+  loadingChangeRef = useRef onLoadingStateChange
+  loadingChangeRef.current = onLoadingStateChange
+
   # The TimelineWindow object
   # this is internally mutable
   tlWindowRef = useRef null
@@ -70,7 +76,7 @@ export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
   [loading, _setLoading] = useState true
   setLoading = useCallback (newValue) ->
     _setLoading newValue
-    onLoadingStateChange newValue
+    loadingChangeRef.current newValue
   , []
 
   # Callback to update events
