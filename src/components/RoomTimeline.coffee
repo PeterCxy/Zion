@@ -1,5 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { FlatList } from "react-native"
+import { FAB } from "react-native-paper"
 import linkifyHtml from 'linkifyjs/html'
 import linkifyStr from 'linkifyjs/string'
 import { EventTimeline, TimelineWindow } from "matrix-js-sdk"
@@ -58,6 +59,9 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
   loadingChangeRef = useRef onLoadingStateChange
   loadingChangeRef.current = onLoadingStateChange
 
+  # Record scroll position using a mutable ref
+  scrollPosRef = useRef 0
+
   # The TimelineWindow object
   # this is internally mutable
   tlWindowRef = useRef null
@@ -72,6 +76,9 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
   # that are immutable and contain information
   # enough for rendering
   [events, setEvents] = useState []
+  # If true, a button is shown to the user to jump to the latest
+  # timeline.
+  [hasNewerEvents, setHasNewerEvents] = useState false
   [initialized, setInitialized] = useState false
   # Initialize to the loading state
   [loading, _setLoading] = useState true
@@ -101,16 +108,23 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
 
     onTimelineUpdate = (_, room) ->
       return if not room or room.roomId != roomId
-      # TODO: if the user is scrolling back, notice the user that there are new
-      # content available instead of updating immediately
+      # If the user is scrolling back, tell the user that the latest position
+      # must be jumped over using the button
+      if scrollPosRef.current != 0
+        setHasNewerEvents true
+        return
       # Do not make requests -- if we need to make requests, it means that
       # we have missed a lot of messages in between, in which case
       # the user should be responsible for jumping to the latest
       while getTlWindow().canPaginate EventTimeline.FORWARDS
         if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
           break
-      # TODO: if still canPaginate forwards, it means that we have missed content
-      # show a prompt to let the user jump to latest in that case.
+      if getTlWindow().canPaginate EventTimeline.FORWARDS
+        # We have missed some events between the latest and the last loaded one
+        # and have to fetch from API
+        # Therefore, show the FAB to jump to current timeline
+        setHasNewerEvents true
+        return
       updateEvents()
 
     client.on 'Room.timeline', onTimelineUpdate
@@ -130,10 +144,28 @@ export default RoomTimeline = ({roomId, onLoadingStateChange, style}) ->
     setLoading false
   , [loading]
 
-  <FlatList
-    inverted
-    style={style}
-    data={events}
-    onEndReached={onEndReached}
-    onEndReachedThreshold={1}
-    renderItem={(data) -> <EventComponent ev={data.item}/>}/>
+  # Other scroll events
+  onScroll = useCallback (scrollEv) ->
+    scrollPosRef.current = scrollEv.nativeEvent.contentOffset.y
+  , []
+
+  <>
+    <FlatList
+      inverted
+      style={style}
+      data={events}
+      onEndReached={onEndReached}
+      onEndReachedThreshold={1}
+      onScroll={onScroll}
+      renderItem={(data) -> <EventComponent ev={data.item}/>}/>
+    <FAB
+      style={{
+        position: 'absolute',
+        margin: 16,
+        right: 0,
+        bottom: 0,
+        elevation: 10
+      }}
+      visible={hasNewerEvents}
+      icon="arrow-down"/>
+  </>
