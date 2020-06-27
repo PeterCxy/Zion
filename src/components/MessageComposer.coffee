@@ -15,6 +15,7 @@ export default MessageComposer = ({roomId}) ->
     toSend = text.trim()
     if toSend is ""
       setShowTextEmptyPrompt true
+      return
     client.sendEvent roomId, "m.room.message",
       msgtype: 'm.text'
       body: text
