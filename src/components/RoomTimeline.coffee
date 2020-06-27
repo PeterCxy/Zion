@@ -130,6 +130,7 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     # the user should be responsible for jumping to the latest
     while getTlWindow().canPaginate EventTimeline.FORWARDS
       # Note: Since we are making no requests, this "await" is actually synchronous
+      #       so we don't need to care about the loading state either
       if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
         break
     if getTlWindow().canPaginate EventTimeline.FORWARDS
