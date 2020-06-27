@@ -71,7 +71,7 @@ export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
   setLoading = useCallback (newValue) ->
     _setLoading newValue
     onLoadingStateChange newValue
-  , [onLoadingStateChange]
+  , []
 
   # Callback to update events
   updateEvents = useCallback ->
@@ -89,7 +89,20 @@ export default RoomTimeline = ({roomId, onLoadingStateChange}) ->
     return
   , []
 
+  # Detect scroll to end
+  onEndReached = useCallback ->
+    return if loading # Do not load while loading
+    return if not getTlWindow().canPaginate EventTimeline.BACKWARDS
+
+    setLoading true
+    await getTlWindow().paginate EventTimeline.BACKWARDS, 20
+    updateEvents()
+    setLoading false
+  , [loading]
+
   <FlatList
     inverted
     data={events}
+    onEndReached={onEndReached}
+    onEndReachedThreshold={1}
     renderItem={(data) -> <EventComponent ev={data.item}/>}/>
