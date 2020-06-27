@@ -15,6 +15,9 @@ transformEvents = (client, events) ->
     Object.assign {}, res,
       key: ev.getId()
       ts: ev.getTs()
+      sender:
+        name: ev.sender.name
+        avatar: ev.sender.getAvatarUrl client.getHomeserverUrl(), 32, 32, "scale", false
       self: ev.sender.userId == client.getUserId()
       sent: (not ev.status?) or (ev.status == EventStatus.SENT)
       # TODO: handle errored pending events
@@ -23,14 +26,12 @@ transformEvents = (client, events) ->
 transformEvent = (client, ev) ->
   switch ev.getType()
     when "m.room.message" then messageEvent client, ev
+    when "m.sticker" then stickerEvent client, ev
     else unknownEvent ev
 
 messageEvent = (client, ev) ->
-  ret =
-    sender:
-      name: ev.sender.name
-      avatar: ev.sender.getAvatarUrl client.getHomeserverUrl(), 32, 32, "scale", false
-
+  ret = {}
+  
   content = ev.getContent()
   switch content.msgtype
     when "m.text"
@@ -47,6 +48,15 @@ messageEvent = (client, ev) ->
       ret.ev_type = "msg_#{content.msgtype}"
 
   ret
+
+stickerEvent = (client, ev) ->
+  content = ev.getContent()
+
+  return
+    type: 'msg_sticker'
+    url: client.mxcUrlToHttp content.url, content.info.w, content.info.h, 'scale'
+    width: content.info.w
+    height: content.info.h
 
 unknownEvent = (ev) ->
     type: 'unknown'

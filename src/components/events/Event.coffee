@@ -20,7 +20,7 @@ export default Event = ({ev}) ->
     style={wrapperStyle}>
     {
       switch ev.type
-        when 'msg_text', 'msg_html'
+        when 'msg_text', 'msg_html', 'msg_sticker'
           <EventWithAvatar ev={ev}/>
         else
           <UnknownEvent ev={ev}/>
