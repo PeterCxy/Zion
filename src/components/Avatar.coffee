@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react"
 import { Animated, Image, Text, View } from "react-native"
-import { cachedFetchAsDataURL, fetchMemCache } from "../util/cache"
+import { useCachedFetch } from "../util/cache"
 import { useStyles } from "../theme"
 
 extractCapital = (word) ->
@@ -25,35 +25,20 @@ extractCapitals = (name) ->
 # Otherwise show the fetched image after it gets fully loaded
 export default Avatar = ({name, url, style}) ->
   [theme, styles] = useStyles buildStyles
-  [dataURL, setDataURL] = useState fetchMemCache url
   fadeAnim = useRef(new Animated.Value 1).current
-
-  useEffect ->
-    return if dataURL or not url
-
-    unmounted = false
-
-    do -> 
-      dUrl = await cachedFetchAsDataURL url
-      
-      if dUrl and not unmounted
-        # Play animation first
-        Animated.timing fadeAnim,
-          toValue: 0
-          duration: 200
-          useNativeDriver: true
-        .start ->
-          return if unmounted
-          setDataURL dUrl
-          Animated.timing fadeAnim,
-            toValue: 1
-            duration: 200
-            useNativeDriver: true
-          .start()
-
-    return ->
-      unmounted = true
-  , []
+  dataURL = useCachedFetch url, (dUrl, callback) ->
+    # Play animation first
+    Animated.timing fadeAnim,
+      toValue: 0
+      duration: 200
+      useNativeDriver: true
+    .start ->
+      callback()
+      Animated.timing fadeAnim,
+        toValue: 1
+        duration: 200
+        useNativeDriver: true
+      .start()
 
   if not dataURL
     <Animated.View style={Object.assign {}, styles.styleTextBackground, style, { opacity: fadeAnim }}>

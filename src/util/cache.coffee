@@ -1,3 +1,4 @@
+import React, { useEffect, useState } from "react"
 import { LRUMap } from 'lru_map'
 import RNFetchBlob from 'rn-fetch-blob'
 import * as RNFS from 'react-native-fs'
@@ -52,3 +53,25 @@ export cachedFetchAsDataURL = (url) ->
   await RNFS.writeFile await fsCachePath(url), dUrl, 'utf8'
 
   return dUrl
+
+# A React hook for using cached dataURL
+export useCachedFetch = (url, onFetched) ->
+  [dataURL, setDataURL] = useState fetchMemCache url
+
+  useEffect ->
+    return if dataURL or not url
+
+    unmounted = false
+    do ->
+      dUrl = await cachedFetchAsDataURL url
+
+      if dUrl and not unmounted
+        onFetched dUrl, ->
+          return if unmounted
+          setDataURL dUrl
+
+    return ->
+      unmounted = true
+  , []
+
+  dataURL
