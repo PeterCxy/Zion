@@ -104,7 +104,8 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
 
   # Callback to update events
   updateEvents = useCallback ->
-    setEvents transformEvents client, getTlWindow().getEvents()
+    setEvents transformEvents client,
+      [...getTlWindow().getEvents(), ...client.getRoom(roomId).getPendingEvents()]
   , []
 
   # Initialize the timeline window
