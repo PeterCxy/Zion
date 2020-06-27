@@ -112,9 +112,16 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     do ->
       await getTlWindow().load()
       updateEvents()
+      updateReadReceipt()
       setInitialized true
       setLoading false
     return
+  , []
+
+  # Update read receipt to the latest event in window
+  updateReadReceipt = useCallback ->
+    events = getTlWindow().getEvents()
+    client.sendReadReceipt events[events.length - 1]
   , []
 
   # Load all events that are present in memory until cannot load anymore
@@ -142,6 +149,10 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       return Promise.resolve false
     setHasNewerEvents false
     updateEvents()
+    # We can send receipt because if we reached here, the client must be at the
+    # bottom of the timeline
+    # We don't care about whether this is actually sent or not
+    updateReadReceipt()
     return Promise.resolve true
   , []
 

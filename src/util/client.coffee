@@ -34,7 +34,8 @@ export createMatrixClient = (baseUrl, token, uid) ->
     accessToken: token
     userId: uid
     store: await initIndexedDBStore()
-  await client.startClient()
+  await client.startClient
+    pendingEventOrdering: 'detached'
   client
 
 export createLoginMatrixClient = (baseUrl) ->
