@@ -17,6 +17,8 @@
   "room_event_unknown": "Unknown event '%'",
   "room_msg_unknown": "Unknown msg '%'",
   "time_format_hour_minute": "%a:%b",
+  "chat_placeholder": "Write something...",
+  "chat_text_empty": "Please write something to send",
   "err_failed_login": "Failed to log in. Please check your credentials.",
   "ok": "OK"
 }

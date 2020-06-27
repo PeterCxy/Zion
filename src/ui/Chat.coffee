@@ -3,6 +3,7 @@ import { View } from "react-native"
 import { Appbar, ProgressBar } from "react-native-paper"
 import Avatar from "../components/Avatar"
 import RoomTimeline from "../components/RoomTimeline"
+import MessageComposer from "../components/MessageComposer"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 
@@ -55,6 +56,7 @@ export default Chat = ({route, navigation}) ->
         color={theme.COLOR_ACCENT}
         visible={loading}/>
     </View>
+    <MessageComposer/>
   </>
 
 buildStyles = (theme) ->
