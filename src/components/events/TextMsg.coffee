@@ -1,5 +1,7 @@
 import React, { useMemo } from "react"
 import { View, Text } from "react-native"
+import linkifyHtml from 'linkifyjs/html'
+import linkifyStr from 'linkifyjs/string'
 import HTML from "react-native-render-html"
 import { useStyles } from "../../theme"
 import { translate } from "../../util/i18n"
@@ -31,11 +33,20 @@ export default TextMsg = ({ev}) ->
   else
     styles.styleMsgBubble
 
-  if ev.html? and ev.html.indexOf('<li>') != -1
+  if ev.type == 'msg_html' and ev.body.indexOf('<li>') != -1
     # There is a weird bug about lists in react-native-render-html
     # that causes the view, when in auto width, wrapping at each character
     # for now, let's fix it by making the width constant
     bubbleStyle = Object.assign {}, bubbleStyle, { width: '80%' }
+
+  fixedHtml = useMemo ->
+    # Linkify both string and html to always produce html
+    html = if ev.type == 'msg_html'
+      linkifyHtml ev.body
+    else
+      linkifyStr ev.body
+    fixHtml html
+  , [ev.body]
 
   <View
     style={bubbleStyle}>
@@ -47,26 +58,14 @@ export default TextMsg = ({ev}) ->
           {ev.sender.name}
         </Text>
     }
-    {  
-      if ev.text
-        <Text
-          style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}>
-          {ev.text}
-        </Text>
-      else if ev.html
-        fixedHtml = useMemo ->
-          fixHtml ev.html
-        , [ev.html]
-
-        <HTML
-          html={fixedHtml}
-          renderersProps={{
-            styles: styles
-          }}
-          renderers={htmlRenderers}
-          style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
-          baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
-    }
+    <HTML
+      html={fixedHtml}
+      renderersProps={{
+        styles: styles
+      }}
+      renderers={htmlRenderers}
+      style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
+      baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
     <Text
       style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
       {translate "time_format_hour_minute",

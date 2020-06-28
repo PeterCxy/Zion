@@ -1,8 +1,6 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { FlatList } from "react-native"
 import { FAB } from "react-native-paper"
-import linkifyHtml from 'linkifyjs/html'
-import linkifyStr from 'linkifyjs/string'
 import { EventTimeline, EventStatus, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
 import EventComponent from "./events/Event"
@@ -40,10 +38,10 @@ messageEvent = (client, ev) ->
       switch content.format
         when 'org.matrix.custom.html'
           ret.type = 'msg_html'
-          ret.html = linkifyHtml content.formatted_body
+          ret.body = content.formatted_body
         else
-          ret.type = 'msg_html' # We linkify and escape the content as HTML
-          ret.html = linkifyStr content.body
+          ret.type = 'msg_text'
+          ret.body = content.body
     else
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
