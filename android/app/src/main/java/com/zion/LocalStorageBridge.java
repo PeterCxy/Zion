@@ -52,4 +52,9 @@ public class LocalStorageBridge extends ReactContextBaseJavaModule {
     public void clear(String name) {
         mImpls.get(name).clear();
     }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    public int getLength(String name){
+        return mImpls.get(name).getLength();
+    }
 }

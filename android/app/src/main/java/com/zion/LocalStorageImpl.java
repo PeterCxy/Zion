@@ -42,4 +42,8 @@ class LocalStorageImpl {
         mPrefs.edit().clear().apply();
         mMemCache.clear();
     }
+
+    public int getLength() {
+        return mMemCache.size();
+    }
 }
