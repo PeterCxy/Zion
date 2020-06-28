@@ -3,6 +3,7 @@ import setGlobalVars from "@indexeddbshim/indexeddbshim/src/browser-noninvasive"
 import * as m from 'matrix-js-sdk'
 import { LocalIndexedDBStoreBackend } from 'matrix-js-sdk/lib/store/indexeddb-local-backend'
 import React from 'react'
+import LocalStorage from './LocalStorage'
 
 initGlobals = ->
   # This is needed by `browser-request`, used by matrix-js-sdk
@@ -21,6 +22,7 @@ initIndexedDB = ->
 initIndexedDBStore = ->
   store = new ExtraIndexedDBStore
     indexedDB: initIndexedDB()
+    localStorage: new LocalStorage "local"
     dbName: 'matrix-client'
   await store.startup()
   store
