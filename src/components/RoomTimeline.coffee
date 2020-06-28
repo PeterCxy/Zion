@@ -10,11 +10,12 @@ import { MatrixClientContext } from "../util/client"
 
 # Transform raw events to what we show in the timeline
 transformEvents = (client, events) ->
-  events.map (ev) ->
+  events.map (ev, idx, array) ->
     res = transformEvent client, ev
     Object.assign {}, res,
       key: ev.getId()
       ts: ev.getTs()
+      prev_ts: array[idx + 1]?.getTs()
       sender:
         name: ev.sender.name
         avatar: ev.sender.getAvatarUrl client.getHomeserverUrl(), 32, 32, "scale", false

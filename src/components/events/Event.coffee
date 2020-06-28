@@ -1,5 +1,6 @@
 import React from "react"
 import { View } from "react-native"
+import EventDayDivider from "./EventDayDivider"
 import EventWithAvatar from "./EventWithAvatar"
 import UnknownEvent from "./UnknownEvent"
 import { useStyles } from "../../theme"
@@ -16,16 +17,19 @@ export default Event = ({ev}) ->
   if not ev.sent
     wrapperStyle = Object.assign {}, wrapperStyle, { opacity: 0.5 }
 
-  <View
-    style={wrapperStyle}>
-    {
-      switch ev.type
-        when 'msg_text', 'msg_html', 'msg_sticker'
-          <EventWithAvatar ev={ev}/>
-        else
-          <UnknownEvent ev={ev}/>
-    }
-  </View>
+  <>
+    <EventDayDivider ev={ev}/>
+    <View
+      style={wrapperStyle}>
+      {
+        switch ev.type
+          when 'msg_text', 'msg_html', 'msg_sticker'
+            <EventWithAvatar ev={ev}/>
+          else
+            <UnknownEvent ev={ev}/>
+      }
+    </View>
+  </>
 
 buildStyles = (theme) ->
   ret =
