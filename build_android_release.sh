@@ -5,6 +5,7 @@ if [ -z "$KEYSTORE" ]; then
   echo "Please set KEYSTORE, KEY_ALIAS and APKSIGNER in .env.keystore"
   exit 1
 fi
+yarn run build:sdk
 pushd android
 ./gradlew assemblePubRelease
 popd
