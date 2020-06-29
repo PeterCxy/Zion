@@ -63,8 +63,8 @@ public class OlmOutboundGroupSessionBridge extends OlmSerializableBridgeBase<Olm
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    public double messageIndex(String id) throws OlmException {
+    public int messageIndex(String id) throws OlmException {
         OlmOutboundGroupSession session = getObj(id);
-        return (double) session.messageIndex();
+        return session.messageIndex();
     }
 }
