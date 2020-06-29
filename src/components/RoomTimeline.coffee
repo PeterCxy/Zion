@@ -4,6 +4,7 @@ import { FAB } from "react-native-paper"
 import { EventTimeline, EventStatus, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
 import EventComponent from "./events/Event"
+import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
 
 # Transform raw events to what we show in the timeline
@@ -26,6 +27,7 @@ transformEvent = (client, ev) ->
   switch ev.getType()
     when "m.room.message" then messageEvent client, ev
     when "m.sticker" then stickerEvent client, ev
+    when "m.room.encrypted" then encryptedEvent ev
     else unknownEvent ev
 
 messageEvent = (client, ev) ->
@@ -56,6 +58,10 @@ stickerEvent = (client, ev) ->
     url: client.mxcUrlToHttp content.url, content.info.w, content.info.h, 'scale'
     width: content.info.w
     height: content.info.h
+
+encryptedEvent = (ev) ->
+    type: 'msg_text' # Pretend it's a message and show a placeholder
+    body: translate 'room_msg_encrypted_placeholder'
 
 unknownEvent = (ev) ->
     type: 'unknown'
@@ -175,12 +181,18 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       return if not room or room.roomId != roomId
       loadUntilLatest()
 
+    onEventDecrypted = (ev) ->
+      return if roomId != ev.getRoomId()
+      loadUntilLatest()
+
     client.on 'Room.timeline', onTimelineUpdate
     client.on 'Room.localEchoUpdated', onTimelineUpdate # For message sent status
+    client.on 'Event.decrypted', onEventDecrypted
 
     return ->
       client.removeListener 'Room.timeline', onTimelineUpdate
       client.removeListener 'Room.localEchoUpdated', onTimelineUpdate
+      client.removeListener 'Event.decrypted', onEventDecrypted
   , [initialized]
 
   # Detect scroll to end

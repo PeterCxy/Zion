@@ -36,6 +36,9 @@ eventToDescription = (ev) ->
   switch ev.getType()
     when 'm.room.message'
       translate "room_event_message", ev.sender.name, messageToDescription ev.getContent()
+    when 'm.room.encrypted'
+      translate "room_event_message", ev.sender.name,
+        translate "room_msg_encrypted_placeholder"
     when 'm.reaction'
       translate "room_event_message", ev.sender.name, ev.getContent()["m.relates_to"]["key"]
     when 'm.room.create'
@@ -104,9 +107,11 @@ export default RoomList = ({onEnterRoom}) ->
     # TODO: maybe this is too much of work to update all rooms on all sync events?
     #       maybe we can do better?
     client.on 'sync', refreshRooms
+    client.on 'Event.decrypted', refreshRooms
     
     return ->
       client.removeListener 'sync', refreshRooms
+      client.removeListener 'Event.decrypted', refreshRooms
   , []
 
   <>
