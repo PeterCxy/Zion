@@ -4,11 +4,14 @@ import * as m from 'matrix-js-sdk'
 import { LocalIndexedDBStoreBackend } from 'matrix-js-sdk/lib/store/indexeddb-local-backend'
 import React from 'react'
 import LocalStorage from './LocalStorage'
+import * as Olm from './olm'
 
 initGlobals = ->
   # This is needed by `browser-request`, used by matrix-js-sdk
   global.location =
     href: "https://example.com"
+  # The Olm object for matrix-js-sdk
+  global.Olm = Olm
 
 initIndexedDB = ->
   win = {}
@@ -19,23 +22,33 @@ initIndexedDB = ->
     useSQLiteIndexes: true
   win.indexedDB
 
-initIndexedDBStore = ->
+initIndexedDBStore = (indexedDB) ->
   store = new ExtraIndexedDBStore
-    indexedDB: initIndexedDB()
+    indexedDB: indexedDB
     localStorage: new LocalStorage "local"
     dbName: 'matrix-client'
   await store.startup()
   store
 
+initIndexedDBCryptoStore = (indexedDB) ->
+  store = new m.IndexedDBCryptoStore indexedDB, 'matrix-client-crypto-store-db'
+  await store.startup()
+  store
+
 export MatrixClientContext = React.createContext null
 
-export createMatrixClient = (baseUrl, token, uid) ->
+export createMatrixClient = (baseUrl, token, uid, deviceId) ->
   initGlobals()
+  indexedDB = initIndexedDB()
   client = m.createClient
     baseUrl: baseUrl
     accessToken: token
     userId: uid
-    store: await initIndexedDBStore()
+    deviceId: deviceId
+    store: await initIndexedDBStore indexedDB
+    cryptoStore: await initIndexedDBCryptoStore indexedDB
+    sessionStore: new m.WebStorageSessionStore new LocalStorage "session"
+  await client.initCrypto()
   await client.startClient
     pendingEventOrdering: 'detached'
   client

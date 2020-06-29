@@ -134,6 +134,7 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+        multiDexEnabled true
     }
 
     flavorDimensions "flavor"
@@ -191,6 +192,12 @@ android {
         exclude "**/libjsc.so"
     }
 
+    repositories {
+        flatDir {
+            dir 'libs'
+        }
+    }
+
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -214,6 +221,8 @@ dependencies {
     implementation 'org.chromium:v8-android:+'
 
     implementation "androidx.swiperefreshlayout:swiperefreshlayout:1.0.0"
+    
+    compile project(":olm-sdk")
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'

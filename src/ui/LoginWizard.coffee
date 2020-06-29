@@ -39,8 +39,10 @@ export default LoginWizard = ({onLogin}) ->
         await AsyncStorage.setItem "@base_url", baseUrl
         await AsyncStorage.setItem "@access_token", resp.access_token
         await AsyncStorage.setItem "@user_id", resp.user_id
+        await AsyncStorage.setItem "@device_id", resp.device_id
         # Create the real client
-        client = await createMatrixClient baseUrl, resp.access_token, resp.user_id
+        client = await createMatrixClient baseUrl, resp.access_token,
+          resp.user_id, resp.device_id
         # Wait for first sync to finish
         client.once 'sync', ->
           # Notify the main page to switch

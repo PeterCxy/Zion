@@ -45,13 +45,14 @@ export default App = () ->
       baseUrl = await AsyncStorage.getItem "@base_url"
       token = await AsyncStorage.getItem "@access_token"
       uid = await AsyncStorage.getItem "@user_id"
+      deviceId = await AsyncStorage.getItem "@device_id"
 
-      if not (baseUrl and token and uid)
+      if not (baseUrl and token and uid and deviceId)
         setLoaded true
         setClient null
       else
         # We have the full information to construct client
-        client = await createMatrixClient baseUrl, token, uid
+        client = await createMatrixClient baseUrl, token, uid, deviceId
         setClient client
         setLoaded true
     return

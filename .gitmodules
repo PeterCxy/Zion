@@ -1,0 +1,3 @@
+[submodule "vendor/olm"]
+	path = vendor/olm
+	url = https://cgit.typeblog.net/git/olm.git
