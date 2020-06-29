@@ -22,7 +22,7 @@
     "lodash": "^4.17.15",
     "lodash.memoize": "^4.1.2",
     "lru_map": "^0.3.3",
-    "matrix-js-sdk": "./vendor/matrix-js-sdk",
+    "matrix-js-sdk": "link:./vendor/matrix-js-sdk",
     "node-libs-react-native": "^1.2.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
