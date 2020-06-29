@@ -21,6 +21,7 @@
   "chat_text_empty": "Please write something to send",
   "verification_title": "Verification",
   "verification_start": "A verification request was initiated by %",
+  "verification_pending": "Cross-verification request pending",
   "verification_waiting": "Waiting for the other side...",
   "verification_match_prompt": "Compare the following emojis with the other side",
   "verification_they_match": "They Match",
@@ -30,5 +31,7 @@
   "err_failed_login": "Failed to log in. Please check your credentials.",
   "ok": "OK",
   "continue": "Continue",
-  "cancel": "Cancel"
+  "cancel": "Cancel",
+  "accept": "Accept",
+  "decline": "Decline"
 }
