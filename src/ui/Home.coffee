@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useMemo, useState } from "react"
+import React, { useContext, useEffect, useMemo, useRef, useState } from "react"
 import { View } from "react-native"
 import { NavigationContainer, DefaultTheme as NavDefTheme } from "@react-navigation/native"
 import { createStackNavigator } from '@react-navigation/stack'
@@ -15,6 +15,8 @@ Stack = createStackNavigator()
 export default Home = () ->
   client = useContext MatrixClientContext
   {theme} = useContext ThemeContext
+
+  verifyingRef = useRef false
 
   [verifier, setVerifier] = useState null
 
@@ -36,6 +38,11 @@ export default Home = () ->
     onVerificationRequest = (request) ->
       if request.verifier
         console.log "has verifier"
+        if verifyingRef.current
+          console.log "rejecting verification because one is in progress"
+          request.verifier.cancel 'Already in progress'
+          return
+        verifyingRef.current = true
         setVerifier request.verifier
     client.on 'crypto.verification.request', onVerificationRequest
 
@@ -61,7 +68,10 @@ export default Home = () ->
       if verifier
         <SASVerificationDialog
           verifier={verifier}
-          onDismiss={-> setVerifier null}/>
+          onDismiss={->
+            setVerifier null
+            verifyingRef.current = false
+          }/>
     }
   </View>
 
