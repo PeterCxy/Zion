@@ -34,6 +34,7 @@ export default LoginWizard = ({onLogin}) ->
       resp = await tmpClient.login "m.login.password",
         user: userName
         password: password
+        initial_device_display_name: "Zion"
       if resp.access_token
         # Write them to async storage
         await AsyncStorage.setItem "@base_url", baseUrl
