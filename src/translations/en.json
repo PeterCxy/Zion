@@ -17,6 +17,7 @@
   "room_event_unknown": "Unknown event '%'",
   "room_msg_unknown": "Unknown msg '%'",
   "room_msg_encrypted_placeholder": "Encrypted message",
+  "room_msg_bad_encryption": "Failed to decrypt message",
   "time_format_hour_minute": "%a:%b",
   "chat_placeholder": "Write something...",
   "chat_text_empty": "Please write something to send",

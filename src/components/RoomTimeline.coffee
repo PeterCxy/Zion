@@ -44,6 +44,9 @@ messageEvent = (client, ev) ->
         else
           ret.type = 'msg_text'
           ret.body = content.body
+    when "m.bad.encrypted"
+      ret.type = 'msg_text'
+      ret.body = translate 'room_msg_bad_encryption'
     else
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
