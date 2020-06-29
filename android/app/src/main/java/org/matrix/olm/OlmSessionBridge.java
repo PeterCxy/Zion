@@ -54,7 +54,7 @@ public class OlmSessionBridge extends OlmSerializableBridgeBase<OlmSession> {
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    public void creeateInbound(String id, String accountId,
+    public void createInbound(String id, String accountId,
         String oneTimeKeyMsg) throws OlmException {
         OlmSession session = getObj(id);
         session.initInboundSession(
@@ -64,7 +64,7 @@ public class OlmSessionBridge extends OlmSerializableBridgeBase<OlmSession> {
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    public void creeateInboundFrom(String id, String accountId,
+    public void createInboundFrom(String id, String accountId,
         String identKey, String oneTimeKeyMsg) throws OlmException {
         OlmSession session = getObj(id);
         session.initInboundSessionFrom(
