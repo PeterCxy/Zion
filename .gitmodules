@@ -1,3 +1,7 @@
 [submodule "vendor/olm"]
 	path = vendor/olm
 	url = https://cgit.typeblog.net/git/olm.git
+[submodule "vendor/matrix-js-sdk"]
+	path = vendor/matrix-js-sdk
+	url = https://cgit.typeblog.net/git/matrix-js-sdk.git
+	branch = 7.0.0-zion

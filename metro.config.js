@@ -18,7 +18,10 @@ module.exports = {
     )
   },
   resolver: {
-    extraNodeModules: require('node-libs-react-native'),
+    extraNodeModules:
+      Object.assign({}, require('node-libs-react-native'), {
+        vm: require.resolve('node-libs-react-native/mock/vm')
+      }),
     sourceExts: ['js', 'coffee', 'ts', 'tsx']
   }
 };

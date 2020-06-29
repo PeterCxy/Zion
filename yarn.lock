@@ -4652,10 +4652,8 @@ map-visit@^1.0.0:
   dependencies:
     object-visit "^1.0.0"
 
-matrix-js-sdk@^6.2.2:
-  version "6.2.2"
-  resolved "https://registry.yarnpkg.com/matrix-js-sdk/-/matrix-js-sdk-6.2.2.tgz#103d951f61945217b110962f55ae43996756f615"
-  integrity sha512-uTXmKVzl7GXM3R70cl2E87H+mtwN3ILqPeB80Z/2ITN9Vaf9pMURCCAuHePEBXbhnD7DOZj7Cke42uP+ByR6Hw==
+matrix-js-sdk@./vendor/matrix-js-sdk:
+  version "7.0.0"
   dependencies:
     "@babel/runtime" "^7.8.3"
     another-json "^0.2.0"
@@ -5901,7 +5899,7 @@ react-native-paper@^3.10.1:
     color "^3.1.2"
     react-native-safe-area-view "^0.14.9"
 
-react-native-randombytes@^3.5.1:
+react-native-randombytes@^3.5.1, react-native-randombytes@^3.5.3:
   version "3.5.3"
   resolved "https://registry.yarnpkg.com/react-native-randombytes/-/react-native-randombytes-3.5.3.tgz#b3bdcd11473cce106551a586244b98855e443cd1"
   integrity sha512-n/7QwMrRJxHr+/3mt2KxqqacGylM+ssW+FfBTgXGzvwq5KzSohooEWf6Z6MTSByuJ/izP9VbSPtwomPwzvupKQ==

@@ -1,9 +1,11 @@
 import SQLite from 'react-native-sqlite-2'
 import setGlobalVars from "@indexeddbshim/indexeddbshim/src/browser-noninvasive"
 import * as m from 'matrix-js-sdk'
+import { setCrypto } from 'matrix-js-sdk/lib/utils'
 import { verificationMethods } from 'matrix-js-sdk/lib/crypto'
 import { LocalIndexedDBStoreBackend } from 'matrix-js-sdk/lib/store/indexeddb-local-backend'
 import React from 'react'
+import * as crypto from 'crypto'
 import LocalStorage from './LocalStorage'
 import * as Olm from './olm'
 
@@ -13,6 +15,7 @@ initGlobals = ->
     href: "https://example.com"
   # The Olm object for matrix-js-sdk
   global.Olm = Olm
+  setCrypto crypto
 
 initIndexedDB = ->
   win = {}
