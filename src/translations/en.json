@@ -19,6 +19,16 @@
   "time_format_hour_minute": "%a:%b",
   "chat_placeholder": "Write something...",
   "chat_text_empty": "Please write something to send",
+  "verification_title": "Verification",
+  "verification_start": "A verification request was initiated by %",
+  "verification_waiting": "Waiting for the other side...",
+  "verification_match_prompt": "Compare the following emojis with the other side",
+  "verification_they_match": "They Match",
+  "verification_they_dont_match": "They don't Match",
+  "verification_cancelled": "Verification cancelled",
+  "verification_finished": "This device has been verified successfully.",
   "err_failed_login": "Failed to log in. Please check your credentials.",
-  "ok": "OK"
+  "ok": "OK",
+  "continue": "Continue",
+  "cancel": "Cancel"
 }

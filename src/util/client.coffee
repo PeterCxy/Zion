@@ -1,6 +1,7 @@
 import SQLite from 'react-native-sqlite-2'
 import setGlobalVars from "@indexeddbshim/indexeddbshim/src/browser-noninvasive"
 import * as m from 'matrix-js-sdk'
+import { verificationMethods } from 'matrix-js-sdk/lib/crypto'
 import { LocalIndexedDBStoreBackend } from 'matrix-js-sdk/lib/store/indexeddb-local-backend'
 import React from 'react'
 import LocalStorage from './LocalStorage'
@@ -48,6 +49,7 @@ export createMatrixClient = (baseUrl, token, uid, deviceId) ->
     store: await initIndexedDBStore indexedDB
     cryptoStore: await initIndexedDBCryptoStore indexedDB
     sessionStore: new m.WebStorageSessionStore new LocalStorage "session"
+    verificationMethods: [verificationMethods.SAS]
   await client.initCrypto()
   await client.startClient
     pendingEventOrdering: 'detached'
