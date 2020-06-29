@@ -68,7 +68,7 @@ export class Session
     SessionBridge.matchesInboundFrom @nativeId, identity_key,
       one_time_key_message
   encrypt: (plaintext) =>
-    SessionBridge.encrypt @nativeId, plaintext
+    JSON.parse SessionBridge.encrypt @nativeId, plaintext
   decrypt: (message_type, message) =>
     SessionBridge.decrypt @nativeId, message_type, message
   describe: => "unimplemented description" # TODO: what should we use here?

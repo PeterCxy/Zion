@@ -4,6 +4,11 @@ import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
 
+import org.json.JSONObject;
+
+import java.util.Map;
+import java.util.HashMap;
+
 public class OlmSessionBridge extends OlmSerializableBridgeBase<OlmSession> {
     private static OlmSessionBridge sInstance;
 
@@ -106,7 +111,11 @@ public class OlmSessionBridge extends OlmSerializableBridgeBase<OlmSession> {
     @ReactMethod(isBlockingSynchronousMethod = true)
     public String encrypt(String id, String plaintext) throws OlmException {
         OlmSession session = getObj(id);
-        return session.encryptMessage(plaintext).mCipherText;
+        OlmMessage msg = session.encryptMessage(plaintext);
+        Map<String, Object> ret = new HashMap();
+        ret.put("type", msg.mType);
+        ret.put("body", msg.mCipherText);
+        return new JSONObject(ret).toString();
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
