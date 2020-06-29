@@ -3,8 +3,9 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "android": "react-native run-android --variant=privDebug",
-    "ios": "react-native run-ios",
+    "build:sdk": "cd vendor/matrix-js-sdk && yarn install --development",
+    "android": "yarn run build:sdk && react-native run-android --variant=privDebug",
+    "ios": "yarn run build:sdk && react-native run-ios",
     "start": "react-native start",
     "build-android": "./build_android_release.sh",
     "test": "jest",
