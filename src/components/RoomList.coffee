@@ -4,7 +4,6 @@ import { TouchableRipple } from "react-native-paper"
 import Avatar from "./Avatar"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
-import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
 # Transform a list of rooms received from the SDK
@@ -30,44 +29,7 @@ transformRooms = (client, rooms) ->
 getLatestMessage = (room) ->
   events = room.getLiveTimeline().getEvents()
   latest = events[events.length - 1]
-  [latest.getTs(), eventToDescription(latest)]
-
-eventToDescription = (ev) ->
-  #console.log "type = #{ev.getType()}"
-  switch ev.getType()
-    when 'm.room.message'
-      translate "room_event_message", ev.sender.name, messageToDescription ev.getContent()
-    when 'm.room.encrypted'
-      translate "room_event_message", ev.sender.name,
-        translate "room_msg_encrypted_placeholder"
-    when 'm.reaction'
-      translate "room_event_message", ev.sender.name, ev.getContent()["m.relates_to"]["key"]
-    when 'm.room.create'
-      translate "room_event_created"
-    when 'm.sticker'
-      translate "room_event_sticker", ev.sender.name
-    when 'm.room.member'
-      content = ev.getContent()
-      switch content.membership
-        when 'invite'
-          translate "room_event_invite", ev.sender.name, content.displayname
-        when 'join'
-          translate "room_event_join", content.displayname
-        when 'leave'
-          translate "room_event_leave", content.displayname
-        else
-          content.membership
-    when 'm.room.name'
-      translate "room_event_name_changed", ev.sender.name
-    when 'm.room.server_acl'
-      translate "room_event_server_acl_changed", ev.sender.name
-    else translate "room_event_unknown", ev.getType()
-
-messageToDescription = (content) ->
-  #console.log "msgType = #{content.msgtype}"
-  switch content.msgtype
-    when "m.text" then content.body
-    else translate "room_msg_unknown", content.msgtype
+  [latest.getTs(), mext.eventToDescription(latest)]
 
 renderRoom = (onEnterRoom, theme, styles, {item}) ->
   <TouchableRipple
