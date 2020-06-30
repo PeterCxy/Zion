@@ -31,8 +31,8 @@ public class EncryptedAttachment extends ReactContextBaseJavaModule {
         // Do not block the main thread -- we use Promise anyway
         new Thread(() -> {
             try {
-                byte[] key = Base64.getUrlDecoder().decode(inKey);
-                byte[] iv = Base64.getUrlDecoder().decode(inIv);
+                byte[] key = Base64.getDecoder().decode(base64UrlToBase64(inKey));
+                byte[] iv = Base64.getDecoder().decode(base64UrlToBase64(inIv));
 
                 Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
                 cipher.init(Cipher.DECRYPT_MODE,
@@ -74,5 +74,13 @@ public class EncryptedAttachment extends ReactContextBaseJavaModule {
                 promise.reject("Something went wrong on Java side, see log output");
             }
         }).start();
+    }
+
+    // We use this instead of Java's Base64.getUrlEncoder() because
+    // sometimes Matrix does not encode URL-safe base64 properly.
+    // Using this we can be more permissive about it
+    // (i.e. do not throw when something different happens)
+    private static String base64UrlToBase64(String str) {
+        return str.replace("-", "+").replace("_", "/");
     }
 }
