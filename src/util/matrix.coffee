@@ -59,7 +59,7 @@ export eventToDescription = (ev) ->
         else
           content.membership
     when 'm.room.name'
-      translate "room_event_name_changed", ev.sender.name
+      translate "room_event_name_changed", ev.sender.name, ev.getContent().name
     when 'm.room.server_acl'
       translate "room_event_server_acl_changed", ev.sender.name
     else translate "room_event_unknown", ev.getType()

@@ -12,7 +12,7 @@
   "room_event_invite": "%a invited %b",
   "room_event_join": "% joined",
   "room_event_leave": "% left",
-  "room_event_name_changed": "Title changed by %",
+  "room_event_name_changed": "%a changed room title to '%b'",
   "room_event_server_acl_changed": "Server ACLs changed by %",
   "room_event_unknown": "Unknown event '%'",
   "room_msg_unknown": "Unknown msg '%'",
