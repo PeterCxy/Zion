@@ -34,7 +34,7 @@ export default Image = ({ev}) ->
       client.mxcUrlToHttp ev.info.thumbnail.url,
         width * windowScale, height * windowScale, "scale"
     else if ev.info.thumbnail.cryptoInfo
-      client.mxcUrlToHttp ev.info.cryptoInfo.url
+      client.mxcUrlToHttp ev.info.thumbnail.cryptoInfo.url
     else
       null
   , [width, height, windowScale]

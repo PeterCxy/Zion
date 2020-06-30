@@ -93,7 +93,7 @@ messageEvent = (client, content) ->
         url: content.url
         mime: content.info.mimetype
         cryptoInfo: content.file
-      ret.info.thumbnail = if content.info.thumbnail?
+      ret.info.thumbnail = if content.info.thumbnail_info?
           width: content.info.thumbnail_info.w
           height: content.info.thumbnail_info.h
           url: content.info.thumbnail_url
