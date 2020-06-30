@@ -48,41 +48,50 @@ export default TextMsg = ({ev}) ->
     fixHtml html
   , [ev.body]
 
-  <View
-    style={bubbleStyle}>
-    {
-      if not ev.self
-        <Text
-          numberOfLines={1}
-          style={styles.styleMsgSender}>
-          {ev.sender.name}
-        </Text>
-    }
-    <HTML
-      html={fixedHtml}
-      renderersProps={{
-        styles: styles
-      }}
-      renderers={htmlRenderers}
-      style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
-      baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
-    <Text
-      style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
-      {translate "time_format_hour_minute",
-        ('' + date.getHours()).padStart(2, '0'),
-        ('' + date.getMinutes()).padStart(2, '0')}
-    </Text>
+  <View style={styles.styleMsgBubbleWrapper}>
+    <View
+      style={bubbleStyle}>
+      {
+        if not ev.self
+          <Text
+            numberOfLines={1}
+            style={styles.styleMsgSender}>
+            {ev.sender.name}
+          </Text>
+      }
+      <HTML
+        html={fixedHtml}
+        renderersProps={{
+          styles: styles
+        }}
+        renderers={htmlRenderers}
+        style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
+        baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+      <Text
+        style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
+        {translate "time_format_hour_minute",
+          ('' + date.getHours()).padStart(2, '0'),
+          ('' + date.getMinutes()).padStart(2, '0')}
+      </Text>
+    </View>
   </View>
 
 buildStyles = (theme) ->
   styles =
+    styleMsgBubbleWrapper:
+      # Make the wrapper width fill the rest of the flexbox
+      # Without wrapper, the max width of the bubble is
+      # relative to the entire list, not the rest of flex
+      flex: 1
     styleMsgBubble:
+      alignSelf: 'flex-start' # Wrap-Content
       backgroundColor: theme.COLOR_CHAT_BUBBLE
-      maxWidth: '80%'
+      maxWidth: '90%'
       paddingStart: 10
       paddingEnd: 10
       borderRadius: 8
     styleMsgBubbleReverse:
+      alignSelf: 'flex-end'
       paddingTop: 5
       backgroundColor: theme.COLOR_PRIMARY
     styleMsgText:
