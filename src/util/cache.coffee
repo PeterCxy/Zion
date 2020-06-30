@@ -10,6 +10,8 @@ import * as EncryptedAttachment from './EncryptedAttachment'
 # This should only be used for avatars / thumbnails
 memCache = new LRUMap 128
 
+MEM_CACHE_MAX_FILE_SIZE = 500 * 1024 # 500kB
+
 # FS cache path
 FS_CACHE_PATH = "#{RNFS.DocumentDirectoryPath}/cache"
 FS_TEMP_PATH = "#{RNFS.DocumentDirectoryPath}/temp"
@@ -68,7 +70,8 @@ export cachedFetchAsDataURL = (url, mime, cryptoInfo) ->
   resp.flush()
 
   # Write to both mem and fs cache
-  memCache.set url, dUrl
+  if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
+    memCache.set url, dUrl
   await RNFS.writeFile await fsCachePath(url), dUrl, 'utf8'
 
   return dUrl
