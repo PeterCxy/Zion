@@ -68,7 +68,7 @@ export eventToDescription = (ev) ->
 messageToDescription = (content) ->
   #console.log "msgType = #{content.msgtype}"
   switch content.msgtype
-    when "m.text" then content.body
+    when "m.text", "m.notice" then content.body
     when "m.bad.encrypted" then translate 'room_msg_bad_encryption'
     else translate "room_msg_unknown", content.msgtype
 

@@ -75,7 +75,7 @@ messageEvent = (client, content) ->
   ret = {}
   
   switch content.msgtype
-    when "m.text"
+    when "m.text", "m.notice"
       #console.log content
       switch content.format
         when 'org.matrix.custom.html'
