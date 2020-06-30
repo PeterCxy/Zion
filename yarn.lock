@@ -712,18 +712,6 @@
   dependencies:
     "@hapi/hoek" "^8.3.0"
 
-"@indexeddbshim/indexeddbshim@^6.5.0":
-  version "6.5.0"
-  resolved "https://registry.yarnpkg.com/@indexeddbshim/indexeddbshim/-/indexeddbshim-6.5.0.tgz#a1150ebb8cb47145616574f00c870180c712ae91"
-  integrity sha512-y5V8nH7cW618vHX/StUWUJymPlBVzTKsDhnkrObPddXSyQvxFnYk5uk6+kolEjIaGNZS7rnL1YHUftACOOZ51w==
-  dependencies:
-    eventtargeter "0.8.0"
-    regenerator-runtime "^0.13.5"
-    sync-promise "git+https://github.com/brettz9/sync-promise.git#full-sync-missing-promise-features"
-    typeson "5.18.2"
-    typeson-registry "1.0.0-alpha.37"
-    websql "git+https://github.com/brettz9/node-websql.git#configurable-secure2"
-
 "@jest/console@^24.7.1", "@jest/console@^24.9.0":
   version "24.9.0"
   resolved "https://registry.yarnpkg.com/@jest/console/-/console-24.9.0.tgz#79b1bc06fb74a8cfb01cbdedf945584b1b9707f0"
@@ -3608,6 +3596,18 @@ imurmurhash@^0.1.4:
   version "0.1.4"
   resolved "https://registry.yarnpkg.com/imurmurhash/-/imurmurhash-0.1.4.tgz#9218b9b2b928a238b13dc4fb6b6d576f231453ea"
   integrity sha1-khi5srkoojixPcT7a21XbyMUU+o=
+
+indexeddbshim@^6.6.0:
+  version "6.6.0"
+  resolved "https://registry.yarnpkg.com/indexeddbshim/-/indexeddbshim-6.6.0.tgz#3321bfa45d207b69f727868a670d65a8b9d1e15d"
+  integrity sha512-w/IpVXjHmL7jpzNHHt/NAoyGOSmYwEsVNELPBu1RiqSZxJz30OKUKLOmq54z/ZCPLYJoqH2FGd36Ozb1UY3Oag==
+  dependencies:
+    eventtargeter "0.8.0"
+    regenerator-runtime "^0.13.5"
+    sync-promise "git+https://github.com/brettz9/sync-promise.git#full-sync-missing-promise-features"
+    typeson "5.18.2"
+    typeson-registry "1.0.0-alpha.37"
+    websql "git+https://github.com/brettz9/node-websql.git#configurable-secure2"
 
 inflight@^1.0.4:
   version "1.0.6"
