@@ -8,7 +8,7 @@ export default Sticker = ({ev}) ->
 
   [width, height] = useMemo ->
     w = 512 / windowScale # A sticker is always 512 px wide
-    if w > windowWidth
+    if w > windowWidth * 0.6
       w = 0.6 * windowWidth
     h = ev.height / ev.width * w
     [w, h]
