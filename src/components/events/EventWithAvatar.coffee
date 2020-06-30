@@ -2,6 +2,7 @@ import React from "react"
 import Avatar from "../Avatar"
 import TextMsg from "./TextMsg"
 import Sticker from "./Sticker"
+import Image from "./Image"
 import { useStyles } from "../../theme"
 
 # An event that needs to show an avatar (normal-sized)
@@ -19,6 +20,8 @@ export default EventWithAvatar = ({ev}) ->
           <TextMsg ev={ev}/>
         when 'msg_sticker'
           <Sticker ev={ev}/>
+        when 'msg_image'
+          <Image ev={ev}/>
     }
   </>
 

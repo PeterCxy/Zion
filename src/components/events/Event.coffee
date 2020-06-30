@@ -24,7 +24,7 @@ export default Event = ({ev}) ->
       style={wrapperStyle}>
       {
         switch ev.type
-          when 'msg_text', 'msg_html', 'msg_sticker'
+          when 'msg_text', 'msg_html', 'msg_sticker', 'msg_image'
             <EventWithAvatar ev={ev}/>
           when 'room_state'
             <RoomState ev={ev}/>

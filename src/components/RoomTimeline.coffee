@@ -84,6 +84,19 @@ messageEvent = (client, content) ->
         else
           ret.type = 'msg_text'
           ret.body = content.body
+    when "m.image"
+      ret.type = 'msg_image'
+      # TODO: handle encrypted images
+      ret.info =
+        width: content.info.w
+        height: content.info.h
+        url: content.url
+      ret.info.thumbnail = if content.info.thumbnail?
+          width: content.info.thumbnail_info.w
+          height: content.info.thumbnail_info.h
+          url: content.info.thumbnail_url
+      else
+        ret.info
     when "m.bad.encrypted"
       ret.type = 'msg_text'
       ret.body = translate 'room_msg_bad_encryption'
