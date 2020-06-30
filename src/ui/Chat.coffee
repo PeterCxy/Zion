@@ -6,6 +6,7 @@ import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
+import * as mext from "../util/matrix"
 
 export default Chat = ({route, navigation}) ->
   {roomId} = route.params
@@ -19,8 +20,7 @@ export default Chat = ({route, navigation}) ->
   # update the state based on events.
   [name, setName] = useState -> client.getRoom(roomId).name
   [avatar, setAvatar] = useState ->
-    client.getRoom roomId
-      .getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
+    mext.calculateRoomAvatarURL client, client.getRoom roomId
   [loading, setLoading] = useState true
 
   # Listen to room name updates

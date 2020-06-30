@@ -5,6 +5,7 @@ import Avatar from "./Avatar"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
+import * as mext from "../util/matrix"
 
 # Transform a list of rooms received from the SDK
 # to a list that we can use
@@ -21,7 +22,7 @@ transformRooms = (client, rooms) ->
       return
         key: room.roomId
         name: room.name
-        avatar: room.getAvatarUrl client.getHomeserverUrl(), 64, 64, "scale", false
+        avatar: mext.calculateRoomAvatarURL client, room
         summary: desc
         timestamp: ts
     .sort (x, y) -> y.timestamp - x.timestamp
