@@ -4,6 +4,7 @@ import { translate } from "./i18n"
 
 AVATAR_SIZE = 64 # TODO: should we calculate this based on DPI?
 AVATAR_SIZE_SMALL = 32
+AVATAR_SIZE_TINY = 24
 
 # Calculate avatar URL of a room
 # if the room is a direct chat, and does not
@@ -24,6 +25,10 @@ export calculateRoomAvatarURL = (client, room) ->
 export calculateMemberSmallAvatarURL = (client, member) ->
   member.getAvatarUrl client.getHomeserverUrl(),
     AVATAR_SIZE_SMALL, AVATAR_SIZE_SMALL, "scale", false
+
+export calculateMemberTinyAvatarURL = (client, member) ->
+  member.getAvatarUrl client.getHomeserverUrl(),
+    AVATAR_SIZE_TINY, AVATAR_SIZE_TINY, "scale", false
 
 # Convert a known event to a description of the event
 # that can be shown in room lists or as state events
@@ -65,3 +70,11 @@ messageToDescription = (content) ->
     when "m.text" then content.body
     when "m.bad.encrypted" then translate 'room_msg_bad_encryption'
     else translate "room_msg_unknown", content.msgtype
+
+# State events
+STATE_EVENTS = [
+  "m.room.create", "m.room.member",
+  "m.room.name", "m.room.server_acl"
+]
+
+export isStateEvent = (ev) -> ev.getType() in STATE_EVENTS

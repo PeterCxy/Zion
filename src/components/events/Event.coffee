@@ -2,6 +2,7 @@ import React from "react"
 import { View } from "react-native"
 import EventDayDivider from "./EventDayDivider"
 import EventWithAvatar from "./EventWithAvatar"
+import RoomState from "./RoomState"
 import UnknownEvent from "./UnknownEvent"
 import { useStyles } from "../../theme"
 
@@ -25,6 +26,8 @@ export default Event = ({ev}) ->
         switch ev.type
           when 'msg_text', 'msg_html', 'msg_sticker'
             <EventWithAvatar ev={ev}/>
+          when 'room_state'
+            <RoomState ev={ev}/>
           else
             <UnknownEvent ev={ev}/>
       }

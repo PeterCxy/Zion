@@ -19,6 +19,7 @@ transformEvents = (client, events) ->
       sender:
         name: ev.sender.name
         avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
+        tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
       self: ev.sender.userId == client.getUserId()
       sent: (not ev.status?) or (ev.status == EventStatus.SENT)
       # TODO: handle errored pending events
@@ -29,7 +30,11 @@ transformEvent = (client, ev) ->
     when "m.room.message" then messageEvent client, ev
     when "m.sticker" then stickerEvent client, ev
     when "m.room.encrypted" then encryptedEvent ev
-    else unknownEvent ev
+    else
+      if mext.isStateEvent ev
+        stateEvent ev
+      else
+        unknownEvent ev
 
 messageEvent = (client, ev) ->
   ret = {}
@@ -66,6 +71,10 @@ stickerEvent = (client, ev) ->
 encryptedEvent = (ev) ->
     type: 'msg_text' # Pretend it's a message and show a placeholder
     body: translate 'room_msg_encrypted_placeholder'
+
+stateEvent = (ev) ->
+    type: 'room_state'
+    body: mext.eventToDescription ev
 
 unknownEvent = (ev) ->
     type: 'unknown'
