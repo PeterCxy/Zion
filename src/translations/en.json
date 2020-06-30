@@ -19,6 +19,7 @@
   "room_msg_encrypted_placeholder": "Encrypted message",
   "room_msg_bad_encryption": "Failed to decrypt message",
   "room_msg_redacted": "(Deleted)",
+  "room_msg_edited": "(edited)",
   "time_format_hour_minute": "%a:%b",
   "chat_placeholder": "Write something...",
   "chat_text_empty": "Please write something to send",

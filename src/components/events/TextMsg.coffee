@@ -67,6 +67,13 @@ export default TextMsg = ({ev}) ->
         renderers={htmlRenderers}
         style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
         baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+      {
+        if ev.edited
+          <Text
+            style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
+            {translate 'room_msg_edited'}
+          </Text>
+      }
       <Text
         style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
         {translate "time_format_hour_minute",

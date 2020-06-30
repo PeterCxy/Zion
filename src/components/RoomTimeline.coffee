@@ -11,13 +11,14 @@ import * as mext from "../util/matrix"
 # Transform raw events to what we show in the timeline
 transformEvents = (client, events) ->
   redacted = []
+  replaced = {}
 
   events
     # The FlatList itself has been inverted, so we have to invert again
     # Also, this allows us to see redaction / edits before the actual event
     .reverse()
     .map (ev, idx, array) ->
-      res = transformEvent client, ev, redacted
+      res = transformEvent client, ev, redacted, replaced
       # Some events themselves do not need to be shown, like redactions
       return null if not res?
       Object.assign {}, res,
@@ -33,13 +34,29 @@ transformEvents = (client, events) ->
         # TODO: handle errored pending events
     .filter (ev) -> ev?
 
-transformEvent = (client, ev, redacted) ->
+transformEvent = (client, ev, redacted, replaced) ->
   if ev.getId() in redacted
     return redactedEvent ev
 
+  content = ev.getContent()
+  # Handle replacement (edits)
+  if replaced[ev.getId()]
+    content = Object.assign {}, replaced[ev.getId()].newContent
+    content.edited = true
+  if ev.isRelation 'm.replace'
+    origId = ev.getAssociatedId()
+    ts = ev.getTs()
+    if replaced[origId]? and replaced[origId].ts > ts
+      # We only take the latest replacement
+      return null
+    replaced[origId] =
+      ts: ts
+      newContent: content['m.new_content']
+    return null
+
   switch ev.getType()
-    when "m.room.message" then messageEvent client, ev
-    when "m.sticker" then stickerEvent client, ev
+    when "m.room.message" then messageEvent client, content
+    when "m.sticker" then stickerEvent client, content
     when "m.room.encrypted" then encryptedEvent ev
     when "m.room.redaction"
       redacted.push ev.getAssociatedId()
@@ -54,10 +71,9 @@ redactedEvent = (ev) ->
     type: 'msg_text'
     body: translate 'room_msg_redacted'
 
-messageEvent = (client, ev) ->
+messageEvent = (client, content) ->
   ret = {}
   
-  content = ev.getContent()
   switch content.msgtype
     when "m.text"
       #console.log content
@@ -75,11 +91,12 @@ messageEvent = (client, ev) ->
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
 
+  if content.edited
+    ret.edited = true
+
   ret
 
-stickerEvent = (client, ev) ->
-  content = ev.getContent()
-
+stickerEvent = (client, content) ->
   return
     type: 'msg_sticker'
     url: client.mxcUrlToHttp content.url, content.info.w, content.info.h, 'scale'
