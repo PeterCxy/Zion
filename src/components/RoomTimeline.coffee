@@ -10,31 +10,49 @@ import * as mext from "../util/matrix"
 
 # Transform raw events to what we show in the timeline
 transformEvents = (client, events) ->
-  events.map (ev, idx, array) ->
-    res = transformEvent client, ev
-    Object.assign {}, res,
-      key: ev.getId()
-      ts: ev.getTs()
-      prev_ts: array[idx + 1]?.getTs()
-      sender:
-        name: ev.sender.name
-        avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
-        tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
-      self: ev.sender.userId == client.getUserId()
-      sent: (not ev.status?) or (ev.status == EventStatus.SENT)
-      # TODO: handle errored pending events
-  .reverse() # The FlatList itself has been inverted, so we have to invert again
+  redacted = []
 
-transformEvent = (client, ev) ->
+  events
+    # The FlatList itself has been inverted, so we have to invert again
+    # Also, this allows us to see redaction / edits before the actual event
+    .reverse()
+    .map (ev, idx, array) ->
+      res = transformEvent client, ev, redacted
+      # Some events themselves do not need to be shown, like redactions
+      return null if not res?
+      Object.assign {}, res,
+        key: ev.getId()
+        ts: ev.getTs()
+        prev_ts: array[idx - 1]?.getTs()
+        sender:
+          name: ev.sender.name
+          avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
+          tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
+        self: ev.sender.userId == client.getUserId()
+        sent: (not ev.status?) or (ev.status == EventStatus.SENT)
+        # TODO: handle errored pending events
+    .filter (ev) -> ev?
+
+transformEvent = (client, ev, redacted) ->
+  if ev.getId() in redacted
+    return redactedEvent ev
+
   switch ev.getType()
     when "m.room.message" then messageEvent client, ev
     when "m.sticker" then stickerEvent client, ev
     when "m.room.encrypted" then encryptedEvent ev
+    when "m.room.redaction"
+      redacted.push ev.getAssociatedId()
+      null
     else
       if mext.isStateEvent ev
         stateEvent ev
       else
         unknownEvent ev
+
+redactedEvent = (ev) ->
+    type: 'msg_text'
+    body: translate 'room_msg_redacted'
 
 messageEvent = (client, ev) ->
   ret = {}
