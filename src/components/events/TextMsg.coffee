@@ -40,6 +40,7 @@ export default TextMsg = ({ev}) ->
     bubbleStyle = Object.assign {}, bubbleStyle, { width: '80%' }
 
   fixedHtml = useMemo ->
+    return null if not ev.body or ev.body == ""
     # Linkify both string and html to always produce html
     html = if ev.type == 'msg_html'
       linkifyHtml ev.body
@@ -59,14 +60,17 @@ export default TextMsg = ({ev}) ->
             {ev.sender.name}
           </Text>
       }
-      <HTML
-        html={fixedHtml}
-        renderersProps={{
-          styles: styles
-        }}
-        renderers={htmlRenderers}
-        style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
-        baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+      {
+        if fixedHtml?
+          <HTML
+            html={fixedHtml}
+            renderersProps={{
+              styles: styles
+            }}
+            renderers={htmlRenderers}
+            style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
+            baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+      }
       {
         if ev.edited
           <Text
