@@ -5,15 +5,19 @@ AVATAR_SIZE = 64 # TODO: should we calculate this based on DPI?
 AVATAR_SIZE_SMALL = 32
 
 # Calculate avatar URL of a room
-# if the room is a direct chat, return the
-# avatar of the other user
+# if the room is a direct chat, and does not
+# have an avatar of its own,
+# return the avatar of the other user
 # otherwise returns the room avatar directly
+# null if none
 export calculateRoomAvatarURL = (client, room) ->
-  fallback = room.getAvatarFallbackMember()
-  if not fallback?
-    room.getAvatarUrl client.getHomeserverUrl(), AVATAR_SIZE, AVATAR_SIZE, "scale", false
+  roomAvatar = room.getAvatarUrl client.getHomeserverUrl(),
+    AVATAR_SIZE, AVATAR_SIZE, "scale", false
+  if roomAvatar?
+    roomAvatar
   else
-    fallback.getAvatarUrl client.getHomeserverUrl(), AVATAR_SIZE, AVATAR_SIZE, "scale", false
+    room.getAvatarFallbackMember()?.getAvatarUrl client.getHomeserverUrl(),
+      AVATAR_SIZE, AVATAR_SIZE, "scale", false
 
 # Calculate the small avatar URL of a room member
 export calculateMemberSmallAvatarURL = (client, member) ->
