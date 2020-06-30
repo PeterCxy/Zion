@@ -1,5 +1,5 @@
 import React from "react"
-import { Text } from "react-native"
+import { Text, View } from "react-native"
 import Avatar from "../Avatar"
 import { useStyles } from "../../theme"
 
@@ -15,9 +15,12 @@ export default RoomState = ({ev}) ->
       style={if ev.self then styles.styleAvatarReverse else styles.styleAvatar}
       name={ev.sender.name}
       url={ev.sender.tinyAvatar}/>
-    <Text style={styles.styleText}>
-      {ev.body}
-    </Text>
+    <View
+      style={styles.styleTextWrapper}>
+      <Text style={if ev.self then styles.styleTextReverse else styles.styleText}>
+        {ev.body}
+      </Text>
+    </View>
   </>
 
 buildStyles = (theme) ->
@@ -30,12 +33,18 @@ buildStyles = (theme) ->
     styleAvatarReverse:
       marginStart: 10
       marginEnd: 0
-    styleText:
+    styleTextWrapper:
       flex: 1 # Make it follow the padding rules of parent flex container
+    styleText:
+      alignSelf: 'flex-start'
       fontSize: 14
       color: theme.COLOR_CHAT_STATE_EVENT
+    styleTextReverse:
+      alignSelf: 'flex-end'
 
   ret.styleAvatarReverse =
     Object.assign {}, ret.styleAvatar, ret.styleAvatarReverse
+  ret.styleTextReverse =
+    Object.assign {}, ret.styleText, ret.styleTextReverse
 
   ret
