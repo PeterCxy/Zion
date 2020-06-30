@@ -91,10 +91,14 @@ messageEvent = (client, content) ->
         width: content.info.w
         height: content.info.h
         url: content.url
+        mime: content.info.mimetype
+        cryptoInfo: content.file
       ret.info.thumbnail = if content.info.thumbnail?
           width: content.info.thumbnail_info.w
           height: content.info.thumbnail_info.h
           url: content.info.thumbnail_url
+          mime: content.info.thumbnail_info.mimetype
+          cryptoInfo: content.info.thumbnail_file
       else
         ret.info
     when "m.bad.encrypted"

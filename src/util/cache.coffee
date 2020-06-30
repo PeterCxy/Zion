@@ -3,6 +3,7 @@ import { LRUMap } from 'lru_map'
 import RNFetchBlob from 'rn-fetch-blob'
 import * as RNFS from 'react-native-fs'
 import { sha1 } from 'react-native-sha1'
+import * as EncryptedAttachment from './EncryptedAttachment'
 
 # A cached fetch using in-memory LRU + FS cache
 # and the fetched content will be data URLs
@@ -11,9 +12,13 @@ memCache = new LRUMap 128
 
 # FS cache path
 FS_CACHE_PATH = "#{RNFS.DocumentDirectoryPath}/cache"
+FS_TEMP_PATH = "#{RNFS.DocumentDirectoryPath}/temp"
 
 fsCachePath = (url) ->
   "#{FS_CACHE_PATH}/#{await sha1 url}"
+
+fsTempPath = (url) ->
+  "#{FS_TEMP_PATH}/#{await sha1 url}"
 
 # Fetch only from memory cache
 export fetchMemCache = (url) ->
@@ -23,12 +28,17 @@ export fetchMemCache = (url) ->
     null
 
 # Fetch as data URL
-export cachedFetchAsDataURL = (url) ->
+# Also supports decrypting encrypted remote data
+# via "EncryptedAttachment" native module
+# When decryption is needed, mime and cryptoInfo must
+# not be null
+export cachedFetchAsDataURL = (url, mime, cryptoInfo) ->
   # Check the memory cache first
   if memCache.has url
     return Promise.resolve memCache.get url
   # Ensure FS dir exists
   await RNFS.mkdir FS_CACHE_PATH
+  await RNFS.mkdir FS_TEMP_PATH
   # Then check fs cache
   fsPath = await fsCachePath url
   if await RNFS.exists fsPath
@@ -38,14 +48,23 @@ export cachedFetchAsDataURL = (url) ->
     return dUrl
 
   # No cache found, fetch
+  tmpPath = await fsTempPath url
   resp = await RNFetchBlob.config
     fileCache: true
+    path: tmpPath
   .fetch 'GET', url
   info = resp.info()
   if info.status != 200
     resp.flush()
     return null
-  dUrl = "data:" + info.headers["content-type"].split(";")[0].trim() + ";base64," + await resp.base64()
+  mimeType = mime ? info.headers["content-type"].split(";")[0].trim()
+  # Handle decryption here
+  if cryptoInfo?
+    data = await EncryptedAttachment.decryptAttachmentToBase64 tmpPath, cryptoInfo
+  else
+    data = await resp.base64()
+
+  dUrl = "data:" + mimeType + ";base64," + data
   resp.flush()
 
   # Write to both mem and fs cache
@@ -55,7 +74,8 @@ export cachedFetchAsDataURL = (url) ->
   return dUrl
 
 # A React hook for using cached dataURL
-export useCachedFetch = (url, onFetched) ->
+# When decryption is needed, mime and cryptoInfo must not be null
+export useCachedFetch = (url, mime, cryptoInfo, onFetched) ->
   [dataURL, setDataURL] = useState fetchMemCache url
   [immediatelyAvailable, setImmediatelyAvailable] = useState false
 
@@ -67,7 +87,7 @@ export useCachedFetch = (url, onFetched) ->
     unmounted = false
     do ->
       try
-        dUrl = await cachedFetchAsDataURL url
+        dUrl = await cachedFetchAsDataURL url, mime, cryptoInfo
       catch err
         console.warn err
         return

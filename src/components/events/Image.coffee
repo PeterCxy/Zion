@@ -33,6 +33,8 @@ export default Image = ({ev}) ->
     if ev.info.thumbnail.url
       client.mxcUrlToHttp ev.info.thumbnail.url,
         width * windowScale, height * windowScale, "scale"
+    else if ev.info.thumbnail.cryptoInfo
+      client.mxcUrlToHttp ev.info.cryptoInfo.url
     else
       null
   , [width, height, windowScale]
@@ -48,7 +50,9 @@ export default Image = ({ev}) ->
       <ImageThumbnail
         url={httpUrl}
         width={width}
-        height={height}/>
+        height={height}
+        mime={ev.mime}
+        cryptoInfo={ev.info.thumbnail.cryptoInfo}/>
       <View
         style={Object.assign {}, styles.styleTextWrapper, { maxWidth: width * 0.8 }}>
         <Text style={styles.styleText}>{

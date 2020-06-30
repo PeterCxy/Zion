@@ -2,7 +2,7 @@ import React, { useRef, useMemo } from "react"
 import { Animated, Image, View } from "react-native"
 import { useCachedFetch } from "../util/cache"
 
-export default ImageThumbnail = ({url, width, height}) ->
+export default ImageThumbnail = ({url, width, height, mime, cryptoInfo}) ->
   # Build cached styles
   styles = useMemo ->
       width: width
@@ -11,7 +11,7 @@ export default ImageThumbnail = ({url, width, height}) ->
   # We show nothing when we start
   fadeAnim = useRef(new Animated.Value 0).current
   # Lazy fetch
-  [dataURL, immediatelyAvailable] = useCachedFetch url, (dUrl, callback) ->
+  [dataURL, immediatelyAvailable] = useCachedFetch url, mime, cryptoInfo, (dUrl, callback) ->
     callback()
     Animated.timing fadeAnim,
       toValue: 1

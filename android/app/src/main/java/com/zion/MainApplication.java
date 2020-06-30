@@ -34,6 +34,7 @@ public class MainApplication extends Application implements ReactApplication {
           packages.add(new SoftInputModePackage());
           packages.add(new LocalStoragePackage());
           packages.add(new OlmReactPackage());
+          packages.add(new EncryptedAttachmentPackage());
           return packages;
         }
 
