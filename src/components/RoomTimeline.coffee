@@ -6,6 +6,7 @@ import Avatar from "./Avatar"
 import EventComponent from "./events/Event"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
+import * as mext from "../util/matrix"
 
 # Transform raw events to what we show in the timeline
 transformEvents = (client, events) ->
@@ -17,7 +18,7 @@ transformEvents = (client, events) ->
       prev_ts: array[idx + 1]?.getTs()
       sender:
         name: ev.sender.name
-        avatar: ev.sender.getAvatarUrl client.getHomeserverUrl(), 32, 32, "scale", false
+        avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
       self: ev.sender.userId == client.getUserId()
       sent: (not ev.status?) or (ev.status == EventStatus.SENT)
       # TODO: handle errored pending events
