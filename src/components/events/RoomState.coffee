@@ -31,6 +31,7 @@ buildStyles = (theme) ->
       marginStart: 10
       marginEnd: 0
     styleText:
+      flex: 1 # Make it follow the padding rules of parent flex container
       fontSize: 14
       color: theme.COLOR_CHAT_STATE_EVENT
 
