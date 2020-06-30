@@ -158,10 +158,14 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     # we have missed a lot of messages in between, in which case
     # the user should be responsible for jumping to the latest
     while getTlWindow().canPaginate EventTimeline.FORWARDS
-      # Note: Since we are making no requests, this "await" is actually synchronous
-      #       so we don't need to care about the loading state either
-      if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
-        break
+      try
+        # Note: Since we are making no requests, this "await" is actually synchronous
+        #       so we don't need to care about the loading state either
+        if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
+          break
+      catch err
+        console.warn err
+        return Promise.resolve false
     if getTlWindow().canPaginate EventTimeline.FORWARDS
       # We have missed some events between the latest and the last loaded one
       # and have to fetch from API
@@ -205,8 +209,11 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     return if not getTlWindow().canPaginate EventTimeline.BACKWARDS
 
     setLoading true
-    await getTlWindow().paginate EventTimeline.BACKWARDS, 20
-    updateEvents()
+    try
+      await getTlWindow().paginate EventTimeline.BACKWARDS, 20
+      updateEvents()
+    catch err
+      console.warn err
     setLoading false
   , [loading]
 

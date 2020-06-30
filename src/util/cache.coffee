@@ -66,7 +66,11 @@ export useCachedFetch = (url, onFetched) ->
 
     unmounted = false
     do ->
-      dUrl = await cachedFetchAsDataURL url
+      try
+        dUrl = await cachedFetchAsDataURL url
+      catch err
+        console.warn err
+        return
 
       if dUrl and not unmounted
         onFetched dUrl, ->
