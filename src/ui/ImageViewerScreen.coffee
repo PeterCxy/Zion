@@ -16,7 +16,7 @@ export default ImageViewerScreen = ({route}) ->
   [dataUrl, setDataUrl] = useState cache.fetchMemCache thumbnailUrl
 
   largeUrl = client.mxcUrlToHttp info.url ? info.cryptoInfo.url
-  [largeDataUrl, setLargeDataUrl] = cache.useCachedFetch largeUrl, info.mime,
+  [largeDataUrl, _] = cache.useCachedFetch largeUrl, info.mime,
     info.cryptoInfo, (_, callback) -> callback()
 
   useEffect ->
