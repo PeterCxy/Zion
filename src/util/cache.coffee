@@ -84,9 +84,11 @@ class CachedDownload
       # So that when we are working to fetch things,
       # new requests won't be made for the same resource
       @promise = do =>
-        res = await @_doFetch()
-        await @deleteSelf()
-        return res
+        try
+          res = await @_doFetch()
+          return res
+        finally
+          await @deleteSelf()
     @promise
 
   _doFetch: =>
