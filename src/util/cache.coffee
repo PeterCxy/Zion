@@ -92,8 +92,9 @@ class CachedDownload
     fsPath = await fsCachePath @url
     if await RNFS.exists fsPath
       dUrl = await AsyncFileOps.readAsString fsPath
-      # Also set memory cache
-      memCache.set @url, dUrl
+      if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
+        # Also set memory cache
+        memCache.set @url, dUrl
       return dUrl
 
     # No cache found, fetch
