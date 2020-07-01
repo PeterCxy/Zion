@@ -1,4 +1,4 @@
-import React, { useContext, useMemo } from "react"
+import React, { useContext, useMemo, useRef } from "react"
 import { Text, View, useWindowDimensions } from "react-native"
 import ImageThumbnail from "../ImageThumbnail"
 import { MatrixClientContext } from "../../util/client"
@@ -11,6 +11,7 @@ import { SharedElement } from "react-navigation-shared-element"
 export default Image = ({ev}) ->
   client = useContext MatrixClientContext
   navigation = useNavigation()
+  refDataUrl = useRef null # when thumbnail loaded, this will be set
   [theme, styles] = useStyles buildStyles
   windowWidth = useWindowDimensions().width
   windowHeight = useWindowDimensions().height
@@ -50,8 +51,15 @@ export default Image = ({ev}) ->
   <View
     style={styles.styleWrapperWrapper}>
     <TouchableRipple
-      onPress={=> navigation.navigate "ImageViewerScreen",
-        { thumbnailUrl: httpUrl, info: ev.info }}>
+      onPress={=>
+        if refDataUrl.current?
+          # Only allow loading image viewer when the thumbnail is loaded
+          # We pass the thumbnail data along with the original url
+          # because the thumbnail may not fit in the memory cache
+          # Since we already have the data, just pass it over directly
+          # to make the transition smooth
+          navigation.navigate "ImageViewerScreen",
+            { thumbnailUrl: httpUrl, thumbnailDataUrl: refDataUrl.current, info: ev.info }}>
       <View
         style={styles.styleWrapper}>
         <SharedElement id={"image.thumbnail.#{httpUrl}"}>
@@ -60,6 +68,7 @@ export default Image = ({ev}) ->
             width={width}
             height={height}
             mime={ev.mime}
+            refDataUrl={refDataUrl}
             cryptoInfo={ev.info.thumbnail.cryptoInfo}/>
         </SharedElement>
         <View

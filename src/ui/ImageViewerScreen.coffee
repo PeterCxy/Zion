@@ -9,11 +9,16 @@ import * as util from "../util/util"
 import { useStyles } from "../theme"
 
 export default ImageViewerScreen = ({route}) ->
-  {thumbnailUrl, info} = route.params
+  # We take both the thumbnail url and the actual thumbnail data
+  # because the thumbnail may not fit in memory cache
+  # but we want a smooth transition.
+  # Refer to RoomTimeline for the content of "info"
+  # (the "info" field of a transformed m.image message)
+  {thumbnailUrl, thumbnailDataUrl, info} = route.params
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [loading, setLoading] = useState true
-  [dataUrl, setDataUrl] = useState cache.fetchMemCache thumbnailUrl
+  [dataUrl, setDataUrl] = useState thumbnailDataUrl
 
   largeUrl = client.mxcUrlToHttp info.url ? info.cryptoInfo.url
   [largeDataUrl, _] = cache.useCachedFetch largeUrl, info.mime,
