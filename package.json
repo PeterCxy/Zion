@@ -23,6 +23,7 @@
     "lodash.memoize": "^4.1.2",
     "lru_map": "^0.3.3",
     "matrix-js-sdk": "link:./vendor/matrix-js-sdk",
+    "mime-types": "^2.1.27",
     "node-libs-react-native": "^1.2.0",
     "react": "16.11.0",
     "react-native": "0.62.2",

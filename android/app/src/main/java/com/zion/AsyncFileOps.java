@@ -72,4 +72,24 @@ public class AsyncFileOps extends ReactContextBaseJavaModule {
             }
         }).start();
     }
+
+    // Write a base64-encoded binary string to a file,
+    // replacing existing content or create new
+    @ReactMethod
+    public void writeBase64(String path, String content, Promise promise) {
+        new Thread(() -> {
+            try {
+                Files.write(
+                    new File(path).toPath(),
+                    Base64.getDecoder().decode(content),
+                    StandardOpenOption.CREATE,
+                    StandardOpenOption.WRITE,
+                    StandardOpenOption.TRUNCATE_EXISTING
+                );
+                promise.resolve(null);
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
+    }
 }

@@ -3,8 +3,11 @@ import { LRUMap } from 'lru_map'
 import RNFetchBlob from 'rn-fetch-blob'
 import * as RNFS from 'react-native-fs'
 import { sha1 } from 'react-native-sha1'
+import * as mimeUtils from 'mime-types'
 import AsyncFileOps from './AsyncFileOps'
 import * as EncryptedAttachment from './EncryptedAttachment'
+
+console.log mimeUtils
 
 # A cached fetch using in-memory LRU + FS cache
 # and the fetched content will be data URLs
@@ -99,9 +102,9 @@ class CachedDownload
     await RNFS.mkdir FS_CACHE_PATH
     await RNFS.mkdir FS_TEMP_PATH
     # Then check fs cache
-    fsPath = await fsCachePath @url
-    if await RNFS.exists fsPath
-      dUrl = await AsyncFileOps.readAsString fsPath
+    dUrl = await @_tryReadFromFsCache()
+    if dUrl?
+      # FS cache found
       if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
         # Also set memory cache
         memCache.set @url, dUrl
@@ -128,15 +131,38 @@ class CachedDownload
     else
       data = await AsyncFileOps.readAsBase64 tmpPath
 
-    dUrl = "data:" + mimeType + ";base64," + data
+    dUrl = @_base64ToDataUrl mimeType, data
     resp.flush()
 
     # Write to both mem and fs cache
     if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
       memCache.set @url, dUrl
-    await AsyncFileOps.writeString await fsCachePath(@url), dUrl
+    await @_writeToFsCache mimeType, data
 
     return dUrl
+
+  _writeToFsCache: (mimeType, data) =>
+    basePath = await fsCachePath @url
+    await RNFS.mkdir basePath
+    filePath = "#{basePath}/file.#{mimeUtils.extension mimeType}"
+    await AsyncFileOps.writeBase64 filePath, data
+
+  _tryReadFromFsCache: =>
+    basePath = await fsCachePath @url
+    items = null
+    try
+      items = await RNFS.readDir basePath
+    catch err
+      # treat as items = null
+    if not items? or items.length == 0
+      return null
+    file = items[0].path
+    mimeType = mimeUtils.lookup file
+    return @_base64ToDataUrl mimeType,
+      await AsyncFileOps.readAsBase64 file
+
+  _base64ToDataUrl: (mimeType, data) =>
+    "data:" + mimeType + ";base64," + data
 
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
