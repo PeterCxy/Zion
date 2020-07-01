@@ -6,6 +6,7 @@ import Avatar from "./Avatar"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import * as mext from "../util/matrix"
+import * as util from "../util/util"
 
 # Transform a list of rooms received from the SDK
 # to a list that we can use
@@ -59,8 +60,10 @@ export default RoomList = ({onEnterRoom}) ->
   [rooms, setRooms] = useState []
 
   refreshRooms = useCallback ->
-    newRooms = transformRooms client, client.getRooms()
-    setRooms newRooms
+    util.asyncRunAfterInteractions ->
+      newRooms = transformRooms client, client.getRooms()
+      setRooms newRooms
+    return
   , []
 
   # Load rooms on mount
