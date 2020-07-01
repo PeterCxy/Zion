@@ -116,7 +116,7 @@ messageEvent = (client, content) ->
 stickerEvent = (client, content) ->
   return
     type: 'msg_sticker'
-    url: client.mxcUrlToHttp content.url, content.info.w, content.info.h, 'scale'
+    url: client.mxcUrlToHttp content.url
     width: content.info.w
     height: content.info.h
 
