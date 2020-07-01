@@ -1,7 +1,7 @@
 import React, { useContext, useEffect, useMemo } from "react"
 import { View } from "react-native"
 import { NavigationContainer, DefaultTheme as NavDefTheme } from "@react-navigation/native"
-import { createStackNavigator } from '@react-navigation/stack'
+import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 import changeNavigationBarColor from "react-native-navigation-bar-color"
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
@@ -9,7 +9,7 @@ import Chat from "./Chat"
 import VerificationRequestHandler from "./VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
-Stack = createStackNavigator()
+Stack = createSharedElementStackNavigator()
 
 export default Home = () ->
   {theme} = useContext ThemeContext
@@ -39,7 +39,8 @@ export default Home = () ->
           component={HomeRoomList}/>
         <Stack.Screen
           name="Chat"
-          component={Chat}/>
+          component={Chat}
+          sharedElements={Chat.sharedElements}/>
       </Stack.Navigator>
     </NavigationContainer>
     <VerificationRequestHandler/>

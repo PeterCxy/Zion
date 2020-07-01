@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react"
 import { View } from "react-native"
 import { Appbar, ProgressBar } from "react-native-paper"
+import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "../components/Avatar"
 import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
@@ -39,10 +40,12 @@ export default Chat = ({route, navigation}) ->
   <>
     <Appbar.Header>
       <Appbar.BackAction onPress={-> navigation.goBack()}/>
-      <Avatar
-        name={name}
-        url={avatar}
-        style={styles.styleAvatar}/>
+      <SharedElement id={"room.#{roomId}.avatar"}>
+        <Avatar
+          name={name}
+          url={avatar}
+          style={styles.styleAvatar}/>
+      </SharedElement>
       <Appbar.Content title={name} />
     </Appbar.Header>
     <View style={styles.styleContentWrapper}>
@@ -59,6 +62,9 @@ export default Chat = ({route, navigation}) ->
     <MessageComposer
       roomId={roomId}/>
   </>
+
+Chat.sharedElements = (route, otherRoute, showing) ->
+  ["room.#{route.params.roomId}.avatar"]
 
 buildStyles = (theme) ->
     styleContentWrapper:

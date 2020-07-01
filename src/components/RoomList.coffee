@@ -1,6 +1,7 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Image, FlatList, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
+import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "./Avatar"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
@@ -39,10 +40,12 @@ renderRoom = (onEnterRoom, theme, styles, {item}) ->
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
     <View style={styles.styleRoomItem}>
-      <Avatar
-        style={styles.styleRoomAvatar}
-        name={item.name}
-        url={item.avatar}/>
+      <SharedElement id={"room.#{item.key}.avatar"}>
+        <Avatar
+          style={styles.styleRoomAvatar}
+          name={item.name}
+          url={item.avatar}/>
+      </SharedElement>
       <View style={styles.styleTextContainer}>
         <Text numberOfLines={1} style={styles.styleTextTitle}>{item.name}</Text>
         <Text numberOfLines={1} style={styles.styleTextSummary}>{item.summary}</Text>

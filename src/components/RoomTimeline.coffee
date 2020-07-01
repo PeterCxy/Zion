@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
-import { FlatList } from "react-native"
+import { FlatList, InteractionManager } from "react-native"
 import { FAB } from "react-native-paper"
 import { EventTimeline, EventStatus, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
@@ -191,7 +191,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
 
   # Initialize the timeline window
   useEffect ->
-    do ->
+    # We might be in the middle of the transition animation
+    # So let's wait until that finishes before we load
+    InteractionManager.runAfterInteractions ->
       await getTlWindow().load()
       updateEvents()
       updateReadReceipt()
