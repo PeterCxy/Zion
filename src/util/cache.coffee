@@ -35,46 +35,92 @@ export fetchMemCache = (url) ->
 # When decryption is needed, mime and cryptoInfo must
 # not be null
 export cachedFetchAsDataURL = (url, mime, cryptoInfo) ->
-  # Check the memory cache first
-  if memCache.has url
-    return Promise.resolve memCache.get url
-  # Ensure FS dir exists
-  await RNFS.mkdir FS_CACHE_PATH
-  await RNFS.mkdir FS_TEMP_PATH
-  # Then check fs cache
-  fsPath = await fsCachePath url
-  if await RNFS.exists fsPath
-    dUrl = await RNFS.readFile fsPath, "utf8"
-    # Also set memory cache
-    memCache.set url, dUrl
-    return dUrl
+  (await CachedDownload.getInstance url, mime, cryptoInfo).fetch()
 
-  # No cache found, fetch
-  tmpPath = await fsTempPath url
-  resp = await RNFetchBlob.config
-    fileCache: true
-    path: tmpPath
-  .fetch 'GET', url
-  info = resp.info()
-  if info.status != 200
+# Handles deduplication of requests
+# so that we don't fire a lot of requests for the
+# same resource simutaneously when multiple are
+# shown at the same time on screen (e.g. avatars in room timeline)
+class CachedDownload
+  @instances: {}
+
+  @calculateInstanceHash: (url, mime, cryptoInfo) ->
+    await sha1 JSON.stringify
+      url: url
+      mime: mime
+      cryptoInfo: cryptoInfo
+
+  @getInstance: (url, mime, cryptoInfo) ->
+    hash = await @calculateInstanceHash url, mime, cryptoInfo
+    if not @instances[hash]
+      @instances[hash] = new CachedDownload url, mime, cryptoInfo
+    @instances[hash]
+
+  constructor: (@url, @mime, @cryptoInfo) ->
+    @promise = null
+
+  deleteSelf: =>
+    # Delete ourselves from the instance list
+    hash = await CachedDownload.calculateInstanceHash @url, @mime, @cryptoInfo
+    delete CachedDownload.instances[hash]
+
+  fetch: =>
+    # Ensure we only ever have one request promise for each resource
+    # This function returns the same promise for simultaneous requests
+    # for the same resource
+    if not @promise?
+      # If there is no request ongoing, make a new one
+      # Note that we do not await the promise here.
+      # Instead, we just store the promise and return it
+      # So that when we are working to fetch things,
+      # new requests won't be made for the same resource
+      @promise = do =>
+        res = await @_doFetch()
+        await @deleteSelf()
+        return res
+    @promise
+
+  _doFetch: =>
+    # Check the memory cache first
+    if memCache.has @url
+      return Promise.resolve memCache.get @url
+    # Ensure FS dir exists
+    await RNFS.mkdir FS_CACHE_PATH
+    await RNFS.mkdir FS_TEMP_PATH
+    # Then check fs cache
+    fsPath = await fsCachePath @url
+    if await RNFS.exists fsPath
+      dUrl = await RNFS.readFile fsPath, "utf8"
+      # Also set memory cache
+      memCache.set @url, dUrl
+      return dUrl
+
+    # No cache found, fetch
+    tmpPath = await fsTempPath @url
+    resp = await RNFetchBlob.config
+      fileCache: true
+      path: tmpPath
+    .fetch 'GET', @url
+    info = resp.info()
+    if info.status != 200
+      resp.flush()
+      return null
+    mimeType = @mime ? info.headers["content-type"].split(";")[0].trim()
+    # Handle decryption here
+    if @cryptoInfo?
+      data = await EncryptedAttachment.decryptAttachmentToBase64 tmpPath, @cryptoInfo
+    else
+      data = await resp.base64()
+
+    dUrl = "data:" + mimeType + ";base64," + data
     resp.flush()
-    return null
-  mimeType = mime ? info.headers["content-type"].split(";")[0].trim()
-  # Handle decryption here
-  if cryptoInfo?
-    data = await EncryptedAttachment.decryptAttachmentToBase64 tmpPath, cryptoInfo
-  else
-    data = await resp.base64()
 
-  dUrl = "data:" + mimeType + ";base64," + data
-  resp.flush()
+    # Write to both mem and fs cache
+    if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
+      memCache.set @url, dUrl
+    await RNFS.writeFile await fsCachePath(@url), dUrl, 'utf8'
 
-  # Write to both mem and fs cache
-  if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
-    memCache.set url, dUrl
-  await RNFS.writeFile await fsCachePath(url), dUrl, 'utf8'
-
-  return dUrl
+    return dUrl
 
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
