@@ -64,7 +64,10 @@ export default Chat = ({route, navigation}) ->
   </>
 
 Chat.sharedElements = (route, otherRoute, showing) ->
-  ["room.#{route.params.roomId}.avatar"]
+  # Only use the avatar animation when coming from or to room list
+  # (because we don't share the avatar with ImageViewerScreen)
+  if otherRoute.name == "HomeRoomList"
+    ["room.#{route.params.roomId}.avatar"]
 
 buildStyles = (theme) ->
     styleContentWrapper:

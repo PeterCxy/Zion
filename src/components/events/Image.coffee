@@ -4,9 +4,13 @@ import ImageThumbnail from "../ImageThumbnail"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import { useStyles } from "../../theme"
+import { useNavigation } from '@react-navigation/native'
+import { TouchableRipple } from "react-native-paper"
+import { SharedElement } from "react-navigation-shared-element"
 
 export default Image = ({ev}) ->
   client = useContext MatrixClientContext
+  navigation = useNavigation()
   [theme, styles] = useStyles buildStyles
   windowWidth = useWindowDimensions().width
   windowHeight = useWindowDimensions().height
@@ -45,23 +49,29 @@ export default Image = ({ev}) ->
 
   <View
     style={styles.styleWrapperWrapper}>
-    <View
-      style={styles.styleWrapper}>
-      <ImageThumbnail
-        url={httpUrl}
-        width={width}
-        height={height}
-        mime={ev.mime}
-        cryptoInfo={ev.info.thumbnail.cryptoInfo}/>
+    <TouchableRipple
+      onPress={=> navigation.navigate "ImageViewerScreen",
+        { thumbnailUrl: httpUrl, info: ev.info }}>
       <View
-        style={Object.assign {}, styles.styleTextWrapper, { maxWidth: width * 0.8 }}>
-        <Text style={styles.styleText}>{
-          translate "time_format_hour_minute",
-            ('' + date.getHours()).padStart(2, '0'),
-            ('' + date.getMinutes()).padStart(2, '0')}
-        </Text>
+        style={styles.styleWrapper}>
+        <SharedElement id={"image.thumbnail.#{httpUrl}"}>
+          <ImageThumbnail
+            url={httpUrl}
+            width={width}
+            height={height}
+            mime={ev.mime}
+            cryptoInfo={ev.info.thumbnail.cryptoInfo}/>
+        </SharedElement>
+        <View
+          style={Object.assign {}, styles.styleTextWrapper, { maxWidth: width * 0.8 }}>
+          <Text style={styles.styleText}>{
+            translate "time_format_hour_minute",
+              ('' + date.getHours()).padStart(2, '0'),
+              ('' + date.getMinutes()).padStart(2, '0')}
+          </Text>
+        </View>
       </View>
-    </View>
+    </TouchableRipple>
   </View>
 
 buildStyles = (theme) ->

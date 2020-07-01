@@ -6,6 +6,7 @@ import changeNavigationBarColor from "react-native-navigation-bar-color"
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
 import Chat from "./Chat"
+import ImageViewerScreen from "./ImageViewerScreen"
 import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
@@ -41,6 +42,10 @@ export default Home = () ->
           name="Chat"
           component={Chat}
           sharedElements={Chat.sharedElements}/>
+        <Stack.Screen
+          name="ImageViewerScreen"
+          component={ImageViewerScreen}
+          sharedElements={ImageViewerScreen.sharedElements}/>
       </Stack.Navigator>
     </NavigationContainer>
     <VerificationRequestHandler/>

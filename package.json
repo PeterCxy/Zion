@@ -28,6 +28,7 @@
     "react-native": "0.62.2",
     "react-native-fs": "^2.16.6",
     "react-native-gesture-handler": "^1.6.1",
+    "react-native-image-zoom-viewer": "^3.0.1",
     "react-native-localize": "^1.4.0",
     "react-native-navigation-bar-color": "^2.0.1",
     "react-native-paper": "^3.10.1",
