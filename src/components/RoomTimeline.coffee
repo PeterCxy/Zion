@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
-import { FlatList, InteractionManager } from "react-native"
+import { FlatList } from "react-native"
 import { FAB } from "react-native-paper"
 import { EventTimeline, EventStatus, TimelineWindow } from "matrix-js-sdk"
 import Avatar from "./Avatar"
@@ -7,6 +7,7 @@ import EventComponent from "./events/Event"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
 import * as mext from "../util/matrix"
+import * as util from "../util/util"
 
 # Transform raw events to what we show in the timeline
 transformEvents = (client, events) ->
@@ -193,7 +194,7 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   useEffect ->
     # We might be in the middle of the transition animation
     # So let's wait until that finishes before we load
-    InteractionManager.runAfterInteractions ->
+    util.asyncRunAfterInteractions ->
       await getTlWindow().load()
       updateEvents()
       updateReadReceipt()
@@ -224,7 +225,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       try
         # Note: Since we are making no requests, this "await" is actually synchronous
         #       so we don't need to care about the loading state either
-        if not await getTlWindow().paginate EventTimeline.FORWARDS, 20, false
+        res = await util.asyncRunAfterInteractions ->
+          getTlWindow().paginate EventTimeline.FORWARDS, 20, false
+        if not res
           break
       catch err
         console.warn err
@@ -236,7 +239,7 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       setHasNewerEvents true
       return Promise.resolve false
     setHasNewerEvents false
-    updateEvents()
+    await util.asyncRunAfterInteractions -> updateEvents()
     # We can send receipt because if we reached here, the client must be at the
     # bottom of the timeline
     # We don't care about whether this is actually sent or not
@@ -273,8 +276,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
 
     setLoading true
     try
-      await getTlWindow().paginate EventTimeline.BACKWARDS, 20
-      updateEvents()
+      await util.asyncRunAfterInteractions ->
+        getTlWindow().paginate EventTimeline.BACKWARDS, 20
+      await util.asyncRunAfterInteractions -> updateEvents()
     catch err
       console.warn err
     setLoading false
