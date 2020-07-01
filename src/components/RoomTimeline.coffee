@@ -101,7 +101,7 @@ messageEvent = (client, content) ->
           mime: content.info.thumbnail_info.mimetype
           cryptoInfo: content.info.thumbnail_file
       else
-        ret.info
+        Object.assign {}, ret.info
     when "m.bad.encrypted"
       ret.type = 'msg_text'
       ret.body = translate 'room_msg_bad_encryption'
