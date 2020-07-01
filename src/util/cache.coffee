@@ -6,13 +6,14 @@ import { sha1 } from 'react-native-sha1'
 import * as mimeUtils from 'mime-types'
 import AsyncFileOps from './AsyncFileOps'
 import * as EncryptedAttachment from './EncryptedAttachment'
+import * as util from './util'
 
 # A cached fetch using in-memory LRU + FS cache
 # and the fetched content will be data URLs
 # This should only be used for avatars / thumbnails
 memCache = new LRUMap 128
 
-MEM_CACHE_MAX_FILE_SIZE = 100 * 1024 # 100kB
+MEM_CACHE_MAX_FILE_SIZE = 10 * 1024 # 100kB
 
 # FS cache path
 FS_CACHE_PATH = "#{RNFS.DocumentDirectoryPath}/cache"
@@ -165,16 +166,20 @@ class CachedDownload
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
 export useCachedFetch = (url, mime, cryptoInfo, onFetched, onProgress) ->
-  [dataURL, setDataURL] = useState fetchMemCache url
+  [dataURL, setDataURL] = useState null
   [immediatelyAvailable, setImmediatelyAvailable] = useState false
 
   useEffect ->
-    if dataURL and url
-      setImmediatelyAvailable true
-    return if dataURL or not url
-
     unmounted = false
-    do ->
+
+    util.asyncRunAfterInteractions ->
+      memDataURL = fetchMemCache url
+      if memDataURL and url
+        await util.asyncRunAfterInteractions ->
+          setDataURL memDataURL
+          setImmediatelyAvailable true
+      return if memDataURL or not url
+
       try
         dUrl = await cachedFetchAsDataURL url, mime, cryptoInfo, onProgress
       catch err
@@ -182,9 +187,10 @@ export useCachedFetch = (url, mime, cryptoInfo, onFetched, onProgress) ->
         return
 
       if dUrl and not unmounted
-        onFetched dUrl, ->
-          return if unmounted
-          setDataURL dUrl
+        await util.asyncRunAfterInteractions ->
+          onFetched dUrl, ->
+            return if unmounted
+            setDataURL dUrl
 
     return ->
       unmounted = true
