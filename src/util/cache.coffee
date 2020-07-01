@@ -7,8 +7,6 @@ import * as mimeUtils from 'mime-types'
 import AsyncFileOps from './AsyncFileOps'
 import * as EncryptedAttachment from './EncryptedAttachment'
 
-console.log mimeUtils
-
 # A cached fetch using in-memory LRU + FS cache
 # and the fetched content will be data URLs
 # This should only be used for avatars / thumbnails
