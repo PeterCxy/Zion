@@ -87,7 +87,6 @@ messageEvent = (client, content) ->
           ret.body = content.body
     when "m.image"
       ret.type = 'msg_image'
-      # TODO: handle encrypted images
       ret.info =
         width: content.info.w
         height: content.info.h
