@@ -19,10 +19,14 @@ export default ImageViewerScreen = ({route}) ->
   [theme, styles] = useStyles buildStyles
   [loading, setLoading] = useState true
   [dataUrl, setDataUrl] = useState thumbnailDataUrl
+  [progress, setProgress] = useState -1
 
   largeUrl = client.mxcUrlToHttp info.url ? info.cryptoInfo.url
   [largeDataUrl, _] = cache.useCachedFetch largeUrl, info.mime,
-    info.cryptoInfo, (_, callback) -> callback()
+    info.cryptoInfo, (_, callback) ->
+      callback()
+    , (progress) ->
+      setProgress progress
 
   useEffect ->
     return if not largeDataUrl?
@@ -39,7 +43,8 @@ export default ImageViewerScreen = ({route}) ->
     renderHeader={->
       <ProgressBar
         style={styles.styleProgress}
-        indeterminate={true}
+        indeterminate={progress == -1}
+        progress={progress}
         color={theme.COLOR_ACCENT}
         visible={loading}/>
     }

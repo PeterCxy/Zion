@@ -35,8 +35,10 @@ export fetchMemCache = (url) ->
 # via "EncryptedAttachment" native module
 # When decryption is needed, mime and cryptoInfo must
 # not be null
-export cachedFetchAsDataURL = (url, mime, cryptoInfo) ->
-  (await CachedDownload.getInstance url, mime, cryptoInfo).fetch()
+export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
+  (await CachedDownload.getInstance url, mime, cryptoInfo)
+    .registerProgressListener onProgress
+    .fetch()
 
 # Handles deduplication of requests
 # so that we don't fire a lot of requests for the
@@ -59,6 +61,12 @@ class CachedDownload
 
   constructor: (@url, @mime, @cryptoInfo) ->
     @promise = null
+    @progressListeners = []
+
+  registerProgressListener: (listener) =>
+    if listener?
+      @progressListeners.push listener
+    @
 
   deleteSelf: =>
     # Delete ourselves from the instance list
@@ -103,6 +111,10 @@ class CachedDownload
       fileCache: true
       path: tmpPath
     .fetch 'GET', @url
+    .progress (received, total) =>
+      p = received / total
+      @progressListeners.forEach (listener) =>
+        listener p
     info = resp.info()
     if info.status != 200
       resp.flush()
@@ -126,7 +138,7 @@ class CachedDownload
 
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
-export useCachedFetch = (url, mime, cryptoInfo, onFetched) ->
+export useCachedFetch = (url, mime, cryptoInfo, onFetched, onProgress) ->
   [dataURL, setDataURL] = useState fetchMemCache url
   [immediatelyAvailable, setImmediatelyAvailable] = useState false
 
@@ -138,7 +150,7 @@ export useCachedFetch = (url, mime, cryptoInfo, onFetched) ->
     unmounted = false
     do ->
       try
-        dUrl = await cachedFetchAsDataURL url, mime, cryptoInfo
+        dUrl = await cachedFetchAsDataURL url, mime, cryptoInfo, onProgress
       catch err
         console.warn err
         return
