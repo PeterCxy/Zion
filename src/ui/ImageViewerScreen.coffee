@@ -40,6 +40,7 @@ export default ImageViewerScreen = ({route}) ->
 
   <ImageViewer
     imageUrls={[{ url: dataUrl }]}
+    saveToLocalByLongPress={false} # TODO: too ugly. implement this ourselves.
     renderHeader={->
       <ProgressBar
         style={styles.styleProgress}
