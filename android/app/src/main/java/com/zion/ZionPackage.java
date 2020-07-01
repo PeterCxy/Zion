@@ -9,7 +9,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-public class LocalStoragePackage implements ReactPackage {
+public class ZionPackage implements ReactPackage {
     @Override
     public List<ViewManager> createViewManagers(ReactApplicationContext reactContext) {
         return Collections.emptyList();
@@ -20,7 +20,9 @@ public class LocalStoragePackage implements ReactPackage {
                                 ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
 
+        modules.add(new SoftInputMode(reactContext));
         modules.add(new LocalStorageBridge(reactContext));
+        modules.add(new EncryptedAttachment(reactContext));
 
         return modules;
   }
