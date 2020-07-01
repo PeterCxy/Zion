@@ -6,7 +6,7 @@ import changeNavigationBarColor from "react-native-navigation-bar-color"
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
 import Chat from "./Chat"
-import VerificationRequestHandler from "./VerificationRequestHandler" 
+import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
 Stack = createSharedElementStackNavigator()
