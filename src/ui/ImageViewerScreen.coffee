@@ -32,7 +32,7 @@ export default ImageViewerScreen = ({route}) ->
       setLoading false
 
     return
-  , [largeDataUrl]
+  , [largeDataUrl?]
 
   <ImageViewer
     imageUrls={[{ url: dataUrl }]}
