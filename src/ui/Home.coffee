@@ -45,7 +45,8 @@ export default Home = () ->
         <Stack.Screen
           name="ImageViewerScreen"
           component={ImageViewerScreen}
-          sharedElements={ImageViewerScreen.sharedElements}/>
+          sharedElements={ImageViewerScreen.sharedElements}
+          options={ImageViewerScreen.navigationOptions}/>
       </Stack.Navigator>
     </NavigationContainer>
     <VerificationRequestHandler/>

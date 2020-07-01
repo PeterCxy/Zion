@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Image, View } from "react-native"
+import { Easing, Image, View } from "react-native"
 import { ProgressBar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import ImageViewer from "react-native-image-zoom-viewer"
@@ -54,6 +54,22 @@ ImageViewerScreen.sharedElements = (route, otherRoute, showing) ->
   # Only use the animation when coming FROM the Chat UI
   if otherRoute.name == "Chat" and showing
     ["image.thumbnail.#{route.params.thumbnailUrl}"]
+
+ImageViewerScreen.navigationOptions =
+  transitionSpec:
+    open:
+      animation: 'timing'
+      config:
+        duration: 500
+        easing: Easing.out Easing.ease
+    close:
+      animation: 'timing'
+      config:
+        duration: 500
+        easing: Easing.in Easing.ease
+  cardStyleInterpolator: ({ current, closing }) ->
+    cardStyle:
+      opacity: current.progress
 
 buildStyles = (theme) ->
     styleProgress:
