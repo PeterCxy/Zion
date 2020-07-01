@@ -3,6 +3,7 @@ import { LRUMap } from 'lru_map'
 import RNFetchBlob from 'rn-fetch-blob'
 import * as RNFS from 'react-native-fs'
 import { sha1 } from 'react-native-sha1'
+import AsyncFileOps from './AsyncFileOps'
 import * as EncryptedAttachment from './EncryptedAttachment'
 
 # A cached fetch using in-memory LRU + FS cache
@@ -90,7 +91,7 @@ class CachedDownload
     # Then check fs cache
     fsPath = await fsCachePath @url
     if await RNFS.exists fsPath
-      dUrl = await RNFS.readFile fsPath, "utf8"
+      dUrl = await AsyncFileOps.readAsString fsPath
       # Also set memory cache
       memCache.set @url, dUrl
       return dUrl
@@ -110,7 +111,7 @@ class CachedDownload
     if @cryptoInfo?
       data = await EncryptedAttachment.decryptAttachmentToBase64 tmpPath, @cryptoInfo
     else
-      data = await resp.base64()
+      data = await AsyncFileOps.readAsBase64 tmpPath
 
     dUrl = "data:" + mimeType + ";base64," + data
     resp.flush()
@@ -118,7 +119,7 @@ class CachedDownload
     # Write to both mem and fs cache
     if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
       memCache.set @url, dUrl
-    await RNFS.writeFile await fsCachePath(@url), dUrl, 'utf8'
+    await AsyncFileOps.writeString await fsCachePath(@url), dUrl
 
     return dUrl
 

@@ -23,6 +23,7 @@ public class ZionPackage implements ReactPackage {
         modules.add(new SoftInputMode(reactContext));
         modules.add(new LocalStorageBridge(reactContext));
         modules.add(new EncryptedAttachment(reactContext));
+        modules.add(new AsyncFileOps(reactContext));
 
         return modules;
   }
