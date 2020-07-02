@@ -67,6 +67,11 @@ export eventToDescription = (ev) ->
             ""
           else if prevContent.avatar_url isnt content.avatar_url
             translate "room_event_changed_avatar", content.displayname
+        when content.membership is 'leave' and prevContent.membership is 'invite'
+          if ev.getStateKey() == ev.getSender()
+            translate "room_event_invite_rejected", content.displayname
+          else
+            translate "room_event_invite_revoked", ev.sender.name, content.displayname
         when content.membership is 'leave' and prevContent.membership isnt 'ban'
           if ev.getStateKey() == ev.getSender()
             translate "room_event_leave", content.displayname
