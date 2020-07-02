@@ -49,40 +49,7 @@ export eventToDescription = (ev) ->
     when 'm.sticker'
       translate "room_event_sticker", ev.sender.name
     when 'm.room.member'
-      content = ev.getContent()
-      prevContent = ev.getPrevContent()
-      # <https://matrix.org/docs/spec/client_server/latest#m-room-member>
-      switch
-        when content.membership is 'invite'
-          translate "room_event_invite", ev.sender.name, content.displayname
-        when content.membership is 'join' and prevContent.membership isnt 'join'
-          translate "room_event_join", content.displayname
-        when content.membership is 'join' and prevContent.membership is 'join'
-          if prevContent.displayname isnt content.displayname
-            translate "room_event_changed_name", content.displayname,
-              prevContent.displayname
-          else if (not prevContent.avatar_url?) and (not content.avatar_url?)
-            # I don't know why Matrix IRC bridge produces a bunch of avatar changes
-            # where the previous avatar is null while the current avatar is undefined
-            ""
-          else if prevContent.avatar_url isnt content.avatar_url
-            translate "room_event_changed_avatar", content.displayname
-        when content.membership is 'leave' and prevContent.membership is 'invite'
-          if ev.getStateKey() == ev.getSender()
-            translate "room_event_invite_rejected", content.displayname
-          else
-            translate "room_event_invite_revoked", ev.sender.name, content.displayname
-        when content.membership is 'leave' and prevContent.membership isnt 'ban'
-          if ev.getStateKey() == ev.getSender()
-            translate "room_event_leave", content.displayname
-          else
-            translate "room_event_kicked", content.displayname
-        when content.membership is 'leave' and prevContent.membership is 'ban'
-          translate "room_event_unbanned", content.displayname
-        when content.membership is 'ban'
-          translate "room_event_banned", content.displayname
-        else
-          content.membership
+      membershipToDescription ev
     when 'm.room.name'
       translate "room_event_name_changed", ev.sender.name, ev.getContent().name
     when 'm.room.server_acl'
@@ -96,6 +63,42 @@ messageToDescription = (content) ->
     when "m.image" then translate 'room_event_image'
     when "m.bad.encrypted" then translate 'room_msg_bad_encryption'
     else translate "room_msg_unknown", content.msgtype
+
+membershipToDescription = (ev) ->
+  content = ev.getContent()
+  prevContent = ev.getPrevContent()
+  # <https://matrix.org/docs/spec/client_server/latest#m-room-member>
+  switch
+    when content.membership is 'invite'
+      translate "room_event_invite", ev.sender.name, content.displayname
+    when content.membership is 'join' and prevContent.membership isnt 'join'
+      translate "room_event_join", content.displayname
+    when content.membership is 'join' and prevContent.membership is 'join'
+      if prevContent.displayname isnt content.displayname
+        translate "room_event_changed_name", content.displayname,
+          prevContent.displayname
+      else if (not prevContent.avatar_url?) and (not content.avatar_url?)
+        # I don't know why Matrix IRC bridge produces a bunch of avatar changes
+        # where the previous avatar is null while the current avatar is undefined
+        ""
+      else if prevContent.avatar_url isnt content.avatar_url
+        translate "room_event_changed_avatar", content.displayname
+    when content.membership is 'leave' and prevContent.membership is 'invite'
+      if ev.getStateKey() == ev.getSender()
+        translate "room_event_invite_rejected", content.displayname
+      else
+        translate "room_event_invite_revoked", ev.sender.name, content.displayname
+    when content.membership is 'leave' and prevContent.membership isnt 'ban'
+      if ev.getStateKey() == ev.getSender()
+        translate "room_event_leave", content.displayname
+      else
+        translate "room_event_kicked", content.displayname
+    when content.membership is 'leave' and prevContent.membership is 'ban'
+      translate "room_event_unbanned", content.displayname
+    when content.membership is 'ban'
+      translate "room_event_banned", content.displayname
+    else
+      content.membership
 
 # State events
 STATE_EVENTS = [
