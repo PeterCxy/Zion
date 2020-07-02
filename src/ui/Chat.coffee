@@ -8,6 +8,7 @@ import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
+import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
 export default Chat = ({route, navigation}) ->
@@ -25,17 +26,25 @@ export default Chat = ({route, navigation}) ->
     mext.calculateRoomAvatarURL client, client.getRoom roomId
   [isEncrypted, setIsEncrypted] = useState -> client.isRoomEncrypted roomId
   [loading, setLoading] = useState true
+  [hasUntrustedDevice, setHasUntrustedDevice] = useState false
 
   # Listen to room name updates
   # TODO: also implement room avatar / encrypted state updates?
   useEffect ->
+    unmounted = false
+
     onNameChange = (room) ->
       return if room.roomId != roomId
       setName room.name
 
     client.on 'Room.name', onNameChange
 
+    do ->
+      res = await client.getRoom(roomId).hasUnverifiedDevices()
+      setHasUntrustedDevice res unless unmounted
+
     return ->
+      unmounted = true
       client.removeListener 'Room.name', onNameChange
   , []
 
@@ -44,6 +53,7 @@ export default Chat = ({route, navigation}) ->
       <Appbar.BackAction onPress={-> navigation.goBack()}/>
       <AvatarBadgeWrapper
         icon={if isEncrypted then "shield"}
+        color={if hasUntrustedDevice then theme.COLOR_ROOM_BADGE_UNTRUSTED}
         style={styles.styleAvatarWrapper}>
         <SharedElement id={"room.#{roomId}.avatar"}>
           <Avatar
@@ -52,7 +62,9 @@ export default Chat = ({route, navigation}) ->
             style={styles.styleAvatar}/>
         </SharedElement>
       </AvatarBadgeWrapper>
-      <Appbar.Content title={name} />
+      <Appbar.Content
+        title={name}
+        subtitle={if hasUntrustedDevice then translate "room_has_untrusted_devices"}/>
     </Appbar.Header>
     <View style={styles.styleContentWrapper}>
       <RoomTimeline
