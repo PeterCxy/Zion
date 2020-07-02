@@ -3,6 +3,7 @@ import { View } from "react-native"
 import { Appbar, ProgressBar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "../components/Avatar"
+import AvatarBadgeWrapper from "../components/AvatarBadgeWrapper"
 import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
 import { useStyles } from "../theme"
@@ -22,10 +23,11 @@ export default Chat = ({route, navigation}) ->
   [name, setName] = useState -> client.getRoom(roomId).name
   [avatar, setAvatar] = useState ->
     mext.calculateRoomAvatarURL client, client.getRoom roomId
+  [isEncrypted, setIsEncrypted] = useState -> client.isRoomEncrypted roomId
   [loading, setLoading] = useState true
 
   # Listen to room name updates
-  # TODO: also implement room avatar updates?
+  # TODO: also implement room avatar / encrypted state updates?
   useEffect ->
     onNameChange = (room) ->
       return if room.roomId != roomId
@@ -40,12 +42,16 @@ export default Chat = ({route, navigation}) ->
   <>
     <Appbar.Header>
       <Appbar.BackAction onPress={-> navigation.goBack()}/>
-      <SharedElement id={"room.#{roomId}.avatar"}>
-        <Avatar
-          name={name}
-          url={avatar}
-          style={styles.styleAvatar}/>
-      </SharedElement>
+      <AvatarBadgeWrapper
+        icon={if isEncrypted then "shield"}
+        style={styles.styleAvatarWrapper}>
+        <SharedElement id={"room.#{roomId}.avatar"}>
+          <Avatar
+            name={name}
+            url={avatar}
+            style={styles.styleAvatar}/>
+        </SharedElement>
+      </AvatarBadgeWrapper>
       <Appbar.Content title={name} />
     </Appbar.Header>
     <View style={styles.styleContentWrapper}>
@@ -74,11 +80,14 @@ buildStyles = (theme) ->
       flex: 1
       flexDirection: 'column-reverse' # To make sure ProgressBar always appear on top
       alignSelf: 'stretch'
+    styleAvatarWrapper:
+      width: 40
+      height: 40
+      marginStart: 10
     styleAvatar:
       width: 40
       height: 40
       borderRadius: 20
-      marginLeft: 10
     styleProgress:
       width: '100%'
       height: 2

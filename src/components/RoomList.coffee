@@ -3,6 +3,7 @@ import { Image, FlatList, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "./Avatar"
+import AvatarBadgeWrapper from "./AvatarBadgeWrapper"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import * as mext from "../util/matrix"
@@ -26,6 +27,7 @@ transformRooms = (client, rooms) ->
         avatar: mext.calculateRoomAvatarURL client, room
         summary: desc
         timestamp: ts
+        encrypted: client.isRoomEncrypted room.roomId
     .sort (x, y) -> y.timestamp - x.timestamp
 
 getLatestMessage = (room) ->
@@ -49,12 +51,16 @@ RoomComponent = React.memo ({onEnterRoom, theme, styles, item}) ->
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
     <View style={styles.styleRoomItem}>
-      <SharedElement id={"room.#{item.key}.avatar"}>
-        <Avatar
-          style={styles.styleRoomAvatar}
-          name={item.name}
-          url={item.avatar}/>
-      </SharedElement>
+      <AvatarBadgeWrapper
+        style={styles.styleRoomAvatarWrapper}
+        icon={if item.encrypted then "shield"}>
+        <SharedElement id={"room.#{item.key}.avatar"}>
+          <Avatar
+            style={styles.styleRoomAvatar}
+            name={item.name}
+            url={item.avatar}/>
+        </SharedElement>
+      </AvatarBadgeWrapper>
       <View style={styles.styleTextContainer}>
         <Text numberOfLines={1} style={styles.styleTextTitle}>{item.name}</Text>
         <Text numberOfLines={1} style={styles.styleTextSummary}>{item.summary}</Text>
@@ -103,11 +109,14 @@ buildStyles = (theme) ->
       flex: 1
       flexDirection: "row"
       alignSelf: "stretch"
+    styleRoomAvatarWrapper:
+      width: 56
+      height: 56
+      margin: 16
     styleRoomAvatar:
       width: 56
       height: 56
       borderRadius: 28
-      margin: 16
     styleTextContainer:
       flex: 1
       flexDirection: "column"
