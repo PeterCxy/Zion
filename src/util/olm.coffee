@@ -1,3 +1,9 @@
+# Re-implemented libolm JS bindings using true native SDKs
+# because React Native does not work with the output of
+# emscripten as of now.
+# Bindings interface definition:
+# <https://gitlab.matrix.org/matrix-org/olm/-/blob/master/javascript/index.d.ts>
+# Also refer to the Java side for how the native bridge works
 import { NativeModules } from "react-native"
 
 # Bridges
