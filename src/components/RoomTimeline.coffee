@@ -34,6 +34,9 @@ transformEvents = (client, events) ->
         sent: (not ev.status?) or (ev.status == EventStatus.SENT)
         # TODO: handle errored pending events
     .filter (ev) -> ev?
+    # Work around some empty room state (membership) events
+    # see membership handling in matrix.coffee for details
+    .filter (ev) -> ev.type isnt 'room_state' or (ev.body? and ev.body isnt "")
 
 transformEvent = (client, ev, redacted, replaced) ->
   if ev.getId() in redacted
