@@ -34,6 +34,14 @@ getLatestMessage = (room) ->
   [latest.getTs(), mext.eventToDescription(latest)]
 
 renderRoom = (onEnterRoom, theme, styles, {item}) ->
+  <RoomComponent
+    onEnterRoom={onEnterRoom}
+    theme={theme}
+    styles={styles}
+    item={item}/>
+
+# Use a standalone component to prevent excessive re-rendering
+RoomComponent = React.memo ({onEnterRoom, theme, styles, item}) ->
   <TouchableRipple
     onPress={->
       onEnterRoom item.key
@@ -53,6 +61,7 @@ renderRoom = (onEnterRoom, theme, styles, {item}) ->
       </View>
     </View>
   </TouchableRipple>
+, (x, y) -> JSON.stringify(x.item) == JSON.stringify(y.item)
 
 export default RoomList = ({onEnterRoom}) ->
   client = useContext MatrixClientContext
