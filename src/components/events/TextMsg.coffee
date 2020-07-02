@@ -67,6 +67,9 @@ export default TextMsg = ({ev}) ->
             renderersProps={{
               styles: styles
             }}
+            tagsStyles={{
+              code: styles.styleCodeText
+            }}
             renderers={htmlRenderers}
             style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
             baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
@@ -134,6 +137,9 @@ buildStyles = (theme) ->
     styleMsgQuoteContent:
       marginStart: 10
       opacity: 0.5
+    styleCodeText:
+      fontFamily: 'monospace'
+      color: theme.COLOR_CHAT_INLINE_CODE
 
   styles.styleMsgBubbleReverse =
     Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
