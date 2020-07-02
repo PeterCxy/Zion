@@ -22,6 +22,8 @@ export default Chat = ({route, navigation}) ->
   # on their internal state. Instead, we should only
   # update the state based on events.
   [name, setName] = useState -> client.getRoom(roomId).name
+  [memberCount, setMemberCount] = useState ->
+    client.getRoom(roomId).getJoinedMemberCount()
   [avatar, setAvatar] = useState ->
     mext.calculateRoomAvatarURL client, client.getRoom roomId
   [isEncrypted, setIsEncrypted] = useState -> client.isRoomEncrypted roomId
@@ -37,7 +39,12 @@ export default Chat = ({route, navigation}) ->
       return if room.roomId != roomId
       setName room.name
 
+    onMembershipChange = (event, state, member) ->
+      return if member.roomId != roomId
+      setMemberCount client.getRoom(roomId).getJoinedMemberCount()
+
     client.on 'Room.name', onNameChange
+    client.on 'RoomState.members', onMembershipChange
 
     do ->
       res = await client.getRoom(roomId).hasUnverifiedDevices()
@@ -46,6 +53,7 @@ export default Chat = ({route, navigation}) ->
     return ->
       unmounted = true
       client.removeListener 'Room.name', onNameChange
+      client.removeListener 'RoomState.members', onMembershipChange
   , []
 
   <>
@@ -64,7 +72,12 @@ export default Chat = ({route, navigation}) ->
       </AvatarBadgeWrapper>
       <Appbar.Content
         title={name}
-        subtitle={if hasUntrustedDevice then translate "room_has_untrusted_devices"}/>
+        subtitle={
+          if hasUntrustedDevice
+            translate "room_has_untrusted_devices"
+          else
+            translate "room_member_count", memberCount
+        }/>
     </Appbar.Header>
     <View style={styles.styleContentWrapper}>
       <RoomTimeline

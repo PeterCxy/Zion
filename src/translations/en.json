@@ -28,6 +28,7 @@
   "room_msg_bad_encryption": "Failed to decrypt message",
   "room_msg_redacted": "(Deleted)",
   "room_msg_edited": "(edited)",
+  "room_member_count": "% members",
   "room_has_untrusted_devices": "There are untrusted devices",
   "time_format_hour_minute": "%a:%b",
   "chat_placeholder": "Write something...",
