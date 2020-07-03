@@ -45,6 +45,9 @@ export default HomeRoomList = ({navigation}) ->
 
   <>
     <Appbar.Header>
+      <Appbar.Action
+        icon="menu"
+        onPress={-> navigation.openDrawer()}/>
       <Appbar.Content
         title={translate "app_name"}
         subtitle={stateMessages[syncState]}/>

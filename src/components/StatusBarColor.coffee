@@ -9,9 +9,12 @@ export default StatusBarColor = (props) ->
       backgroundColor: props.backgroundColor
   , [StatusBar.currentHeight, props.backgroundColor]
 
+  # The View is actually what decides the color of the status bar
+  # The <StatusBar> element itself only determines the overlay color,
+  # which should be transparent for views like drawer to draw under
   <View style={styleStatusBar}>
     <StatusBar
       translucent
       barStyle="light-content"
-      backgroundColor={styleStatusBar.backgroundColor}/>
+      backgroundColor="rgba(0, 0, 0, #{props.opacity ? 0.20})"/>
   </View>

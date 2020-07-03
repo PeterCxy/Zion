@@ -15,7 +15,8 @@ export default SplashScreen = () ->
 
   <View style={styles.styleWrapper}>
     <StatusBarColor
-      backgroundColor={theme.COLOR_PRIMARY}/>
+      backgroundColor={theme.COLOR_PRIMARY}
+      opacity={0}/>
     <View style={styles.styleMain}>
       <Text style={styles.styleMainText}>{translate "app_name"}</Text>
       <ProgressBar
