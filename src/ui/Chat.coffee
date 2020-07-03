@@ -113,6 +113,8 @@ buildStyles = (theme) ->
       width: 40
       height: 40
       borderRadius: 20
+      borderWidth: 1
+      borderColor: theme.COLOR_SECONDARY
     styleProgress:
       width: '100%'
       height: 2
