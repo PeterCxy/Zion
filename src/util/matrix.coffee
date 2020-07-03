@@ -3,9 +3,9 @@
 import { translate } from "./i18n"
 import { PixelRatio } from "react-native"
 
-AVATAR_SIZE = 64 * PixelRatio.get() # TODO: should we calculate this based on DPI?
-AVATAR_SIZE_SMALL = 32 * PixelRatio.get()
-AVATAR_SIZE_TINY = 24 * PixelRatio.get()
+export AVATAR_SIZE = 64 * PixelRatio.get() # TODO: should we calculate this based on DPI?
+export AVATAR_SIZE_SMALL = 32 * PixelRatio.get()
+export AVATAR_SIZE_TINY = 24 * PixelRatio.get()
 
 # Calculate avatar URL of a room
 # if the room is a direct chat, and does not

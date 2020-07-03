@@ -194,6 +194,6 @@ export useCachedFetch = (url, mime, cryptoInfo, onFetched, onProgress) ->
 
     return ->
       unmounted = true
-  , []
+  , [url]
 
   [dataURL, immediatelyAvailable]

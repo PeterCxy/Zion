@@ -11,6 +11,7 @@ extractCapital = (word) ->
     return word.toUpperCase().charAt(0)
 
 extractCapitals = (name) ->
+  return unless name? and name != ''
   splitted = name.split ' '
   if splitted.length == 0
     ""
