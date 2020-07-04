@@ -24,6 +24,7 @@ public class ZionPackage implements ReactPackage {
         modules.add(new LocalStorageBridge(reactContext));
         modules.add(new EncryptedAttachment(reactContext));
         modules.add(new AsyncFileOps(reactContext));
+        modules.add(new NativeCrypto(reactContext));
 
         return modules;
   }
