@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Promise;
 import com.facebook.react.bridge.WritableMap;
 
 import java.io.UnsupportedEncodingException;
+import java.security.InvalidKeyException;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.security.spec.InvalidKeySpecException;
@@ -16,15 +17,12 @@ import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
-import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
-import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 // Native crypto implementation for matrix-js-sdk local secret storage
 // used in vendor/matrix-js-sdk/src/crypto/aes.js
-// These are only used in local storage so we do not need to replicate
-// the original algorithm exactly.
+// We DO need to replicate the Node / Browser version.
 public class NativeCrypto extends ReactContextBaseJavaModule {
     public NativeCrypto(ReactApplicationContext context) {
         super(context);
@@ -36,8 +34,7 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
     }
 
     // Encrypt a string natively
-    // Key can be anything, since it will be used to derive encryption keys
-    // (but it must be a string, which is different from the JS-side API)
+    // Key must be encoded in base64
     // IV should be base64-encoded
     // If iv is null, a new one is generated randomly
     // returned ciphertext will also be in base64
@@ -61,9 +58,9 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
                 SecretKeySpec keySpec = new SecretKeySpec(keys[0], "AES");
                 Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
                 cipher.init(Cipher.ENCRYPT_MODE, keySpec, ivSpec);
+                byte[] cipherBytes = cipher.doFinal(data.getBytes("UTF-8"));
                 String cipherText =
-                    Base64.getEncoder().encodeToString(
-                        cipher.doFinal(data.getBytes("UTF-8")));
+                    Base64.getEncoder().encodeToString(cipherBytes);
 
                 // HMAC
                 Mac mac = Mac.getInstance("HmacSHA256");
@@ -71,7 +68,7 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
                 mac.init(macSpec);
                 String macText =
                     Base64.getEncoder().encodeToString(
-                        mac.doFinal(cipherText.getBytes("UTF-8")));
+                        mac.doFinal(cipherBytes));
                 
                 // Return value, the same as the JS version
                 WritableMap map = Arguments.createMap();
@@ -87,14 +84,14 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
 
     // Decrypt a string natively
     // ciphertext, iv, hmac must be base64-encoded
-    // key can ba any String, but the JS side uses Uint8Array so conversion
-    // is needed in JS. A simple base64 will do.
+    // key must be encoded in base64
     @ReactMethod
     public void decryptNative(String ciphertext, String iv, String hmac,
         String key, String name, Promise promise) {
         new Thread(() -> {
             try {
                 byte[] ivBytes = Base64.getDecoder().decode(iv);
+                byte[] cipherBytes = Base64.getDecoder().decode(ciphertext);
 
                 byte[][] keys = deriveKeysNative(key, name);
 
@@ -104,9 +101,11 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
                 mac.init(macSpec);
                 String macText =
                     Base64.getEncoder().encodeToString(
-                        mac.doFinal(ciphertext.getBytes("UTF-8")));
+                        mac.doFinal(cipherBytes));
 
-                if (!macText.equals(hmac)) {
+                String _macText = macText.replace("=", "").replace("+", "");
+                String _hmac = hmac.replace("=", "").replace("+", "");
+                if (!_macText.equals(_hmac)) {
                     promise.reject("MACs do not match");
                     return;
                 }
@@ -116,7 +115,7 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
                 SecretKeySpec keySpec = new SecretKeySpec(keys[0], "AES");
                 Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
                 cipher.init(Cipher.DECRYPT_MODE, keySpec, ivSpec);
-                byte[] res = cipher.doFinal(Base64.getDecoder().decode(ciphertext));
+                byte[] res = cipher.doFinal(cipherBytes);
                 promise.resolve(new String(res, "UTF-8"));
             } catch (Exception e) {
                 promise.reject(e.getMessage());
@@ -124,13 +123,39 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
         }).start();
     }
 
+    // HKDF with HMAC-SHA256
     private static byte[][] deriveKeysNative(String key, String name)
-        throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeySpecException {
-        PBEKeySpec spec = new PBEKeySpec(key.toCharArray(), name.getBytes("UTF-8"), 4096, 64 * 8);
-        SecretKeyFactory factory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-        byte[] res = factory.generateSecret(spec).getEncoded();
-        byte[] keyAes = Arrays.copyOfRange(res, 0, 32);
-        byte[] keyHmac = Arrays.copyOfRange(res, 32, 64);
+        throws UnsupportedEncodingException, NoSuchAlgorithmException, InvalidKeyException {
+        byte[] keyBytes = Base64.getDecoder().decode(key);
+        // salt for HKDF, with 8 bytes of zeros
+        SecretKeySpec macSpec = new SecretKeySpec(new byte[8], "HmacSHA256");
+
+        // prk
+        Mac mac = Mac.getInstance("HmacSHA256");
+        mac.init(macSpec);
+        mac.update(keyBytes);
+        byte[] prk = mac.doFinal();
+        SecretKeySpec prkSpec = new SecretKeySpec(prk, "HmacSHA256");
+
+        byte[] b = new byte[1];
+        b[0] = 1;
+
+        // calculate aes key
+        mac = Mac.getInstance("HmacSHA256");
+        mac.init(prkSpec);
+        mac.update(name.getBytes("UTF-8"));
+        mac.update(b);
+        byte[] keyAes = mac.doFinal();
+
+        // Calculate HMAC key
+        b[0] = 2;
+        mac = Mac.getInstance("HmacSHA256");
+        mac.init(prkSpec);
+        mac.update(keyAes);
+        mac.update(name.getBytes("UTF-8"));
+        mac.update(b);
+        byte[] keyHmac = mac.doFinal();
+
         return new byte[][]{keyAes, keyHmac};
     }
 
