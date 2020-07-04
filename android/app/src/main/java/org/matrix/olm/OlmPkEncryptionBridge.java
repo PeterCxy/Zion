@@ -1,8 +1,10 @@
 package org.matrix.olm;
 
+import com.facebook.react.bridge.Arguments;
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
+import com.facebook.react.bridge.WritableMap;
 
 public class OlmPkEncryptionBridge extends OlmBridgeBase<OlmPkEncryption> {
     private static OlmPkEncryptionBridge sInstance;
@@ -40,8 +42,13 @@ public class OlmPkEncryptionBridge extends OlmBridgeBase<OlmPkEncryption> {
     }
 
     @ReactMethod(isBlockingSynchronousMethod = true)
-    public String encrypt(String id, String plaintext) throws OlmException {
+    public WritableMap encrypt(String id, String plaintext) throws OlmException {
         OlmPkEncryption enc = getObj(id);
-        return enc.encrypt(plaintext).mCipherText;
+        OlmPkMessage msg = enc.encrypt(plaintext);
+        WritableMap ret = Arguments.createMap();
+        ret.putString("ephemeral", msg.mEphemeralKey);
+        ret.putString("mac", msg.mMac);
+        ret.putString("ciphertext", msg.mCipherText);
+        return ret;
     }
 }
