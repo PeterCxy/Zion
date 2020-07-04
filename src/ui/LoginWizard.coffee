@@ -68,7 +68,7 @@ export default LoginWizard = ({onLogin}) ->
     <ProgressBar
       style={styles.styleProgress}
       indeterminate={true}
-      color={theme.COLOR_PRIMARY}
+      color={theme.COLOR_ACCENT}
       visible={loading}/>
     {
       # Content area
