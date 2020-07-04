@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useState } from "react"
-import { Image, FlatList, Text, View } from "react-native"
+import { Image, FlatList, PixelRatio, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "./Avatar"
@@ -109,6 +109,8 @@ buildStyles = (theme) ->
       flex: 1
       flexDirection: "row"
       alignSelf: "stretch"
+      borderBottomWidth: 1 / PixelRatio.get()
+      borderBottomColor: theme.COLOR_ROOM_LIST_DIVIDER
     styleRoomAvatarWrapper:
       width: 56
       height: 56
