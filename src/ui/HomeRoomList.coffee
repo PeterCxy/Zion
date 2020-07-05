@@ -52,5 +52,5 @@ export default HomeRoomList = ({navigation}) ->
         title={translate "app_name"}
         subtitle={stateMessages[syncState]}/>
     </Appbar.Header>
-    <RoomList onEnterRoom={(roomId) -> navigation.navigate "Chat", roomId: roomId}/>
+    <RoomList/>
   </>

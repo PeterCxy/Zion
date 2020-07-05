@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from "react"
+import React, { useContext, useEffect, useRef, useState } from "react"
 import { View } from "react-native"
 import { Appbar, ProgressBar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
@@ -12,9 +12,11 @@ import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
 export default Chat = ({route, navigation}) ->
-  {roomId} = route.params
+  {roomId, avatarPlaceholder} = route.params
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
+
+  avatarDataRef = useRef null
 
   # Set initial states
   # Note that the room objects themselves are mutable,
@@ -67,11 +69,17 @@ export default Chat = ({route, navigation}) ->
           <Avatar
             name={name}
             url={avatar}
+            placeholder={avatarPlaceholder}
+            dataRef={avatarDataRef}
             style={styles.styleAvatar}/>
         </SharedElement>
       </AvatarBadgeWrapper>
       <Appbar.Content
-        onPress={-> navigation.navigate "RoomDetails", roomId: roomId}
+        onPress={->
+          navigation.navigate "RoomDetails",
+            roomId: roomId
+            avatarPlaceholder: avatarDataRef.current
+        }
         title={name}
         subtitle={
           if hasUntrustedDevice

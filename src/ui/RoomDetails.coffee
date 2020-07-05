@@ -9,7 +9,7 @@ import { MatrixClientContext } from "../util/client"
 import * as mext from "../util/matrix"
 
 export default RoomDetails = ({route, navigation}) ->
-  {roomId} = route.params
+  {roomId, avatarPlaceholder} = route.params
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
 
@@ -38,6 +38,7 @@ export default RoomDetails = ({route, navigation}) ->
         <SharedElement id={"room.#{roomId}.avatar"}>
           <Avatar
             style={styles.styleAvatar}
+            placeholder={avatarPlaceholder}
             url={avatar}
             name={name}/>
         </SharedElement>

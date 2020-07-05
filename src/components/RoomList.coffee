@@ -1,7 +1,8 @@
-import React, { useCallback, useContext, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useRef, useState } from "react"
 import { Image, FlatList, PixelRatio, Text, View } from "react-native"
 import { TouchableRipple } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
+import { useNavigation } from '@react-navigation/native'
 import Avatar from "./Avatar"
 import AvatarBadgeWrapper from "./AvatarBadgeWrapper"
 import { useStyles } from "../theme"
@@ -35,18 +36,22 @@ getLatestMessage = (room) ->
   latest = events[events.length - 1]
   [latest.getTs(), mext.eventToDescription(latest)]
 
-renderRoom = (onEnterRoom, theme, styles, {item}) ->
+renderRoom = (theme, styles, {item}) ->
   <RoomComponent
-    onEnterRoom={onEnterRoom}
     theme={theme}
     styles={styles}
     item={item}/>
 
 # Use a standalone component to prevent excessive re-rendering
-RoomComponent = React.memo ({onEnterRoom, theme, styles, item}) ->
+RoomComponent = React.memo ({theme, styles, item}) ->
+  navigation = useNavigation()
+  avatarDataRef = useRef null
+
   <TouchableRipple
     onPress={->
-      onEnterRoom item.key
+      navigation.navigate "Chat",
+        roomId: item.key
+        avatarPlaceholder: avatarDataRef.current
     }
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
@@ -57,6 +62,7 @@ RoomComponent = React.memo ({onEnterRoom, theme, styles, item}) ->
         <SharedElement id={"room.#{item.key}.avatar"}>
           <Avatar
             style={styles.styleRoomAvatar}
+            dataRef={avatarDataRef}
             name={item.name}
             url={item.avatar}/>
         </SharedElement>
@@ -69,7 +75,7 @@ RoomComponent = React.memo ({onEnterRoom, theme, styles, item}) ->
   </TouchableRipple>
 , (x, y) -> JSON.stringify(x.item) == JSON.stringify(y.item)
 
-export default RoomList = ({onEnterRoom}) ->
+export default RoomList = () ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [rooms, setRooms] = useState []
@@ -101,7 +107,7 @@ export default RoomList = ({onEnterRoom}) ->
   <>
     <FlatList
       data={rooms}
-      renderItem={(data) -> renderRoom onEnterRoom, theme, styles, data}/>
+      renderItem={(data) -> renderRoom theme, styles, data}/>
   </>
 
 buildStyles = (theme) ->

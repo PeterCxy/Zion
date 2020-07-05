@@ -24,7 +24,12 @@ extractCapitals = (name) ->
 # If the URL is not fetched or null, we show a placeholder
 # Generated from the name
 # Otherwise show the fetched image after it gets fully loaded
-export default Avatar = ({name, url, style}) ->
+# You can also pass a lower-resolution version of the avatar
+# in `placeholder` to show before loading.
+# An Avatar instance can also expose the currently-loaded
+# image into `dataRef` that can be used as a placeholder for
+# other Avatar instances.
+export default Avatar = ({name, url, placeholder, dataRef, style}) ->
   [theme, styles] = useStyles buildStyles
   fadeAnim = useRef(new Animated.Value 1).current
   [dataURL, _] = useCachedFetch url, null, null, (dUrl, callback) ->
@@ -41,12 +46,19 @@ export default Avatar = ({name, url, style}) ->
         useNativeDriver: true
       .start()
 
-  if not dataURL
+  useEffect ->
+    dataRef?.current = dataURL ? placeholder
+    return
+  , [dataURL ? placeholder]
+
+  if not dataURL and not placeholder
     <Animated.View style={Object.assign {}, styles.styleTextBackground, style, { opacity: fadeAnim }}>
       <Text style={styles.styleText}>{extractCapitals name}</Text>
     </Animated.View>
   else
-    <Animated.Image style={Object.assign {}, style, { opacity: fadeAnim }} source={{ uri: dataURL }}/>
+    <Animated.Image
+      style={Object.assign {}, style, { opacity: fadeAnim }}
+      source={{ uri: dataURL ? placeholder }}/>
 
 buildStyles = (theme) ->
     styleTextBackground:
