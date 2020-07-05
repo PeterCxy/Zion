@@ -9,7 +9,7 @@ export default CollapsingHeaderView = (props) ->
   {
     headerHeight, headerBackground,
     renderHeader, renderAppbar,
-    renderContent, goBack
+    children, goBack
   } = props
   [theme, styles] = useStyles buildStyles
   scrollY = useRef(new Animated.Value 0).current
@@ -35,7 +35,7 @@ export default CollapsingHeaderView = (props) ->
     <ScrollView
       contentContainerStyle={{ paddingTop: headerHeight }}
       onScroll={scrollEv}>
-      {renderContent()}
+      {children}
     </ScrollView>
     <Animated.View style={
       Object.assign {}, styles.styleHeader,
