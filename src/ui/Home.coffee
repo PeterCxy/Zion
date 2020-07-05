@@ -9,6 +9,7 @@ import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
 import Chat from "./Chat"
 import ImageViewerScreen from "./ImageViewerScreen"
+import RoomDetails from "./RoomDetails"
 import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
@@ -63,6 +64,10 @@ HomeInner = () ->
         component={ImageViewerScreen}
         sharedElements={ImageViewerScreen.sharedElements}
         options={ImageViewerScreen.navigationOptions}/>
+      <Stack.Screen
+        name="RoomDetails"
+        component={RoomDetails}
+        sharedElements={RoomDetails.sharedElements}/>
     </Stack.Navigator>
     <VerificationRequestHandler/>
   </View>

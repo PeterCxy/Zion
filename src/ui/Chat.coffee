@@ -71,6 +71,7 @@ export default Chat = ({route, navigation}) ->
         </SharedElement>
       </AvatarBadgeWrapper>
       <Appbar.Content
+        onPress={-> navigation.navigate "RoomDetails", roomId: roomId}
         title={name}
         subtitle={
           if hasUntrustedDevice
@@ -97,7 +98,7 @@ export default Chat = ({route, navigation}) ->
 Chat.sharedElements = (route, otherRoute, showing) ->
   # Only use the avatar animation when coming from or to room list
   # (because we don't share the avatar with ImageViewerScreen)
-  if otherRoute.name == "HomeRoomList"
+  if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
 
 buildStyles = (theme) ->

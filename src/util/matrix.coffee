@@ -3,9 +3,19 @@
 import { translate } from "./i18n"
 import { PixelRatio } from "react-native"
 
-export AVATAR_SIZE = 64 * PixelRatio.get() # TODO: should we calculate this based on DPI?
+export AVATAR_SIZE_HUGE = 128 * PixelRatio.get()
+export AVATAR_SIZE = 64 * PixelRatio.get()
 export AVATAR_SIZE_SMALL = 32 * PixelRatio.get()
 export AVATAR_SIZE_TINY = 24 * PixelRatio.get()
+
+_calculateRoomAvatarURL = (client, room, size) ->
+  roomAvatar = room.getAvatarUrl client.getHomeserverUrl(),
+    size, size, "scale", false
+  if roomAvatar?
+    roomAvatar
+  else
+    room.getAvatarFallbackMember()?.getAvatarUrl client.getHomeserverUrl(),
+      size, size, "scale", false
 
 # Calculate avatar URL of a room
 # if the room is a direct chat, and does not
@@ -14,13 +24,10 @@ export AVATAR_SIZE_TINY = 24 * PixelRatio.get()
 # otherwise returns the room avatar directly
 # null if none
 export calculateRoomAvatarURL = (client, room) ->
-  roomAvatar = room.getAvatarUrl client.getHomeserverUrl(),
-    AVATAR_SIZE, AVATAR_SIZE, "scale", false
-  if roomAvatar?
-    roomAvatar
-  else
-    room.getAvatarFallbackMember()?.getAvatarUrl client.getHomeserverUrl(),
-      AVATAR_SIZE, AVATAR_SIZE, "scale", false
+  _calculateRoomAvatarURL client, room, AVATAR_SIZE
+
+export calculateRoomHugeAvatarURL = (client, room) ->
+  _calculateRoomAvatarURL client, room, AVATAR_SIZE_HUGE
 
 # Calculate the small avatar URL of a room member
 export calculateMemberSmallAvatarURL = (client, member) ->

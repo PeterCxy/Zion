@@ -166,19 +166,14 @@ class CachedDownload
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
 export useCachedFetch = (url, mime, cryptoInfo, onFetched, onProgress) ->
-  [dataURL, setDataURL] = useState null
-  [immediatelyAvailable, setImmediatelyAvailable] = useState false
+  [dataURL, setDataURL] = useState -> fetchMemCache url
+  [immediatelyAvailable, setImmediatelyAvailable] = useState -> dataURL and url
 
   useEffect ->
     unmounted = false
 
     util.asyncRunAfterInteractions ->
-      memDataURL = fetchMemCache url
-      if memDataURL and url
-        await util.asyncRunAfterInteractions ->
-          setDataURL memDataURL
-          setImmediatelyAvailable true
-      return if memDataURL or not url
+      return if dataURL or not url
 
       try
         dUrl = await cachedFetchAsDataURL url, mime, cryptoInfo, onProgress
