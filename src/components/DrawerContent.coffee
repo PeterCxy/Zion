@@ -1,8 +1,11 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { StatusBar, Text, View } from "react-native"
+import { StatusBar, ScrollView, Text, View } from "react-native"
+import { TouchableRipple } from "react-native-paper"
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import Avatar from "./Avatar"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
+import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
 export default DrawerContent = () ->
@@ -67,7 +70,33 @@ export default DrawerContent = () ->
       <Text style={styles.styleUserInfoText}>{userName}</Text>
       <Text style={styles.styleUserInfoText}>{userId}</Text>
     </View>
+    <ScrollView style={styles.styleOptionsScrollView}>
+      <View style={styles.styleOptionsWrapper}>
+        <DrawerOption
+          styles={styles}
+          theme={theme}
+          title={translate "settings"}
+          icon="settings"/>
+      </View>
+    </ScrollView>
   </View>
+
+DrawerOption = ({styles, theme, title, icon, onPress}) ->
+  <TouchableRipple
+    style={styles.styleOption}
+    onPress={onPress ? ->}>
+    <View style={styles.styleOptionInner}>
+      <Icon
+        style={styles.styleOptionIcon}
+        size={20}
+        name={icon}
+        color={theme.COLOR_TEXT_ON_BACKGROUND}/>
+      <Text
+        style={styles.styleOptionText}>
+        {title}
+      </Text>
+    </View>
+  </TouchableRipple>
 
 buildStyles = (theme) ->
     styleUserInfoWrapper:
@@ -89,6 +118,28 @@ buildStyles = (theme) ->
       color: theme.COLOR_TEXT_PRIMARY
       fontSize: 13
       paddingTop: 3
-    stylesWrapper:
+    styleWrapper:
       flex: 1
+      flexDirection: 'column'
       backgroundColor: theme.COLOR_BACKGROUND
+    styleOptionsScrollView:
+      width: '100%'
+      alignSelf: 'stretch'
+    styleOptionsWrapper:
+      width: '100%'
+      marginTop: 20
+      flexDirection: "column"
+    styleOption:
+      width: '100%'
+      height: 48
+    styleOptionInner:
+      width: '100%'
+      height: '100%'
+      flexDirection: "row"
+      alignItems: "center"
+    styleOptionIcon:
+      marginStart: 10
+      marginEnd: 10
+    styleOptionText:
+      fontSize: 14
+      color: theme.COLOR_TEXT_ON_BACKGROUND
