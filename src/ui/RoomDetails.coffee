@@ -11,6 +11,7 @@ import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
+import { DEFAULT_APPBAR_HEIGHT } from "../util/util"
 
 HEADER_SIZE = 300
 
@@ -71,7 +72,7 @@ export default RoomDetails = ({route, navigation}) ->
         <Text style={styles.styleHeaderAliasText}>{firstAlias}</Text>
       </View>
     }>
-    <View style={{ minHeight: windowHeight + HEADER_SIZE }}>
+    <View style={{ minHeight: windowHeight - DEFAULT_APPBAR_HEIGHT }}>
       <PreferenceCategory
         title={translate "room_details_overview"}>
         <Preference

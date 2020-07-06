@@ -4,6 +4,7 @@ import React, { useContext, useRef } from "react"
 import { Animated, ScrollView, Text, View } from "react-native"
 import { Appbar } from "react-native-paper"
 import ThemeContext, { useStyles } from "../theme"
+import { DEFAULT_APPBAR_HEIGHT } from "../util/util"
 
 export default CollapsingHeaderView = (props) ->
   {
@@ -22,7 +23,9 @@ export default CollapsingHeaderView = (props) ->
     outputRange: [0, -headerHeight / 2]
     extrapolate: 'clamp'
   opacityAnim = scrollY.interpolate
-    inputRange: [0, headerHeight]
+    # Make appbar opacity 1 when the remaining height is the height
+    # of the appbar.
+    inputRange: [0, headerHeight - DEFAULT_APPBAR_HEIGHT]
     outputRange: [0, 1]
     extrapolate: 'clamp'
   scrollEv = Animated.event [

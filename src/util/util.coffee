@@ -1,5 +1,8 @@
 import { InteractionManager } from "react-native"
 
+# From react-native-paper
+export DEFAULT_APPBAR_HEIGHT = 56
+
 # Compare if two timestamps (in ms) are exactly the same day
 # in the local time zone, while ignoring hours / minutes
 export tsSameDay = (ts1, ts2) ->
