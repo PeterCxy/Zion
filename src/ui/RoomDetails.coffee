@@ -1,11 +1,15 @@
-import React, { useContext, useState } from "react"
+import React, { useContext, useEffect, useState } from "react"
 import { Text, View, useWindowDimensions } from "react-native"
 import { Appbar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
+import { EventTimeline } from "matrix-js-sdk"
 import Avatar from "../components/Avatar"
 import CollapsingHeaderView from "../components/CollapsingHeaderView"
+import PreferenceCategory from "../components/preferences/PreferenceCategory"
+import Preference from "../components/preferences/Preference"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
+import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
 HEADER_SIZE = 300
@@ -23,6 +27,24 @@ export default RoomDetails = ({route, navigation}) ->
     mext.calculateRoomHugeAvatarURL client, client.getRoom roomId
   [firstAlias, setFirstAlias] = useState ->
     client.getRoom(roomId).getCanonicalAlias() ? roomId
+  [desc, setDesc] = useState ->
+    client.getRoom(roomId).getLiveTimeline()
+      .getState(EventTimeline.FORWARDS)
+      .getStateEvents("m.room.topic", "")
+      ?.getContent().topic ? translate "room_details_description_default"
+  [isEncrypted, setIsEncrypted] = useState -> client.isRoomEncrypted roomId
+  [hasUntrustedDevice, setHasUntrustedDevice] = useState false
+
+  useEffect ->
+    unmounted = false
+
+    do ->
+      res = await client.getRoom(roomId).hasUnverifiedDevices()
+      setHasUntrustedDevice res unless unmounted
+
+    return ->
+      unmounted = true
+  , []
 
   <CollapsingHeaderView
     headerHeight={HEADER_SIZE}
@@ -50,6 +72,24 @@ export default RoomDetails = ({route, navigation}) ->
       </View>
     }>
     <View style={{ minHeight: windowHeight + HEADER_SIZE }}>
+      <PreferenceCategory
+        title={translate "room_details_overview"}>
+        <Preference
+          icon="information"
+          title={translate "room_details_description"}
+          summary={desc}/>
+        <Preference
+          icon="lock"
+          title={translate "room_details_encryption"}
+          summary={
+            if isEncrypted and not hasUntrustedDevice
+              translate "room_details_encryption_enabled"
+            else if hasUntrustedDevice
+              translate "room_details_encryption_untrusted"
+            else
+              translate "room_details_encryption_disabled"
+          }/>
+      </PreferenceCategory>
     </View>
   </CollapsingHeaderView>
 

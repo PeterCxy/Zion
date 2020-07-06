@@ -1,0 +1,3 @@
+export PREF_ICON_SIZE = 24
+export PREF_ICON_MARGIN = 16
+export PREF_CONTENT_MARGIN = 14
