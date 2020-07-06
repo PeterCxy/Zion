@@ -10,6 +10,7 @@ import HomeRoomList from "./HomeRoomList"
 import Chat from "./Chat"
 import ImageViewerScreen from "./ImageViewerScreen"
 import RoomDetails from "./RoomDetails"
+import Settings from "./Settings"
 import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
@@ -37,16 +38,16 @@ export default Home = () ->
   , []
 
   <NavigationContainer theme={NavTheme}>
-    <Drawer.Navigator drawerContent={-> <DrawerContent/>}>
+    <Drawer.Navigator
+      drawerContent={(props) -> <DrawerContent {...props}/>}>
       <Drawer.Screen
         name="HomeInner"
         component={HomeInner}/>
     </Drawer.Navigator>
   </NavigationContainer>
 
-HomeInner = () ->
+HomeInner = (props) ->
   {theme} = useContext ThemeContext
-
   <View style={styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_PRIMARY}/>
@@ -68,6 +69,9 @@ HomeInner = () ->
         name="RoomDetails"
         component={RoomDetails}
         sharedElements={RoomDetails.sharedElements}/>
+      <Stack.Screen
+        name="Settings"
+        component={Settings}/>
     </Stack.Navigator>
     <VerificationRequestHandler/>
   </View>

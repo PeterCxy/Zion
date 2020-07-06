@@ -45,6 +45,8 @@
   "chat_placeholder": "Write something...",
   "chat_text_empty": "Please write something to send",
   "settings": "Settings",
+  "settings_account": "Account",
+  "settings_account_security": "Security",
   "verification_title": "Verification",
   "verification_start": "A verification request was initiated by %",
   "verification_pending": "Cross-verification request pending",

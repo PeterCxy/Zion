@@ -8,7 +8,7 @@ import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
 import * as mext from "../util/matrix"
 
-export default DrawerContent = () ->
+export default DrawerContent = ({navigation}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
 
@@ -74,6 +74,7 @@ export default DrawerContent = () ->
       <View style={styles.styleOptionsWrapper}>
         <DrawerOption
           styles={styles}
+          onPress={-> navigation.navigate "Settings"}
           theme={theme}
           title={translate "settings"}
           icon="settings"/>
