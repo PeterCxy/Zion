@@ -117,6 +117,7 @@ export default AccountSecuritySettings = ({navigation}) ->
                       "shield-alert"
                   }
                   title={device.display_name}
+                  titleWeight={if device.device_id is sessionId then 'bold'}
                   summary={
                     "#{device.device_id}, #{device.last_seen_ip}\n#{new Date(device.last_seen_ts).toLocaleString()}"}/>
           }

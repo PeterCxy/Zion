@@ -5,7 +5,7 @@ import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import { useStyles } from "../../theme"
 import * as constants from "./constants"
 
-export default Preference = React.memo ({icon, title, summary, onPress}) ->
+export default Preference = React.memo ({icon, title, titleWeight, summary, onPress}) ->
   [theme, styles] = useStyles buildStyles
 
   <View style={styles.styleWrapper}>
@@ -20,7 +20,11 @@ export default Preference = React.memo ({icon, title, summary, onPress}) ->
             color={theme.COLOR_TEXT_ON_BACKGROUND}
             name={icon}
             style={styles.styleIcon}/>
-          <Text style={styles.styleTitle}>{title}</Text>
+          <Text style={Object.assign {}, styles.styleTitle,
+            fontWeight: titleWeight ? 'normal'
+          }>
+            {title}
+          </Text>
         </View>
         {
           if summary?
