@@ -4,4 +4,4 @@
 [submodule "vendor/matrix-js-sdk"]
 	path = vendor/matrix-js-sdk
 	url = https://cgit.typeblog.net/git/matrix-js-sdk.git
-	branch = 7.0.0-zion
+	branch = 7.1.0-zion
