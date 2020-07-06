@@ -19,7 +19,8 @@ export default Settings = ({navigation}) ->
           title={translate "settings_account"}>
           <Preference
             icon="lock"
-            title={translate "settings_account_security"}/>
+            title={translate "settings_account_security"}
+            onPress={-> navigation.navigate "AccountSecuritySettings"}/>
         </PreferenceCategory>
       </View>
     </ScrollView>

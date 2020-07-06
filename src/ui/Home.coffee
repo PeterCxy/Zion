@@ -11,6 +11,7 @@ import Chat from "./Chat"
 import ImageViewerScreen from "./ImageViewerScreen"
 import RoomDetails from "./RoomDetails"
 import Settings from "./Settings"
+import buildSettingsScreens from "./settings"
 import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
 
@@ -72,6 +73,7 @@ HomeInner = (props) ->
       <Stack.Screen
         name="Settings"
         component={Settings}/>
+      {buildSettingsScreens Stack}
     </Stack.Navigator>
     <VerificationRequestHandler/>
   </View>
