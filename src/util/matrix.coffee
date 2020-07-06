@@ -77,7 +77,7 @@ membershipToDescription = (ev) ->
   # <https://matrix.org/docs/spec/client_server/latest#m-room-member>
   switch
     when content.membership is 'invite'
-      translate "room_event_invite", ev.sender.name, content.displayname
+      translate "room_event_invite", ev.sender.name, ev.target.name
     when content.membership is 'join' and prevContent.membership isnt 'join'
       translate "room_event_join", content.displayname
     when content.membership is 'join' and prevContent.membership is 'join'
@@ -94,16 +94,16 @@ membershipToDescription = (ev) ->
       if ev.getStateKey() == ev.getSender()
         translate "room_event_invite_rejected", content.displayname
       else
-        translate "room_event_invite_revoked", ev.sender.name, content.displayname
+        translate "room_event_invite_revoked", ev.sender.name, ev.target.name
     when content.membership is 'leave' and prevContent.membership isnt 'ban'
       if ev.getStateKey() == ev.getSender()
         translate "room_event_leave", content.displayname
       else
-        translate "room_event_kicked", content.displayname
+        translate "room_event_kicked", ev.target.name
     when content.membership is 'leave' and prevContent.membership is 'ban'
-      translate "room_event_unbanned", content.displayname
+      translate "room_event_unbanned", ev.target.name
     when content.membership is 'ban'
-      translate "room_event_banned", content.displayname
+      translate "room_event_banned", ev.target.name
     else
       content.membership
 
