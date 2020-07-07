@@ -25,3 +25,9 @@ export encryptNative = (data, key, name, ivStr) ->
 export decryptNative = (data, key, name) ->
   await NativeModules.NativeCrypto.decryptNative data.ciphertext,
     data.iv, data.mac, Buffer.from(key).toString('base64'), name
+
+# matrix-js-sdk/src/crypto/key_passphrase.js
+export deriveSecretStorageKey = (password, salt, iterations, numBits = 256) ->
+  res = await NativeModules.NativeCrypto.deriveSecretStorageKey password,
+    salt, iterations, numBits
+  Buffer.from res, 'base64'

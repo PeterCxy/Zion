@@ -17,7 +17,10 @@ import java.util.Base64;
 
 import javax.crypto.Cipher;
 import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.SecretKeyFactory;
 import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.PBEKeySpec;
 import javax.crypto.spec.SecretKeySpec;
 
 // Native crypto implementation for matrix-js-sdk local secret storage
@@ -157,6 +160,24 @@ public class NativeCrypto extends ReactContextBaseJavaModule {
         byte[] keyHmac = mac.doFinal();
 
         return new byte[][]{keyAes, keyHmac};
+    }
+
+    // PBKDF key derivation for secret storage
+    // matrix-js-sdk/src/crypto/key_passphrase.js
+    // The return value is base64-encoded
+    @ReactMethod
+    public void deriveSecretStorageKey(String password,
+        String salt, int iterations, int numBits, Promise promise) {
+        new Thread(() -> {
+            try {
+                SecretKeyFactory skf = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA512");
+                PBEKeySpec spec = new PBEKeySpec(password.toCharArray(), salt.getBytes("UTF-8"), iterations, numBits);
+                SecretKey key = skf.generateSecret(spec);
+                promise.resolve(Base64.getEncoder().encodeToString(key.getEncoded()));
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
     }
 
     // Copy-pasted from

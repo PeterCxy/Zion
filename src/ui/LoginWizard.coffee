@@ -8,7 +8,7 @@ import { translate } from "../util/i18n"
 import SoftInputMode from "../util/SoftInputMode"
 import { createLoginMatrixClient, createMatrixClient } from "../util/client"
 
-export default LoginWizard = ({onLogin}) ->
+export default LoginWizard = ({onLogin, getSecretStorageKey}) ->
   [theme, styles] = useStyles buildStyles
   [homeserver, setHomeserver] = useState 'matrix.org'
   [userName, setUserName] = useState ''
@@ -43,7 +43,7 @@ export default LoginWizard = ({onLogin}) ->
         await AsyncStorage.setItem "@device_id", resp.device_id
         # Create the real client
         client = await createMatrixClient baseUrl, resp.access_token,
-          resp.user_id, resp.device_id
+          resp.user_id, resp.device_id, getSecretStorageKey
         # Wait for first sync to finish
         client.once 'sync', ->
           # Notify the main page to switch

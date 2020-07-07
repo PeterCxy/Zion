@@ -7,6 +7,7 @@ import * as defTheme from "./theme/default"
 import LoginWizard from "./ui/LoginWizard"
 import SplashScreen from "./ui/SplashScreen"
 import Home from "./ui/Home"
+import useSecretStorageKeyHandler from "./components/SecretStorageKeyHandler"
 import { reloadI18n } from "./util/i18n"
 import { createMatrixClient, MatrixClientContext } from "./util/client"
 
@@ -24,6 +25,7 @@ export default App = () ->
   [loaded, setLoaded] = useState false
   [client, setClient] = useState null
   [curTheme, setCurTheme] = useState defTheme
+  [secretKeyAccessDialog, getSecretStorageKey] = useSecretStorageKeyHandler()
   setCurTheme = useCallback setCurTheme, []
 
   paperTheme = useMemo ->
@@ -56,7 +58,7 @@ export default App = () ->
         setClient null
       else
         # We have the full information to construct client
-        client = await createMatrixClient baseUrl, token, uid, deviceId
+        client = await createMatrixClient baseUrl, token, uid, deviceId, getSecretStorageKey
         setClient client
         setLoaded true
     return
@@ -68,12 +70,15 @@ export default App = () ->
         if not loaded
           <SplashScreen/>
         else if not client?
-          <LoginWizard onLogin={(client) -> setClient client}/>
+          <LoginWizard
+            onLogin={(client) -> setClient client}
+            getSecretStorageKey={getSecretStorageKey}/>
         else
           <MatrixClientContext.Provider
             value={client}>
             <Home/>
           </MatrixClientContext.Provider>
       }
+      {secretKeyAccessDialog}
     </PaperProvider>
   </ThemeContext.Provider>

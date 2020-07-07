@@ -74,6 +74,8 @@
   "verification_they_dont_match": "They don't Match",
   "verification_cancelled": "Verification cancelled",
   "verification_finished": "This device has been verified successfully.",
+  "secret_storage_key_access_title": "Access secret storage",
+  "secret_storage_key_access_input": "Secret storage password",
   "err_failed_login": "Failed to log in. Please check your credentials.",
   "ok": "OK",
   "continue": "Continue",

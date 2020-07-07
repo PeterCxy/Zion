@@ -41,7 +41,7 @@ initIndexedDBCryptoStore = (indexedDB) ->
 
 export MatrixClientContext = React.createContext null
 
-export createMatrixClient = (baseUrl, token, uid, deviceId) ->
+export createMatrixClient = (baseUrl, token, uid, deviceId, getSecretStorageKey) ->
   initGlobals()
   indexedDB = initIndexedDB()
   client = m.createClient
@@ -53,6 +53,8 @@ export createMatrixClient = (baseUrl, token, uid, deviceId) ->
     cryptoStore: await initIndexedDBCryptoStore indexedDB
     sessionStore: new m.WebStorageSessionStore new LocalStorage "session"
     verificationMethods: [verificationMethods.SAS]
+    cryptoCallbacks:
+      getSecretStorageKey: getSecretStorageKey
   await client.initCrypto()
   await client.startClient
     pendingEventOrdering: 'detached'
