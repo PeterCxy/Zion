@@ -56,7 +56,8 @@ SecretStorageKeyHandlerDialog = React.memo ({show, resolvePromise, rejectPromise
   [passphrase, setPassphrase] = useState ""
 
   <Dialog
-    visible={show}>
+    visible={show}
+    onDismiss={-> rejectPromise "dismissed"}>
     <Dialog.Title>
       {translate "secret_storage_key_access_title"}
     </Dialog.Title>
