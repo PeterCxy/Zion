@@ -43,7 +43,7 @@ export default AccountSecuritySettings = ({navigation}) ->
       _devices = await client.getDevices()
       _devices = _devices?.devices?.map (device) ->
         Object.assign {}, device,
-          trusted: client.checkDeviceTrust client.getUserId(), device.device_id
+          trusted: client.checkDeviceTrust(client.getUserId(), device.device_id).isVerified()
       unless unmounted or not _devices?
         setDevices _devices
         setDevicesLoading false
@@ -117,7 +117,7 @@ export default AccountSecuritySettings = ({navigation}) ->
                     if device.trusted
                       "shield-check"
                     else
-                      "shield-alert"
+                      "cloud-question"
                   }
                   title={device.display_name}
                   titleWeight={if device.device_id is sessionId then 'bold'}
