@@ -1,10 +1,11 @@
 import React, { useContext, useEffect, useState } from "react"
-import { ScrollView, View } from "react-native"
-import { Appbar } from "react-native-paper"
+import { ScrollView, Text, View } from "react-native"
+import { ActivityIndicator, Appbar, Button, Dialog, TextInput } from "react-native-paper"
 import PreferenceCategory from "../../components/preferences/PreferenceCategory"
 import Preference from "../../components/preferences/Preference"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
+import ThemeContext from "../../theme"
 
 export default AccountSecuritySettings = ({navigation}) ->
   client = useContext MatrixClientContext
@@ -13,6 +14,7 @@ export default AccountSecuritySettings = ({navigation}) ->
     client.getKeyBackupEnabled()
   [backupLoading, setBackupLoading] = useState true
   [backupInfo, setBackupInfo] = useState null
+  [restoreDialogVisible, setRestoreDialogVisible] = useState false
 
   [sessionId, setSessionId] = useState -> client.deviceId
   [sessionKey, setSessionKey] = useState ->
@@ -85,8 +87,9 @@ export default AccountSecuritySettings = ({navigation}) ->
                 }/>
           }
           {
-            if not backupLoading and backupInfo?
+            if not backupLoading
               <Preference
+                onPress={-> setRestoreDialogVisible true}
                 icon="backup-restore"
                 title={translate "settings_account_security_backup_restore"}/>
           }
@@ -124,4 +127,97 @@ export default AccountSecuritySettings = ({navigation}) ->
         </PreferenceCategory>
       </View>
     </ScrollView>
+    <RestoreKeyBackupDialog
+      visible={restoreDialogVisible}
+      onDismiss={-> setRestoreDialogVisible false}/>
   </>
+
+# The dialog used for restoring backup
+RESTORE_STATE_INITIAL = 0
+RESTORE_STATE_WAITING = 1
+RESTORE_STATE_SUCCESS = 2
+RESTORE_STATE_FAIL = 3
+
+RestoreKeyBackupDialog = ({visible, onDismiss}) ->
+  {theme} = useContext ThemeContext
+  client = useContext MatrixClientContext
+  [state, setState] = useState RESTORE_STATE_INITIAL
+  [result, setResult] = useState null
+
+  # Reset the state every time visibility is changed
+  useEffect ->
+    setState RESTORE_STATE_INITIAL
+  , [visible]
+
+  # Actually do restoring
+  useEffect ->
+    return unless state == RESTORE_STATE_WAITING
+
+    do ->
+      {backupInfo} = await client.checkKeyBackup()
+      try
+        res = await client.restoreKeyBackupWithCache undefined, undefined, backupInfo
+      catch err
+        setState RESTORE_STATE_FAIL
+        return
+      setResult res
+      setState RESTORE_STATE_SUCCESS
+    return
+  , [state]
+
+  <Dialog
+    visible={visible}
+    onDismiss={onDismiss}
+    dismissable={false}>
+    <Dialog.Title>
+      {translate "settings_account_security_backup_restore_dialog_title"}
+    </Dialog.Title>
+    <Dialog.Content>
+      {
+        switch state
+          when RESTORE_STATE_INITIAL
+            <Text>{translate "settings_account_security_backup_restore_dialog_content"}</Text>
+          when RESTORE_STATE_WAITING
+            <View style={{ flexDirection: "row" }}>
+              <ActivityIndicator
+                animating={true}
+                color={theme.COLOR_ACCENT}/>
+              <Text style={{ marginStart: 10 }}>
+                {translate "settings_account_security_backup_restore_dialog_waiting"}
+              </Text>
+            </View>
+          when RESTORE_STATE_SUCCESS
+            <Text>
+              {
+                translate "settings_account_security_backup_restore_dialog_success",
+                  result.imported, result.total
+              }
+            </Text>
+          when RESTORE_STATE_FAIL
+            <Text>
+              {translate "settings_account_security_backup_restore_dialog_fail"}
+            </Text>
+      }
+    </Dialog.Content>
+    <Dialog.Actions>
+      {
+        switch state
+          when RESTORE_STATE_INITIAL
+            <>
+              <Button
+                onPress={onDismiss}>
+                {translate "cancel"}
+              </Button>
+              <Button
+                onPress={-> setState RESTORE_STATE_WAITING}>
+                {translate "continue"}
+              </Button>
+            </>
+          when RESTORE_STATE_SUCCESS, RESTORE_STATE_FAIL
+            <Button
+              onPress={onDismiss}>
+              {translate "ok"}
+            </Button>
+      }
+    </Dialog.Actions>
+  </Dialog>
