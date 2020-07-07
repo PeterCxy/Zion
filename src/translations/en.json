@@ -65,6 +65,8 @@
   "settings_account_security_cryptography_session_key": "Session Key",
   "settings_account_security_cryptography_session_key_unsupported": "Unsupported",
   "settings_account_security_devices": "Devices",
+  "settings_account_security_devices_verify": "Verify",
+  "settings_account_security_devices_rename": "Rename",
   "verification_title": "Verification",
   "verification_start": "A verification request was initiated by %",
   "verification_pending": "Cross-verification request pending",

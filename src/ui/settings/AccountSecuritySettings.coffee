@@ -3,6 +3,7 @@ import { ScrollView, Text, View } from "react-native"
 import { ActivityIndicator, Appbar, Button, Dialog, TextInput } from "react-native-paper"
 import PreferenceCategory from "../../components/preferences/PreferenceCategory"
 import Preference from "../../components/preferences/Preference"
+import { BottomSheet, BottomSheetItem } from "../../components/BottomSheet"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import ThemeContext from "../../theme"
@@ -24,6 +25,9 @@ export default AccountSecuritySettings = ({navigation}) ->
   [devices, setDevices] = useState null
   [deviceCryptoInfoMap, setDeviceCryptoInfoMap] = useState {}
   [devicesLoading, setDevicesLoading] = useState true
+
+  [showDeviceOptions, setShowDeviceOptions] = useState false
+  [selectedDevice, setSelectedDevice] = useState null
 
   useEffect ->
     unmounted = false
@@ -121,6 +125,11 @@ export default AccountSecuritySettings = ({navigation}) ->
                   }
                   title={device.display_name}
                   titleWeight={if device.device_id is sessionId then 'bold'}
+                  onPress={->
+                    unless showDeviceOptions
+                      setSelectedDevice device
+                      setShowDeviceOptions true
+                  }
                   summary={
                     "#{device.device_id}, #{device.last_seen_ip}\n#{new Date(device.last_seen_ts).toLocaleString()}"}/>
           }
@@ -130,6 +139,10 @@ export default AccountSecuritySettings = ({navigation}) ->
     <RestoreKeyBackupDialog
       visible={restoreDialogVisible}
       onDismiss={-> setRestoreDialogVisible false}/>
+    <DeviceOptionsSheet
+      device={selectedDevice}
+      show={showDeviceOptions}
+      onClose={-> setShowDeviceOptions false}/>
   </>
 
 # The dialog used for restoring backup
@@ -225,3 +238,20 @@ RestoreKeyBackupDialog = ({visible, onDismiss}) ->
       }
     </Dialog.Actions>
   </Dialog>
+
+# Bottom sheet for device operations
+DeviceOptionsSheet = ({show, device, onClose}) ->
+  <BottomSheet
+    show={show}
+    onClose={onClose}>
+    {
+      unless not device? or device.trusted
+        <BottomSheetItem
+          icon={"check"}
+          title={translate "settings_account_security_devices_verify"}/>
+    }
+    <BottomSheetItem
+      icon={"pencil"}
+      title={translate "settings_account_security_devices_rename"}/>
+  </BottomSheet>
+    
