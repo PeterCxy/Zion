@@ -10,6 +10,12 @@ SHEET_ITEM_ICON_SIZE = 24
 
 # A thin wrapper over RBSheet that adds a default height to the sheet
 # based on the number of children and the item height
+# Also adds a "show" property to allow controlling open / close
+# without using refs explicitly.
+# The "onClose" event will fire whenever the state changes to closed,
+# whether it's triggered by a prop change or user input.
+# However, it may fire multiple times when the state is changed
+# to closed programmatically.
 export BottomSheet = (_props) ->
   [theme, styles] = useStyles buildStyles
   props = Object.assign {}, _props
@@ -21,13 +27,15 @@ export BottomSheet = (_props) ->
   delete props.children
 
   refRBSheet = useRef null
-  # TODO: this logic somehow glitches when opening / closing rapidly
   useEffect ->
     return unless refRBSheet.current?
 
-    if _props.show
+    # Using the state of the RBSheet is pretty dirty, but
+    # we have to do this to avoid firing open() and close()
+    # repeatedly
+    if _props.show and not refRBSheet.current.state.modalVisible
       refRBSheet.current.open()
-    else
+    else if not _props.show and refRBSheet.current.state.modalVisible
       refRBSheet.current.close()
   , [_props.show]
 
