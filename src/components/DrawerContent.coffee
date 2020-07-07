@@ -139,8 +139,8 @@ buildStyles = (theme) ->
       flexDirection: "row"
       alignItems: "center"
     styleOptionIcon:
-      marginStart: 10
-      marginEnd: 10
+      marginStart: 20
+      marginEnd: 30
     styleOptionText:
       fontSize: 14
       color: theme.COLOR_TEXT_ON_BACKGROUND
