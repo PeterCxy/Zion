@@ -52,6 +52,10 @@ export default useSecretStorageKeyHandler = ->
 
   [component, getSecretStorageKey]
 
+# If the device has not been initialized with the key to the secret storage,
+# we prompt the user to provide the recovery passphrase or recovery keys
+# However this should be rarely needed since devices automatically
+# gain those keys when verified via cross-signing.
 SecretStorageKeyHandlerDialog = React.memo ({show, resolvePromise, rejectPromise}) ->
   [passphrase, setPassphrase] = useState ""
 
