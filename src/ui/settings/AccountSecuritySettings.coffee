@@ -159,9 +159,9 @@ RestoreKeyBackupDialog = ({visible, onDismiss}) ->
         res = await client.restoreKeyBackupWithCache undefined, undefined, backupInfo
       catch err
         try
+          # If there's none in cache, we try restoring from secret storage
           res = await client.restoreKeyBackupWithSecretStorage backupInfo
         catch err
-          console.log err
           setState RESTORE_STATE_FAIL
           return
       setResult res
