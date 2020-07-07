@@ -59,7 +59,7 @@
   "settings_account_security_backup_restore_dialog_content": "Press continue to restore keys backed up securely on the server",
   "settings_account_security_backup_restore_dialog_waiting": "Restoring key backup",
   "settings_account_security_backup_restore_dialog_success": "%a out of %b keys restored.",
-  "settings_account_security_backup_restore_dialog_fail": "Cannot restore key backup.",
+  "settings_account_security_backup_restore_dialog_fail": "Cannot restore key backup. Make sure you have set up cross-signing, the secret storage and key backup from Riot Web. You can also try verifying this device from another trusted session, which will grant it access to the backup automatically.",
   "settings_account_security_cryptography": "Cryptography",
   "settings_account_security_cryptography_session_id": "Session ID",
   "settings_account_security_cryptography_session_key": "Session Key",
