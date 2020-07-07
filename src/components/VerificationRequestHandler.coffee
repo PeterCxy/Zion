@@ -1,9 +1,13 @@
 import React, { useContext, useEffect, useMemo, useState, useRef } from "react"
+import EventEmitter from "react-native/Libraries/vendor/emitter/EventEmitter"
 import { Banner } from "react-native-paper"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
 import { verificationMethods } from "matrix-js-sdk/lib/crypto"
 import SASVerificationDialog from "./SASVerificationDialog"
+
+# Used for outgoing verification events
+export VerificationEventBus = new EventEmitter()
 
 # A component dedicated to handling verification requests
 export default VerificationRequestHandler = () ->
@@ -44,10 +48,21 @@ export default VerificationRequestHandler = () ->
         # We need to prompt the user to accept the verification
         # before it actually starts
         setPendingVerificationRequest request
+
+    onOutgoingVerification = (verifier) ->
+      if verifyingRef.current
+        console.log "rejecting verification because one is in progress"
+        verifier.cancel 'Already in progress'
+        return
+      verifyingRef.current = true
+      setVerifier verifier
+
     client.on 'crypto.verification.request', onVerificationRequest
+    VerificationEventBus.addListener 'outgoing', onOutgoingVerification
 
     return ->
       client.removeListener 'crypto.verification.request', onVerificationRequest
+      VerificationEventBus.removeListener 'outgoing', onOutgoingVerification
   , []
 
   bannerActions = useMemo ->

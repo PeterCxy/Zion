@@ -69,6 +69,7 @@
   "settings_account_security_devices_rename": "Rename",
   "verification_title": "Verification",
   "verification_start": "A verification request was initiated by %",
+  "verification_outgoing": "Press continue to begin verifying your device %",
   "verification_pending": "Cross-verification request pending",
   "verification_waiting": "Waiting for the other side...",
   "verification_match_prompt": "Compare the following emojis with the other side",

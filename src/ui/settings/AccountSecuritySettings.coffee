@@ -1,9 +1,11 @@
 import React, { useContext, useEffect, useState } from "react"
 import { ScrollView, Text, View } from "react-native"
 import { ActivityIndicator, Appbar, Button, Dialog, TextInput } from "react-native-paper"
+import { verificationMethods } from 'matrix-js-sdk/lib/crypto'
 import PreferenceCategory from "../../components/preferences/PreferenceCategory"
 import Preference from "../../components/preferences/Preference"
 import { BottomSheet, BottomSheetItem } from "../../components/BottomSheet"
+import { VerificationEventBus } from "../../components/VerificationRequestHandler"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import ThemeContext from "../../theme"
@@ -43,7 +45,7 @@ export default AccountSecuritySettings = ({navigation}) ->
         setBackupInfo _backupInfo
         setBackupLoading false
 
-    do ->
+    updateDevices = ->
       _devices = await client.getDevices()
       _devices = _devices?.devices?.map (device) ->
         Object.assign {}, device,
@@ -52,10 +54,19 @@ export default AccountSecuritySettings = ({navigation}) ->
         setDevices _devices
         setDevicesLoading false
 
+    updateDevices()
+
+    onDeviceVerificationChange = (userId) ->
+      return unless userId is client.getUserId()
+      updateDevices()
+
+    client.on 'deviceVerificationChanged', onDeviceVerificationChange
+
     return ->
       unmounted = true
 
       client.removeListener 'crypto.keyBackupStatus', onBackupEnabledStateChange
+      client.removeListener 'deviceVerificationChanged', onDeviceVerificationChange
   , []
 
   <>
@@ -241,6 +252,8 @@ RestoreKeyBackupDialog = ({visible, onDismiss}) ->
 
 # Bottom sheet for device operations
 DeviceOptionsSheet = ({show, device, onClose}) ->
+  client = useContext MatrixClientContext
+
   <BottomSheet
     show={show}
     onClose={onClose}>
@@ -248,7 +261,13 @@ DeviceOptionsSheet = ({show, device, onClose}) ->
       unless not device? or device.trusted
         <BottomSheetItem
           icon={"check"}
-          title={translate "settings_account_security_devices_verify"}/>
+          title={translate "settings_account_security_devices_verify"}
+          onPress={->
+            verifier = client.beginKeyVerification verificationMethods.SAS,
+              client.getUserId(), device.device_id
+            VerificationEventBus.emit 'outgoing', verifier
+            onClose()
+          }/>
     }
     <BottomSheetItem
       icon={"pencil"}

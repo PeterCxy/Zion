@@ -1,4 +1,4 @@
-import React, { useCallback, useEffect, useState } from "react"
+import React, { useCallback, useContext, useEffect, useState } from "react"
 import { Text, View } from "react-native"
 import { ActivityIndicator, Button, Dialog, Paragraph, Snackbar } from "react-native-paper"
 import { translate } from "../util/i18n"
@@ -33,7 +33,18 @@ renderCancelButton = (verifier, setPhase) ->
 renderDialogContentStart = (verifier, setPhase) ->
   <>
     <Dialog.Content>
-      <Paragraph>{translate "verification_start", verifier.userId}</Paragraph>
+      <Paragraph>
+        {
+          if verifier.initiatedByMe
+            # Outgoing
+            # (when the user clicks "verify" on the notification in Riot Web
+            #  after initially logging in, and then accepts on this side,
+            #  that also counts as an "outgoing" verification)
+            translate "verification_outgoing", verifier.deviceId
+          else
+            translate "verification_start", verifier.userId
+        }
+      </Paragraph>
     </Dialog.Content>
     <Dialog.Actions>
       {renderCancelButton verifier, setPhase}
