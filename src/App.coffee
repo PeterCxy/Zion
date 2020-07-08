@@ -11,6 +11,11 @@ import useSecretStorageKeyHandler from "./components/SecretStorageKeyHandler"
 import { reloadI18n } from "./util/i18n"
 import { createMatrixClient, MatrixClientContext } from "./util/client"
 
+# matrix-js-sdk uses console.error extensively
+# I don't want a red screen every time the sync
+# API returns 429 or something
+console.reportErrorsAsExceptions = false
+
 YellowBox.ignoreWarnings [
   # matrix-js-sdk sets long timers.
   # We need to sort this out at some point,
