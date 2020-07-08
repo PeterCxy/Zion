@@ -92,8 +92,17 @@ transformEvent = (client, ev, redacted, replaced, reactions) ->
   return ret
 
 redactedEvent = (ev) ->
-    type: 'msg_text'
-    body: translate 'room_msg_redacted'
+  evType = ev.getType()
+
+  if evType is 'm.room.message' or evType is 'm.sticker'
+      type: 'msg_text'
+      body: translate 'room_msg_redacted'
+  else
+    # If the original event was not something that shows
+    # as a message in the timeline, do not add more messages
+    # to the timeline.
+    # This can happen when the user redacts a reactions.
+    null
 
 messageEvent = (client, content) ->
   ret = {}
