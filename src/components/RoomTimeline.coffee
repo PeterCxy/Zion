@@ -237,6 +237,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   loadUntilLatest = useCallback (ignoreScrollPos = false) ->
     # If the user is scrolling back, tell the user that the latest position
     # must be jumped over using the button
+    # (reference: https://github.com/facebook/react-native/issues/25239
+    #  , basically, if we add new items to the head of the list,
+    #  React Native won't behave nicely for us)
     if (not ignoreScrollPos) and scrollPosRef.current != 0
       setHasNewerEvents true
       return Promise.resolve false
