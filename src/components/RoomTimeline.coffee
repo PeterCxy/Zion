@@ -13,13 +13,14 @@ import * as util from "../util/util"
 transformEvents = (client, events) ->
   redacted = []
   replaced = {}
+  reactions = {}
 
   events
     # The FlatList itself has been inverted, so we have to invert again
     # Also, this allows us to see redaction / edits before the actual event
     .reverse()
     .map (ev, idx, array) ->
-      res = transformEvent client, ev, redacted, replaced
+      res = transformEvent client, ev, redacted, replaced, reactions
       # Some events themselves do not need to be shown, like redactions
       return null if not res?
       Object.assign {}, res,
@@ -38,7 +39,7 @@ transformEvents = (client, events) ->
     # see membership handling in matrix.coffee for details
     .filter (ev) -> ev.type isnt 'room_state' or (ev.body? and ev.body isnt "")
 
-transformEvent = (client, ev, redacted, replaced) ->
+transformEvent = (client, ev, redacted, replaced, reactions) ->
   if ev.getId() in redacted
     return redactedEvent ev
 
@@ -58,18 +59,37 @@ transformEvent = (client, ev, redacted, replaced) ->
       newContent: content['m.new_content']
     return null
 
-  switch ev.getType()
+  ret = switch ev.getType()
     when "m.room.message" then messageEvent client, content
     when "m.sticker" then stickerEvent client, content
     when "m.room.encrypted" then encryptedEvent ev
     when "m.room.redaction"
       redacted.push ev.getAssociatedId()
       null
+    when "m.reaction"
+      # Record reaction to a message
+      # The original message always comes later (because we process in reverse order)
+      reactedTo = ev.getAssociatedId()
+      reactionKey = ev.getContent()["m.relates_to"]["key"] # The emoji of the reaction
+      if not reactions[reactedTo]?
+        reactions[reactedTo] = {}
+      if not reactions[reactedTo][reactionKey]?
+        reactions[reactedTo][reactionKey] = 0
+      reactions[reactedTo][reactionKey] += 1
+      null
     else
       if mext.isStateEvent ev
         stateEvent ev
       else
         unknownEvent ev
+
+  # Handle reactions to the current message
+  # Since we process in reverse order, we always collect
+  # all reactions before the original message
+  if reactions[ev.getId()]?
+    ret.reactions = reactions[ev.getId()]
+
+  return ret
 
 redactedEvent = (ev) ->
     type: 'msg_text'

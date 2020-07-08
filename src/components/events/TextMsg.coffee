@@ -76,6 +76,19 @@ export default TextMsg = ({ev}) ->
             baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
       }
       {
+        if ev.reactions?
+          <View style={styles.styleReactionWrapper}>
+            {
+              Object.entries(ev.reactions).map ([key, value]) ->
+                <Text
+                  style={if ev.self then styles.styleReactionReverse else styles.styleReaction}
+                  key={key}>
+                  {key} {value}
+                </Text>
+            }
+          </View>
+      }
+      {
         if ev.edited
           <Text
             style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
@@ -139,6 +152,18 @@ buildStyles = (theme) ->
     styleCodeText:
       fontFamily: 'monospace'
       color: theme.COLOR_CHAT_INLINE_CODE
+    styleReactionWrapper:
+      width: '100%'
+      flexDirection: 'row'
+      flexWrap: 'wrap'
+    styleReaction:
+      marginTop: 5
+      marginBottom: 5
+      marginEnd: 5
+      fontSize: 12
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleReactionReverse:
+      color: theme.COLOR_TEXT_PRIMARY
 
   styles.styleMsgBubbleReverse =
     Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
@@ -146,5 +171,7 @@ buildStyles = (theme) ->
     Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
   styles.styleMsgTimeReverse =
     Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
+  styles.styleReactionReverse =
+    Object.assign {}, styles.styleReaction, styles.styleReactionReverse
 
   styles
