@@ -53,7 +53,9 @@ export default Avatar = ({name, url, placeholder, dataRef, style}) ->
 
   if not dataURL and not placeholder
     <Animated.View style={Object.assign {}, styles.styleTextBackground, style, { opacity: fadeAnim }}>
-      <Text style={styles.styleText}>{extractCapitals name}</Text>
+      <Text style={Object.assign {}, styles.styleText, { fontSize: style.height * 0.3 }}>
+        {extractCapitals name}
+      </Text>
     </Animated.View>
   else
     <Animated.Image
