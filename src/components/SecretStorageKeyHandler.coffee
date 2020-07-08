@@ -2,12 +2,12 @@ import React, { useCallback, useState } from "react"
 import { Button, Dialog, TextInput } from "react-native-paper"
 import { translate } from "../util/i18n"
 import { deriveSecretStorageKey } from "../util/NativeCrypto"
+import { useInvokeDialogForResult } from "../util/util"
 
 # Returns [UIComponent, getSecretStorageKey]
 export default useSecretStorageKeyHandler = ->
-  [resolvePromise, setResolvePromise] = useState null
-  [rejectPromise, setRejectPromise] = useState null
-  [show, setShow] = useState false
+  [renderedComponent, invokeDialogForResult] =
+    useInvokeDialogForResult SecretStorageKeyHandlerDialog
 
   # Adapted from: matrix-react-sdk/src/CrossSigningManager.js
   getSecretStorageKey = useCallback ({keys}) ->
@@ -17,40 +17,13 @@ export default useSecretStorageKeyHandler = ->
     [name, info] = keyInfoEntries[0]
     # Create a promise and delegate everything to the SecretStorageKeyHandler
     # TODO: implement recovery key support?
-    passphrase = await new Promise (resolve, reject) ->
-      setResolvePromise (orig) ->
-        if orig?
-          reject "Cannot handle multiple simultaneous requests" 
-          return orig
-
-        (res) ->
-          setShow false
-          setRejectPromise null
-          setResolvePromise null
-          resolve res
-      setRejectPromise (orig) ->
-        if orig?
-          reject "Cannot handle multiple simultaneous requests" 
-          return orig
-
-        (err) ->
-          setShow false
-          setRejectPromise null
-          setResolvePromise null
-          reject err
-      setShow true
-    
-    key = await deriveSecretStorageKey passphrase, info.passphrase.salt, info.passphrase.iterations
+    passphrase = await invokeDialogForResult()
+    key = await deriveSecretStorageKey passphrase,
+      info.passphrase.salt, info.passphrase.iterations
     [name, key]
   , []
 
-  component =
-    <SecretStorageKeyHandlerDialog
-      show={show}
-      resolvePromise={resolvePromise}
-      rejectPromise={rejectPromise}/>
-
-  [component, getSecretStorageKey]
+  [renderedComponent, getSecretStorageKey]
 
 # If the device has not been initialized with the key to the secret storage,
 # we prompt the user to provide the recovery passphrase or recovery keys
