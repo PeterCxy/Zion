@@ -70,6 +70,20 @@ RoomComponent = React.memo ({theme, styles, item}) ->
       <View style={styles.styleTextContainer}>
         <Text numberOfLines={1} style={styles.styleTextTitle}>{item.name}</Text>
         <Text numberOfLines={1} style={styles.styleTextSummary}>{item.summary}</Text>
+        <Text numberOfLines={1} style={styles.styleTextTime}>
+          {
+            if new Date().getTime() - item.timestamp < 24 * 60 * 60 * 1000
+              # Show time (HH:MM) if the latest message is within 24 hours
+              util.formatTime new Date item.timestamp
+            else
+              # Show date if the latest message is more than a day ago
+              new Date(item.timestamp).toLocaleDateString undefined,
+                weekday: 'short'
+                year: 'numeric'
+                month: 'short'
+                day: 'numeric'
+          }
+        </Text>
       </View>
     </View>
   </TouchableRipple>
@@ -115,6 +129,7 @@ buildStyles = (theme) ->
       flex: 1
       flexDirection: "row"
       alignSelf: "stretch"
+      alignItems: "center"
       borderBottomWidth: 1 / PixelRatio.get()
       borderBottomColor: theme.COLOR_ROOM_LIST_DIVIDER
     styleRoomAvatarWrapper:
@@ -139,5 +154,9 @@ buildStyles = (theme) ->
       color: theme.COLOR_TEXT_ON_BACKGROUND
     styleTextSummary:
       fontSize: 14
+      marginTop: 8
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleTextTime:
+      fontSize: 13
       marginTop: 8
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND

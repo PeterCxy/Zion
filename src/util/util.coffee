@@ -1,4 +1,5 @@
 import { InteractionManager } from "react-native"
+import { translate } from "./i18n"
 
 # From react-native-paper
 export DEFAULT_APPBAR_HEIGHT = 56
@@ -26,3 +27,9 @@ export asyncRunAfterInteractions = (callback) ->
         resolve callback()
       catch err
         reject err
+
+# Format time according to what is defined in the current locale
+export formatTime = (date) ->
+  translate "time_format_hour_minute",
+    ('' + date.getHours()).padStart(2, '0'),
+    ('' + date.getMinutes()).padStart(2, '0')

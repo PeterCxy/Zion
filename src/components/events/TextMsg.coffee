@@ -5,6 +5,7 @@ import linkifyStr from 'linkifyjs/string'
 import HTML from "react-native-render-html"
 import { useStyles } from "../../theme"
 import { translate } from "../../util/i18n"
+import * as util from "../../util/util"
 
 htmlRenderers =
   blockquote: (_, children, __, passProps) ->
@@ -83,9 +84,7 @@ export default TextMsg = ({ev}) ->
       }
       <Text
         style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
-        {translate "time_format_hour_minute",
-          ('' + date.getHours()).padStart(2, '0'),
-          ('' + date.getMinutes()).padStart(2, '0')}
+        {util.formatTime date}
       </Text>
     </View>
   </View>
