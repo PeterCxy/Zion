@@ -1,4 +1,4 @@
-import React, { useCallback, useState } from "react"
+import React, { useCallback, useEffect, useState } from "react"
 import { Button, Dialog, TextInput } from "react-native-paper"
 import { translate } from "../util/i18n"
 import { deriveSecretStorageKey } from "../util/NativeCrypto"
@@ -32,6 +32,11 @@ export default useSecretStorageKeyHandler = ->
 SecretStorageKeyHandlerDialog = React.memo ({show, resolvePromise, rejectPromise}) ->
   [passphrase, setPassphrase] = useState ""
 
+  # Reset passphrase each time the dialog is re-created
+  useEffect ->
+    setPassphrase ""
+  , [show]
+
   <Dialog
     visible={show}
     onDismiss={-> rejectPromise "dismissed"}>
@@ -43,6 +48,7 @@ SecretStorageKeyHandlerDialog = React.memo ({show, resolvePromise, rejectPromise
         mode="outlined"
         secureTextEntry={true}
         label={translate "secret_storage_key_access_input"}
+        value={passphrase}
         onChangeText={(text) -> setPassphrase text}/>
     </Dialog.Content>
     <Dialog.Actions>
