@@ -45,6 +45,7 @@ buildStyles = (theme) ->
     styleWrapperInner:
       width: '100%'
       flexDirection: 'column'
+      paddingRight: constants.PREF_CONTENT_MARGIN
     styleIconTitleWrapper:
       width: '100%'
       flexDirection: 'row'
