@@ -21,7 +21,7 @@ export default useSecretStorageKeyHandler = ->
       setResolvePromise (orig) ->
         if orig?
           reject "Cannot handle multiple simultaneous requests" 
-          return
+          return orig
 
         (res) ->
           setShow false
@@ -31,7 +31,7 @@ export default useSecretStorageKeyHandler = ->
       setRejectPromise (orig) ->
         if orig?
           reject "Cannot handle multiple simultaneous requests" 
-          return
+          return orig
 
         (err) ->
           setShow false
