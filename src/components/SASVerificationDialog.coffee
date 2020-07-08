@@ -9,6 +9,14 @@ PHASE_START = 0
 PHASE_SHOW_SAS = 1
 PHASE_FINISHED = 2
 
+doVerify = (verifier, setPhase) ->
+  setPhase PHASE_WAITING
+  try
+    await verifier.verify()
+    setPhase PHASE_FINISHED
+  catch err
+    setPhase PHASE_CANCELLED
+
 renderCancelled = (onDismiss) ->
   <Snackbar
     visible={true}
@@ -49,14 +57,7 @@ renderDialogContentStart = (verifier, setPhase) ->
     <Dialog.Actions>
       {renderCancelButton verifier, setPhase}
       <Button
-        onPress={->
-          setPhase PHASE_WAITING
-          try
-            await verifier.verify()
-            setPhase PHASE_FINISHED
-          catch err
-            setPhase PHASE_CANCELLED
-        }>
+        onPress={-> doVerify verifier, setPhase}>
         {translate "continue"}
       </Button>
     </Dialog.Actions>
@@ -135,7 +136,7 @@ renderDialogContentFinished = (onDismiss) ->
     </Dialog.Actions>
   </>
 
-export default SASVerificationDialog = ({verifier, onDismiss}) ->
+export default SASVerificationDialog = ({verifier, isAcceptedPendingRequest, onDismiss}) ->
   [phase, setPhase] = useState PHASE_START
   [sasEv, setSasEv] = useState null
 
@@ -151,6 +152,14 @@ export default SASVerificationDialog = ({verifier, onDismiss}) ->
 
     verifier.on 'cancel', onCancel
     verifier.on 'show_sas', onShowSas
+
+    if isAcceptedPendingRequest
+      # If this verifier was created by accepting a pending request,
+      # start verification right away to make sure WE are always the side
+      # that initiates the verification
+      # See VerificationRequestHandler for details
+      do ->
+        doVerify verifier, setPhase
 
     return ->
       verifier.removeListener 'cancel', onCancel

@@ -19,6 +19,22 @@ export default VerificationRequestHandler = () ->
 
   [verifier, setVerifier] = useState null
   [pendingVerificationRequest, setPendingVerificationRequest] = useState null
+  # For accepted pending requests, we should start verification immediately
+  # to prevent the other client from initiating another verification on its own
+  # because the verifier in this case is "initiated" by us, not the other side
+  # TODO: we should probably implement this the Riot way, i.e. show an UI for
+  #       choosing which method to use, only initiating the verifier after
+  #       the choice; if the other side chooses a verifier before us, use that
+  #       instead (we can listen on the `change` event of the pending request).
+  #       However, that will introduce a lot of complication in our code.
+  #       For now, let's just always make sure WE are the side that initiates
+  #       the verifier by not accepting the pending request until the point where
+  #       we can create the verifier right away.
+  #       And since Zion currently never sends a "pending" verification request,
+  #       so this case won't happen between two Zion clients. If we were to do
+  #       the same thing as Riot in the future, we will need to re-implement this
+  #       the Riot way.
+  [isAcceptedPendingRequest, setIsAcceptedPendingRequest] = useState false
 
   useEffect ->
     onVerificationRequest = (request) ->
@@ -78,6 +94,7 @@ export default VerificationRequestHandler = () ->
           await pendingVerificationRequest.accept()
           verifier =
             pendingVerificationRequest.beginKeyVerification verificationMethods.SAS
+          setIsAcceptedPendingRequest true
           setVerifier verifier
           setPendingVerificationRequest null
     ]
@@ -93,7 +110,9 @@ export default VerificationRequestHandler = () ->
       if verifier
         <SASVerificationDialog
           verifier={verifier}
+          isAcceptedPendingRequest={isAcceptedPendingRequest}
           onDismiss={->
+            setIsAcceptedPendingRequest false
             setVerifier null
             verifyingRef.current = false
           }/>
