@@ -49,6 +49,8 @@ export eventToDescription = (ev) ->
     when 'm.room.encrypted'
       translate "room_event_message", ev.sender.name,
         translate "room_msg_encrypted_placeholder"
+    when 'm.room.redaction'
+      translate "room_event_message_redacted", ev.sender.name
     when 'm.reaction'
       translate "room_event_message", ev.sender.name, ev.getContent()["m.relates_to"]["key"]
     when 'm.room.create'
