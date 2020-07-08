@@ -206,10 +206,38 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
     loadingChangeRef.current newValue
   , []
 
+  # Because we cannot proceed the TimelineWindow forwards when the user scrolls back,
+  # (due to an inherent limitation of FlatList of React Native)
+  # we cannot receive redactions / reactions either unless the list
+  # stays at scroll position 0.
+  # This is a terrible experience. However since redactions and reactions
+  # do not show up as separate items in the list, only adding them would
+  # not result in any trouble
+  # Therefore we keep a separate list of new redaction / reaction events
+  # when the user is scrolling back and app. When a new redaction / reaction
+  # is received, it is appended to this list, and when rendering, they are
+  # appended to the usual event list as normal events.
+  # We make this a mutable Ref to simplify the code handling this, and to avoid
+  # worrying about state inconsistencies.
+  # We also use a map from id to event to facilitate deduplication
+  liveMessageStateEventsRef = useRef {}
+
   # Callback to update events
   updateEvents = useCallback ->
+    events = getTlWindow().getEvents()
+
+    # Deduplicate the temporary live state events list
+    # because if an event is available from the TimelineWindow,
+    # then the user must have scrolled to the latest timeline at
+    # some point
+    for ev in events
+      if liveMessageStateEventsRef.current[ev.getId()]?
+        delete liveMessageStateEventsRef.current[ev.getId()]
+
+    liveEvents = Object.values liveMessageStateEventsRef.current
+
     setEvents transformEvents client,
-      [...getTlWindow().getEvents(), ...client.getRoom(roomId).getPendingEvents()]
+      [...events, ...liveEvents, ...client.getRoom(roomId).getPendingEvents()]
   , []
 
   # Initialize the timeline window
@@ -276,9 +304,17 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
   useEffect ->
     return if not initialized
 
-    onTimelineUpdate = (_, room) ->
+    onTimelineUpdate = (ev, room, toStartOfTimeline, removed, {liveEvent}) ->
       return if not room or room.roomId != roomId
-      loadUntilLatest()
+      unless await loadUntilLatest()
+        # If the user is scrolling back, as described above,
+        # we have to keep a separate list of new message state events
+        # (redactions and reactions etc.)
+        # so that these will be reflected in the timeline
+        evType = ev.getType()
+        return unless liveEvent and (evType is "m.reaction" or evType is "m.room.redaction")
+        liveMessageStateEventsRef.current[ev.getId()] = ev
+        updateEvents()
 
     onEventDecrypted = (ev) ->
       return if roomId != ev.getRoomId()
