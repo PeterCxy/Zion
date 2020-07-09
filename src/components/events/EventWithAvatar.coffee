@@ -21,7 +21,7 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
         performHapticFeedback()
         onMessageSelected ev if onMessageSelected?
       }>
-      <View>
+      <View style={if ev.self then styles.styleChildWrapperReverse else styles.styleChildWrapper}>
       {
         switch ev.type
           when 'msg_text', 'msg_html'
@@ -45,8 +45,16 @@ buildStyles = (theme) ->
     styleMsgAvatarReverse:
       marginStart: 10
       marginEnd: 0
+    styleChildWrapper:
+      flex: 1
+      alignSelf: 'stretch'
+      flexDirection: 'row'
+    styleChildWrapperReverse:
+      flexDirection: 'row-reverse'
 
   ret.styleMsgAvatarReverse =
     Object.assign {}, ret.styleMsgAvatar, ret.styleMsgAvatarReverse
+  ret.styleChildWrapperReverse =
+    Object.assign {}, ret.styleChildWrapper, ret.styleChildWrapperReverse
 
   ret
