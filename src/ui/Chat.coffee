@@ -7,6 +7,7 @@ import AvatarBadgeWrapper from "../components/AvatarBadgeWrapper"
 import { BottomSheet, BottomSheetItem } from "../components/BottomSheet"
 import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
+import { useEmojiPicker } from "../components/EmojiPicker"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
@@ -37,6 +38,8 @@ export default Chat = ({route, navigation}) ->
   # the selectedMsg should be a transformed event as defined in
   # ../util/timeline.coffee
   [selectedMsg, setSelectedMsg] = useState null
+
+  [emojiPickerComponent, invokeEmojiPicker] = useEmojiPicker()
 
   # Listen to room name updates
   # TODO: also implement room avatar / encrypted state updates?
@@ -110,8 +113,10 @@ export default Chat = ({route, navigation}) ->
       roomId={roomId}/>
     <MessageOpsMenu
       onDismiss={-> setSelectedMsg null}
+      invokeEmojiPicker={invokeEmojiPicker}
       show={selectedMsg?}
       msg={selectedMsg}/>
+    {emojiPickerComponent}
   </>
 
 Chat.sharedElements = (route, otherRoute, showing) ->
@@ -120,7 +125,7 @@ Chat.sharedElements = (route, otherRoute, showing) ->
   if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
 
-MessageOpsMenu = ({show, msg, onDismiss}) ->
+MessageOpsMenu = ({show, msg, invokeEmojiPicker, onDismiss}) ->
   <BottomSheet
     title={translate "msg_ops"}
     show={show}
@@ -133,7 +138,15 @@ MessageOpsMenu = ({show, msg, onDismiss}) ->
         # Only allow reactions for text messages
         <BottomSheetItem
           icon="emoticon"
-          title={translate "msg_ops_reaction"}/>
+          title={translate "msg_ops_reaction"}
+          onPress={->
+            onDismiss()
+            try
+              emoji = await invokeEmojiPicker()
+            catch err
+              # Cancelled, just ignore
+              console.log "emoji picker was cancelled"
+          }/>
     }
   </BottomSheet>
 

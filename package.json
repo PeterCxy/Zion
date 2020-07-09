@@ -14,6 +14,7 @@
   "dependencies": {
     "@react-native-community/async-storage": "^1.11.0",
     "@react-native-community/masked-view": "^0.1.10",
+    "@react-native-community/viewpager": "^4.0.1",
     "@react-navigation/drawer": "^5.8.4",
     "@react-navigation/native": "^5.5.1",
     "@react-navigation/stack": "^5.5.1",
@@ -28,6 +29,7 @@
     "node-libs-react-native": "^1.2.0",
     "react": "16.11.0",
     "react-native": "0.62.2",
+    "react-native-emoji-board": "^1.2.1",
     "react-native-fs": "^2.16.6",
     "react-native-gesture-handler": "^1.6.1",
     "react-native-image-zoom-viewer": "^3.0.1",
