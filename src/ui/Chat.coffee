@@ -122,6 +122,7 @@ Chat.sharedElements = (route, otherRoute, showing) ->
 
 MessageOpsMenu = ({show, msg, onDismiss}) ->
   <BottomSheet
+    title={translate "msg_ops"}
     show={show}
     onClose={onDismiss}>
     <BottomSheetItem

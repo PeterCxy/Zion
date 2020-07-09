@@ -255,6 +255,7 @@ DeviceOptionsSheet = ({show, device, onClose}) ->
   client = useContext MatrixClientContext
 
   <BottomSheet
+    title={translate "settings_account_security_devices_ops"}
     show={show}
     onClose={onClose}>
     {

@@ -6,6 +6,7 @@ import { useStyles } from "../theme"
 import RBSheet from "react-native-raw-bottom-sheet"
 
 SHEET_ITEM_HEIGHT = 48
+SHEET_TITLE_HEIGHT = 48
 SHEET_ITEM_ICON_SIZE = 24
 
 # A thin wrapper over RBSheet that adds a default height to the sheet
@@ -21,6 +22,8 @@ export BottomSheet = (_props) ->
   props = Object.assign {}, _props
   if not props.height?
     props.height = SHEET_ITEM_HEIGHT * React.Children.toArray(props.children).length
+  if props.title?
+    props.height += SHEET_TITLE_HEIGHT
   props.customStyles =
     container:
       backgroundColor: theme.COLOR_BACKGROUND
@@ -43,6 +46,12 @@ export BottomSheet = (_props) ->
     ref={refRBSheet}
     {...props}>
     <View style={styles.styleItemsWrapper}>
+      {
+        if props.title?
+          <View style={styles.styleTitle}>
+            <Text style={styles.styleTitleText}>{props.title}</Text>
+          </View>
+      }
       {_props.children}
     </View>
   </RBSheet>
@@ -84,3 +93,12 @@ buildStyles = (theme) ->
     styleItemText:
       fontSize: 14
       color: theme.COLOR_TEXT_ON_BACKGROUND
+    styleTitle:
+      paddingStart: 20
+      height: SHEET_TITLE_HEIGHT
+      flexDirection: 'row'
+      alignItems: 'center'
+    styleTitleText:
+      fontSize: 14
+      fontWeight: 'bold'
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
