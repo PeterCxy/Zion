@@ -165,6 +165,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, onMessageSelected, style, fo
         # (redactions and reactions etc.)
         # so that these will be reflected in the timeline
         evType = ev.getType()
+        # Although redaction is now handled by matrix-js-sdk, we still need to force
+        # an update here because the updated state cannot automatically manifest
+        # in the FlatList
         return unless liveEvent and (evType is "m.reaction" or evType is "m.room.redaction")
         liveMessageStateEventsRef.current[ev.getId()] = ev
         updateEvents()
