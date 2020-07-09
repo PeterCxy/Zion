@@ -11,7 +11,6 @@ import { translate } from './i18n'
 # i.e. the newest events are at lower indices.
 # This function is splitted out from RoomTimeline
 export transformEvents = (client, events) ->
-  redacted = []
   replaced = {}
   reactions = {}
 
@@ -20,7 +19,7 @@ export transformEvents = (client, events) ->
     # Also, this allows us to see redaction / edits before the actual event
     .reverse()
     .map (ev, idx, array) ->
-      res = transformEvent client, ev, redacted, replaced, reactions
+      res = transformEvent client, ev, replaced, reactions
       # Some events themselves do not need to be shown, like redactions
       return null if not res?
       Object.assign {}, res,
@@ -39,8 +38,8 @@ export transformEvents = (client, events) ->
     # see membership handling in matrix.coffee for details
     .filter (ev) -> ev.type isnt 'room_state' or (ev.body? and ev.body isnt "")
 
-transformEvent = (client, ev, redacted, replaced, reactions) ->
-  if ev.getId() in redacted
+transformEvent = (client, ev, replaced, reactions) ->
+  if ev.isRedacted()
     return redactedEvent ev
 
   content = ev.getContent()
@@ -64,7 +63,7 @@ transformEvent = (client, ev, redacted, replaced, reactions) ->
     when "m.sticker" then stickerEvent client, content
     when "m.room.encrypted" then encryptedEvent ev
     when "m.room.redaction"
-      redacted.push ev.getAssociatedId()
+      # Handled by matrix-js-sdk, we just need to ignore these
       null
     when "m.reaction"
       # Record reaction to a message
