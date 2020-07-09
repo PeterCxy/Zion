@@ -4,6 +4,7 @@ import { NavigationContainer, DefaultTheme as NavDefTheme } from "@react-navigat
 import { createDrawerNavigator } from '@react-navigation/drawer'
 import { createSharedElementStackNavigator } from 'react-navigation-shared-element'
 import changeNavigationBarColor from "react-native-navigation-bar-color"
+import { EventStatus } from "matrix-js-sdk"
 import DrawerContent from "../components/DrawerContent"
 import StatusBarColor from "../components/StatusBarColor"
 import HomeRoomList from "./HomeRoomList"
@@ -14,6 +15,7 @@ import Settings from "./Settings"
 import buildSettingsScreens from "./settings"
 import VerificationRequestHandler from "../components/VerificationRequestHandler" 
 import ThemeContext from "../theme"
+import { MatrixClientContext } from "../util/client"
 
 Drawer = createDrawerNavigator()
 Stack = createSharedElementStackNavigator()
@@ -49,6 +51,30 @@ export default Home = () ->
 
 HomeInner = (props) ->
   {theme} = useContext ThemeContext
+  client = useContext MatrixClientContext
+
+  # Some global event logic
+  # we do it here because they are "global"
+  useEffect ->
+    # Cancel all redaction and reactions automatically
+    # if they were ever to fail.
+    # These events do not have their own standalone entries,
+    # and they are reflected in the state of some previous event.
+    # If we don't cancel them, the user won't know that the operation
+    # had failed, which is not a wise choise to make
+    onPendingStateChange = (ev) ->
+      evType = ev.getType()
+      return unless evType is 'm.room.redaction' or evType is 'm.reaction'
+      return unless ev.status is EventStatus.NOT_SENT
+
+      client.cancelPendingEvent ev
+
+    client.on 'Room.localEchoUpdated', onPendingStateChange
+
+    return ->
+      client.removeListener 'Room.localEchoUpdated', onPendingStateChange
+  , []
+
   <View style={styleWrapper}>
     <StatusBarColor
       backgroundColor={theme.COLOR_PRIMARY}/>
