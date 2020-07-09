@@ -153,7 +153,7 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
           }/>
     }
     {
-      if msg?.sender.id is client.getUserId()
+      if msg?.self
         # Only allow redacting messages from self
         <BottomSheetItem
           icon="delete"

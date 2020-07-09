@@ -27,7 +27,6 @@ export transformEvents = (client, events) ->
         ts: ev.getTs()
         prev_ts: array[idx - 1]?.getTs()
         sender:
-          id: ev.sender.userId
           name: ev.sender.name
           avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
           tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
