@@ -1,5 +1,5 @@
 import React, { useCallback, useState } from "react"
-import { InteractionManager } from "react-native"
+import { InteractionManager, Vibration } from "react-native"
 import { translate } from "./i18n"
 
 # From react-native-paper
@@ -28,6 +28,12 @@ export asyncRunAfterInteractions = (callback) ->
         resolve callback()
       catch err
         reject err
+
+# Perform a long-press haptic feedback
+# TODO: maybe improve on this haptic feedback pattern
+#       (e.g. use the one from Pixels?)
+export performHapticFeedback = ->
+  Vibration.vibrate 20
 
 # Format time according to what is defined in the current locale
 export formatTime = (date) ->

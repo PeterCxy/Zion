@@ -1,12 +1,14 @@
 import React from "react"
+import { TouchableWithoutFeedback, View } from "react-native"
 import Avatar from "../Avatar"
 import TextMsg from "./TextMsg"
 import Sticker from "./Sticker"
 import Image from "./Image"
 import { useStyles } from "../../theme"
+import { performHapticFeedback } from "../../util/util"
 
 # An event that needs to show an avatar (normal-sized)
-export default EventWithAvatar = ({ev}) ->
+export default EventWithAvatar = ({ev, onMessageSelected}) ->
   [theme, styles] = useStyles buildStyles
 
   <>
@@ -14,15 +16,23 @@ export default EventWithAvatar = ({ev}) ->
       style={if ev.self then styles.styleMsgAvatarReverse else styles.styleMsgAvatar}
       name={ev.sender.name}
       url={ev.sender.avatar}/>
-    {
-      switch ev.type
-        when 'msg_text', 'msg_html'
-          <TextMsg ev={ev}/>
-        when 'msg_sticker'
-          <Sticker ev={ev}/>
-        when 'msg_image'
-          <Image ev={ev}/>
-    }
+    <TouchableWithoutFeedback
+      onLongPress={->
+        performHapticFeedback()
+        onMessageSelected ev if onMessageSelected?
+      }>
+      <View>
+      {
+        switch ev.type
+          when 'msg_text', 'msg_html'
+            <TextMsg ev={ev}/>
+          when 'msg_sticker'
+            <Sticker ev={ev}/>
+          when 'msg_image'
+            <Image ev={ev}/>
+      }
+      </View>
+    </TouchableWithoutFeedback>
   </>
 
 buildStyles = (theme) ->

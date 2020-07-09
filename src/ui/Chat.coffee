@@ -4,6 +4,7 @@ import { Appbar, ProgressBar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import Avatar from "../components/Avatar"
 import AvatarBadgeWrapper from "../components/AvatarBadgeWrapper"
+import { BottomSheet, BottomSheetItem } from "../components/BottomSheet"
 import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
 import { useStyles } from "../theme"
@@ -31,6 +32,11 @@ export default Chat = ({route, navigation}) ->
   [isEncrypted, setIsEncrypted] = useState -> client.isRoomEncrypted roomId
   [loading, setLoading] = useState true
   [hasUntrustedDevice, setHasUntrustedDevice] = useState false
+
+  # Operations available when the menu is triggered by long-clicking
+  # the selectedMsg should be a transformed event as defined in
+  # ../util/timeline.coffee
+  [selectedMsg, setSelectedMsg] = useState null
 
   # Listen to room name updates
   # TODO: also implement room avatar / encrypted state updates?
@@ -92,6 +98,7 @@ export default Chat = ({route, navigation}) ->
       <RoomTimeline
         style={styles.styleTimeline}
         roomId={roomId}
+        onMessageSelected={(msg) -> setSelectedMsg msg}
         onLoadingStateChange={setLoading}/>
       <ProgressBar
         style={styles.styleProgress}
@@ -101,6 +108,10 @@ export default Chat = ({route, navigation}) ->
     </View>
     <MessageComposer
       roomId={roomId}/>
+    <MessageOpsMenu
+      onDismiss={-> setSelectedMsg null}
+      show={selectedMsg?}
+      msg={selectedMsg}/>
   </>
 
 Chat.sharedElements = (route, otherRoute, showing) ->
@@ -108,6 +119,22 @@ Chat.sharedElements = (route, otherRoute, showing) ->
   # (because we don't share the avatar with ImageViewerScreen)
   if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
+
+MessageOpsMenu = ({show, msg, onDismiss}) ->
+  <BottomSheet
+    show={show}
+    onClose={onDismiss}>
+    <BottomSheetItem
+      icon="reply"
+      title={translate "msg_ops_reply"}/>
+    {
+      if msg?.type is 'msg_text' or msg?.type is 'msg_html'
+        # Only allow reactions for text messages
+        <BottomSheetItem
+          icon="emoticon"
+          title={translate "msg_ops_reaction"}/>
+    }
+  </BottomSheet>
 
 buildStyles = (theme) ->
     styleContentWrapper:

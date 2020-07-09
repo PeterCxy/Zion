@@ -19,7 +19,7 @@ export default RoomTimeline = (props) ->
     forceReload={-> setKey key + 1}
     {...props}/>
 
-RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
+RoomTimelineInner = ({roomId, onLoadingStateChange, onMessageSelected, style, forceReload}) ->
   client = useContext MatrixClientContext
 
   # Record the current onLoadingStateChange callback
@@ -233,7 +233,7 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, style, forceReload}) ->
       onEndReached={onEndReached}
       onEndReachedThreshold={1}
       onScroll={onScroll}
-      renderItem={(data) -> <EventComponent ev={data.item}/>}/>
+      renderItem={(data) -> <EventComponent ev={data.item} onMessageSelected={onMessageSelected}/>}/>
     <FAB
       style={{
         position: 'absolute',

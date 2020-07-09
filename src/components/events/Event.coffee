@@ -8,7 +8,7 @@ import { useStyles } from "../../theme"
 
 # Dispatcher of event rendering in room timeline
 # Every concrete types of events will be implemented by a sub-component
-export default Event = React.memo ({ev}) ->
+export default Event = React.memo ({ev, onMessageSelected}) ->
   [theme, styles] = useStyles buildStyles
 
   wrapperStyle = if ev.self
@@ -25,7 +25,7 @@ export default Event = React.memo ({ev}) ->
       {
         switch ev.type
           when 'msg_text', 'msg_html', 'msg_sticker', 'msg_image'
-            <EventWithAvatar ev={ev}/>
+            <EventWithAvatar ev={ev} onMessageSelected={onMessageSelected}/>
           when 'room_state'
             <RoomState ev={ev}/>
           else
