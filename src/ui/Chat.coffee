@@ -152,6 +152,21 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
               console.log "emoji picker was cancelled or failed to send reaction"
           }/>
     }
+    {
+      if msg?.sender.id is client.getUserId()
+        # Only allow redacting messages from self
+        <BottomSheetItem
+          icon="delete"
+          title={translate "msg_ops_redact"}
+          onPress={->
+            onDismiss()
+            try
+              await mext.sendRedaction client, roomId, msg.key
+            catch err
+              console.log "Failed to redact event, error:"
+              console.log err
+          }/>
+    }
   </BottomSheet>
 
 buildStyles = (theme) ->

@@ -124,3 +124,6 @@ export sendReaction = (client, roomId, origId, emoji) ->
       'event_id': origId
       'key': emoji
       'rel_type': 'm.annotation'
+
+export sendRedaction = (client, roomId, origId) ->
+  client.redactEvent roomId, origId
