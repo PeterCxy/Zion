@@ -95,6 +95,7 @@ redactedEvent = (ev) ->
 
   if evType is 'm.room.message' or evType is 'm.sticker'
       type: 'msg_text'
+      redacted: true
       body: translate 'room_msg_redacted'
   else
     # If the original event was not something that shows

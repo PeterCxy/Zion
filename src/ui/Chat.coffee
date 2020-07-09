@@ -101,7 +101,7 @@ export default Chat = ({route, navigation}) ->
       <RoomTimeline
         style={styles.styleTimeline}
         roomId={roomId}
-        onMessageSelected={(msg) -> setSelectedMsg msg}
+        onMessageSelected={(msg) -> setSelectedMsg msg unless msg.redacted}
         onLoadingStateChange={setLoading}/>
       <ProgressBar
         style={styles.styleProgress}
