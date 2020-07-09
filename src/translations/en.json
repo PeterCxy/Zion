@@ -49,6 +49,7 @@
   "msg_ops_reaction": "Send reaction",
   "msg_ops_reply": "Reply",
   "msg_ops_redact": "Redact",
+  "msg_ops_resend": "Resend",
   "settings": "Settings",
   "settings_account": "Account",
   "settings_account_security": "Security",

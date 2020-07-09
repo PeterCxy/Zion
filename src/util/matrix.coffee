@@ -117,6 +117,12 @@ STATE_EVENTS = [
 
 export isStateEvent = (ev) -> ev.getType() in STATE_EVENTS
 
+export findPendingEventInRoom = (client, roomId, eventId) ->
+  for ev in client.getRoom(roomId).getPendingEvents()
+    if ev.getId() == eventId
+      return ev
+  return null
+
 # Functions for sending different types of events
 export sendReaction = (client, roomId, origId, emoji) ->
   client.sendEvent roomId, 'm.reaction',
@@ -127,3 +133,12 @@ export sendReaction = (client, roomId, origId, emoji) ->
 
 export sendRedaction = (client, roomId, origId) ->
   client.redactEvent roomId, origId
+
+export cancelEvent = (client, roomId, eventId) ->
+  ev = findPendingEventInRoom client, roomId, eventId
+  # Don't throw an exception if not found because it must have succeeded or been cancelled somewhere else
+  client.cancelPendingEvent ev if ev?
+
+export resendEvent = (client, roomId, eventId) ->
+  ev = findPendingEventInRoom client, roomId, eventId
+  client.resendEvent ev, client.getRoom roomId if ev?

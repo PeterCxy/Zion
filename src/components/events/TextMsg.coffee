@@ -30,7 +30,10 @@ export default TextMsg = ({ev}) ->
   , [ev.ts]
 
   bubbleStyle = if ev.self
-    styles.styleMsgBubbleReverse
+    if not ev.failed
+      styles.styleMsgBubbleReverse
+    else
+      styles.styleMsgBubbleReverseFailed
   else
     styles.styleMsgBubble
 
@@ -120,6 +123,8 @@ buildStyles = (theme) ->
       alignSelf: 'flex-end'
       paddingTop: 5
       backgroundColor: theme.COLOR_PRIMARY
+    styleMsgBubbleReverseFailed:
+      backgroundColor: theme.COLOR_CHAT_BUBBLE_FAILED
     styleMsgText:
       fontSize: 14
       color: theme.COLOR_CHAT_TEXT
@@ -167,6 +172,8 @@ buildStyles = (theme) ->
 
   styles.styleMsgBubbleReverse =
     Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
+  styles.styleMsgBubbleReverseFailed =
+    Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
   styles.styleMsgTextReverse =
     Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
   styles.styleMsgTimeReverse =

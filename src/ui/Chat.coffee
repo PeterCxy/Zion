@@ -101,7 +101,8 @@ export default Chat = ({route, navigation}) ->
       <RoomTimeline
         style={styles.styleTimeline}
         roomId={roomId}
-        onMessageSelected={(msg) -> setSelectedMsg msg unless msg.redacted}
+        onMessageSelected={(msg) ->
+          setSelectedMsg msg unless msg.redacted or (not msg.sent and not msg.failed)}
         onLoadingStateChange={setLoading}/>
       <ProgressBar
         style={styles.styleProgress}
@@ -133,6 +134,16 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
     title={translate "msg_ops"}
     show={show}
     onClose={onDismiss}>
+    {
+      if not msg?.failed
+        renderNormalMessageOpsMenu client, msg, roomId, invokeEmojiPicker, onDismiss
+      else
+        renderFailedMessageOpsMenu client, msg, roomId, onDismiss
+    }
+  </BottomSheet>
+
+renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, onDismiss) ->
+  <>
     <BottomSheetItem
       icon="reply"
       title={translate "msg_ops_reply"}/>
@@ -167,7 +178,29 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
               console.log err
           }/>
     }
-  </BottomSheet>
+  </>
+
+renderFailedMessageOpsMenu = (client, msg, roomId, onDismiss) ->
+  <>
+    <BottomSheetItem
+      icon="cancel"
+      title={translate "cancel"}
+      onPress={->
+        onDismiss()
+        mext.cancelEvent client, roomId, msg.key
+      }/>
+    <BottomSheetItem
+      icon="refresh"
+      title={translate "msg_ops_resend"}
+      onPress={->
+        onDismiss()
+        try
+          await mext.resendEvent client, roomId, msg.key
+        catch err
+          console.log "Failed to resend, error:"
+          console.log err
+      }/>
+  </>
 
 buildStyles = (theme) ->
     styleContentWrapper:

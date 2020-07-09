@@ -21,7 +21,11 @@ export BottomSheet = (_props) ->
   [theme, styles] = useStyles buildStyles
   props = Object.assign {}, _props
   if not props.height?
-    props.height = SHEET_ITEM_HEIGHT * React.Children.toArray(props.children).length
+    children = React.Children.toArray props.children
+    if children[0]?.type is React.Fragment
+      # Use the length of the fragment's children to calculate height
+      children = React.Children.toArray children[0].props.children
+    props.height = SHEET_ITEM_HEIGHT * children.length
   if props.title?
     props.height += SHEET_TITLE_HEIGHT
   props.customStyles =

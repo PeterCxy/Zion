@@ -32,7 +32,7 @@ export transformEvents = (client, events) ->
           tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
         self: ev.sender.userId == client.getUserId()
         sent: (not ev.status?) or (ev.status == EventStatus.SENT)
-        # TODO: handle errored pending events
+        failed: ev.status == EventStatus.NOT_SENT
     .filter (ev) -> ev?
     # Work around some empty room state (membership) events
     # see membership handling in matrix.coffee for details
