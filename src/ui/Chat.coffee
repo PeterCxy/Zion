@@ -112,6 +112,7 @@ export default Chat = ({route, navigation}) ->
     <MessageComposer
       roomId={roomId}/>
     <MessageOpsMenu
+      roomId={roomId}
       onDismiss={-> setSelectedMsg null}
       invokeEmojiPicker={invokeEmojiPicker}
       show={selectedMsg?}
@@ -125,7 +126,9 @@ Chat.sharedElements = (route, otherRoute, showing) ->
   if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
 
-MessageOpsMenu = ({show, msg, invokeEmojiPicker, onDismiss}) ->
+MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
+  client = useContext MatrixClientContext
+
   <BottomSheet
     title={translate "msg_ops"}
     show={show}
@@ -143,9 +146,10 @@ MessageOpsMenu = ({show, msg, invokeEmojiPicker, onDismiss}) ->
             onDismiss()
             try
               emoji = await invokeEmojiPicker()
+              await mext.sendReaction client, roomId, msg.key, emoji.code
             catch err
               # Cancelled, just ignore
-              console.log "emoji picker was cancelled"
+              console.log "emoji picker was cancelled or failed to send reaction"
           }/>
     }
   </BottomSheet>

@@ -116,3 +116,11 @@ STATE_EVENTS = [
 ]
 
 export isStateEvent = (ev) -> ev.getType() in STATE_EVENTS
+
+# Functions for sending different types of events
+export sendReaction = (client, roomId, origId, emoji) ->
+  client.sendEvent roomId, 'm.reaction',
+    'm.relates_to':
+      'event_id': origId
+      'key': emoji
+      'rel_type': 'm.annotation'
