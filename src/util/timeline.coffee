@@ -1,3 +1,4 @@
+import { EventStatus } from 'matrix-js-sdk'
 import * as mext from './matrix'
 import { translate } from './i18n'
 
