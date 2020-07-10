@@ -162,9 +162,10 @@ renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeRepl
       onPress={->
         onDismiss()
         try
-          await invokeReplyComposer
+          replyText = await invokeReplyComposer
             title: translate "msg_ops_reply"
             origMsg: msg
+          await mext.sendMessage client, roomId, replyText, msg
         catch err
           console.log "reply failed, err:"
           console.log err

@@ -3,6 +3,7 @@
 import { translate } from "./i18n"
 import { PixelRatio } from "react-native"
 import Markdown from "./Markdown"
+import escape from 'lodash/escape'
 
 export AVATAR_SIZE_HUGE = 128 * PixelRatio.get()
 export AVATAR_SIZE = 64 * PixelRatio.get()
@@ -142,17 +143,40 @@ export renderHtmlIfNeeded = (text, forceHtml = false) ->
   # not attach formatted body
 
 # Functions for sending different types of events
-export sendMessage = (client, roomId, text) ->
+# `replyTo` should be a message object returned by
+# `transformEvent` from `./timeline.coffee`.
+# (null if not a reply)
+export sendMessage = (client, roomId, text, replyTo) ->
   # TODO: how do we handle at-ing users
   content =
     msgtype: 'm.text'
     body: text
 
-  richText = renderHtmlIfNeeded text
+  richText = renderHtmlIfNeeded text, replyTo?
   if richText?
     content = Object.assign {}, content,
       format: 'org.matrix.custom.html'
       formatted_body: richText
+
+  if replyTo?
+    # A reply must be in rich text
+    content.body = "> <#{replyTo.sender.id}> #{replyTo.plaintext}\n#{content.body}"
+    content.formatted_body = """
+      <mx-reply>
+        <blockquote>
+          <a href="https://matrix.to/#/#{roomId}/#{replyTo.key}">In reply to</a> 
+          <a href="https://matrix.to/#/#{replyTo.sender.id}">#{replyTo.sender.id}</a>
+          <br/>
+          #{replyTo.body?.replace(/<mx-reply>.*<\/mx-reply>/g, '') ? replyTo.plaintext}
+        </blockquote>
+      </mx-reply>
+    """ + content.formatted_body
+    content.formatted_body = content.formatted_body
+      .replace /^ +/gm, ''
+      .replace /\n/g, ''
+    content['m.relates_to'] =
+      'm.in_reply_to':
+        'event_id': replyTo.key
 
   client.sendEvent roomId, "m.room.message", content
 

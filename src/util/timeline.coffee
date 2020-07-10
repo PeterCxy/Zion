@@ -27,6 +27,7 @@ export transformEvents = (client, events) ->
         ts: ev.getTs()
         prev_ts: array[idx - 1]?.getTs()
         sender:
+          id: ev.sender.userId
           name: ev.sender.name
           avatar: mext.calculateMemberSmallAvatarURL client, ev.sender
           tinyAvatar: mext.calculateMemberTinyAvatarURL client, ev.sender
@@ -140,6 +141,10 @@ messageEvent = (client, content) ->
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
 
+  # Whatever event it is, the content always has a body that
+  # describes the content
+  ret.plaintext = content.body
+
   if content.edited
     ret.edited = true
 
@@ -151,6 +156,7 @@ stickerEvent = (client, content) ->
     url: client.mxcUrlToHttp content.url
     width: content.info.w
     height: content.info.h
+    plaintext: content.body
 
 encryptedEvent = (ev) ->
     type: 'msg_text' # Pretend it's a message and show a placeholder
