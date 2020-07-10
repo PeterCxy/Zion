@@ -124,21 +124,35 @@ export findPendingEventInRoom = (client, roomId, eventId) ->
       return ev
   return null
 
+# matrix-react-sdk/src/editor/serialize.ts
+# renders `text` into HTML if the text is written in Markdown
+# or if forceHtml = true (when sending replies)
+# Also renders HTML if the text contains Markdown backlash escapes
+# when the text itself does not contain any Markdown format
+# (e.g. text like `\*test\*` is not considered to be Markdown
+#       because it renders to zero rich-text elements, but
+#       showing this as-is would be very jarring)
+export renderHtmlIfNeeded = (text, forceHtml = false) ->
+  parser = new Markdown text
+  if forceHtml or not parser.isPlainText()
+    return parser.toHTML()
+  if text.indexOf("\\") > -1
+    return parser.toPlaintext()
+  # Otherwise, don't return anything and the caller should
+  # not attach formatted body
+
 # Functions for sending different types of events
 export sendMessage = (client, roomId, text) ->
   # TODO: how do we handle at-ing users
-  mkdn = new Markdown text
+  content =
+    msgtype: 'm.text'
+    body: text
 
-  if mkdn.isPlainText()
-    content =
-      msgtype: 'm.text'
-      body: text
-  else
-    content =
-      msgtype: 'm.text'
+  richText = renderHtmlIfNeeded text
+  if richText?
+    content = Object.assign {}, content,
       format: 'org.matrix.custom.html'
-      body: mkdn.toPlaintext()
-      formatted_body: mkdn.toHTML()
+      formatted_body: richText
 
   client.sendEvent roomId, "m.room.message", content
 
