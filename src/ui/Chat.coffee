@@ -111,7 +111,14 @@ export default Chat = ({route, navigation}) ->
         visible={loading}/>
     </View>
     <MessageComposer
-      roomId={roomId}/>
+      onSendClicked={(text) ->
+        try
+          await mext.sendMessage client, roomId, text
+        catch err
+          # Get rid of yellow box on this...
+          console.log "Failed to send message, error:"
+          console.log err
+      }/>
     <MessageOpsMenu
       roomId={roomId}
       onDismiss={-> setSelectedMsg null}

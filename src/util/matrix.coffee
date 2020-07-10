@@ -124,6 +124,13 @@ export findPendingEventInRoom = (client, roomId, eventId) ->
   return null
 
 # Functions for sending different types of events
+export sendMessage = (client, roomId, text) ->
+  # TODO: implement Markdown parsing
+  # TODO: how do we handle at-ing users
+  client.sendEvent roomId, "m.room.message",
+    msgtype: 'm.text'
+    body: text
+
 export sendReaction = (client, roomId, origId, emoji) ->
   client.sendEvent roomId, 'm.reaction',
     'm.relates_to':

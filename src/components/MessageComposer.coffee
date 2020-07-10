@@ -5,7 +5,7 @@ import { useStyles } from "../theme"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
 
-export default MessageComposer = ({roomId}) ->
+export default MessageComposer = ({onSendClicked}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [text, setText] = useState ""
@@ -16,11 +16,9 @@ export default MessageComposer = ({roomId}) ->
     if toSend is ""
       setShowTextEmptyPrompt true
       return
-    client.sendEvent roomId, "m.room.message",
-      msgtype: 'm.text'
-      body: text
+    onSendClicked text
     setText ""
-  , [text, roomId]
+  , [text, onSendClicked]
 
   <>
     <View style={styles.styleWrapper}>
