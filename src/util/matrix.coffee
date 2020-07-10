@@ -167,7 +167,15 @@ export sendMessage = (client, roomId, text, replyTo) ->
           <a href="https://matrix.to/#/#{roomId}/#{replyTo.key}">In reply to</a> 
           <a href="https://matrix.to/#/#{replyTo.sender.id}">#{replyTo.sender.id}</a>
           <br/>
-          #{replyTo.body?.replace(/<mx-reply>.*<\/mx-reply>/g, '') ? escape(replyTo.plaintext)}
+          #{
+            if replyTo.type is 'msg_text'
+              # msg_text has both body and plaintext
+              # but the body is in plaintext
+              # so we have to escape it
+              escape replyTo.body
+            else
+              replyTo.body?.replace(/<mx-reply>.*<\/mx-reply>/g, '') ? escape(replyTo.plaintext)
+          }
         </blockquote>
       </mx-reply>
     """ + content.formatted_body
