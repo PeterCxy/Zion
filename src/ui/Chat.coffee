@@ -8,6 +8,7 @@ import { BottomSheet, BottomSheetItem } from "../components/BottomSheet"
 import RoomTimeline from "../components/RoomTimeline"
 import MessageComposer from "../components/MessageComposer"
 import { useEmojiPicker } from "../components/EmojiPicker"
+import { useAssociatedMessageComposer } from "../components/AssociatedMessageComposer"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
@@ -40,6 +41,8 @@ export default Chat = ({route, navigation}) ->
   [selectedMsg, setSelectedMsg] = useState null
 
   [emojiPickerComponent, invokeEmojiPicker] = useEmojiPicker()
+  [replyComposerComponent, invokeReplyComposer] =
+    useAssociatedMessageComposer()
 
   # Listen to room name updates
   # TODO: also implement room avatar / encrypted state updates?
@@ -123,9 +126,11 @@ export default Chat = ({route, navigation}) ->
       roomId={roomId}
       onDismiss={-> setSelectedMsg null}
       invokeEmojiPicker={invokeEmojiPicker}
+      invokeReplyComposer={invokeReplyComposer}
       show={selectedMsg?}
       msg={selectedMsg}/>
     {emojiPickerComponent}
+    {replyComposerComponent}
   </>
 
 Chat.sharedElements = (route, otherRoute, showing) ->
@@ -134,7 +139,7 @@ Chat.sharedElements = (route, otherRoute, showing) ->
   if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
 
-MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
+MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss}) ->
   client = useContext MatrixClientContext
 
   <BottomSheet
@@ -143,17 +148,27 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, onDismiss}) ->
     onClose={onDismiss}>
     {
       if not msg?.failed
-        renderNormalMessageOpsMenu client, msg, roomId, invokeEmojiPicker, onDismiss
+        renderNormalMessageOpsMenu client, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss
       else
         renderFailedMessageOpsMenu client, msg, roomId, onDismiss
     }
   </BottomSheet>
 
-renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, onDismiss) ->
+renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss) ->
   <>
     <BottomSheetItem
       icon="reply"
-      title={translate "msg_ops_reply"}/>
+      title={translate "msg_ops_reply"}
+      onPress={->
+        onDismiss()
+        try
+          await invokeReplyComposer
+            title: translate "msg_ops_reply"
+            origMsg: msg
+        catch err
+          console.log "reply failed, err:"
+          console.log err
+      }/>
     {
       if msg?.type is 'msg_text' or msg?.type is 'msg_html'
         # Only allow reactions for text messages

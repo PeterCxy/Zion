@@ -54,12 +54,13 @@ export formatTime = (date) ->
 # where the first value `renderedComponent` must be added to the React DOM
 # while the second is a function that returns a promise which resolves
 # or rejects when the user finishes or dismisses the dialog
-export useInvokeDialogForResult = (Component, extraProps = {}) ->
+export useInvokeDialogForResult = (Component) ->
   [resolvePromise, setResolvePromise] = useState null
   [rejectPromise, setRejectPromise] = useState null
+  [componentExtraProps, setExtraProps] = useState null
   [show, setShow] = useState false
 
-  invokeDialogForResult = useCallback ->
+  invokeDialogForResult = useCallback (extraProps) ->
     new Promise (resolve, reject) ->
       setResolvePromise (orig) ->
         if orig?
@@ -70,6 +71,7 @@ export useInvokeDialogForResult = (Component, extraProps = {}) ->
           setShow false
           setRejectPromise null
           setResolvePromise null
+          setExtraProps null
           resolve res
       setRejectPromise (orig) ->
         if orig?
@@ -80,7 +82,14 @@ export useInvokeDialogForResult = (Component, extraProps = {}) ->
           setShow false
           setRejectPromise null
           setResolvePromise null
+          setExtraProps null
           reject err
+      setExtraProps (orig) ->
+        if orig?
+          reject "Cannot handle multiple simultaneous requests" 
+          return orig
+
+        return extraProps
       setShow true
   , []
 
@@ -89,6 +98,6 @@ export useInvokeDialogForResult = (Component, extraProps = {}) ->
       show={show}
       rejectPromise={rejectPromise}
       resolvePromise={resolvePromise}
-      {...extraProps}/>
+      {...componentExtraProps}/>
 
   [renderedComponent, invokeDialogForResult]
