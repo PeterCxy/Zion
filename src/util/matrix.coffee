@@ -160,7 +160,7 @@ export sendMessage = (client, roomId, text, replyTo) ->
 
   if replyTo?
     # A reply must be in rich text
-    content.body = "> <#{replyTo.sender.id}> #{replyTo.plaintext}\n#{content.body}"
+    content.body = "> <#{replyTo.sender.id}> #{replyTo.plaintext}\n\n#{content.body}"
     content.formatted_body = """
       <mx-reply>
         <blockquote>
