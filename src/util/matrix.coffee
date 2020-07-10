@@ -2,6 +2,7 @@
 # Often imported as "mext" in other modules
 import { translate } from "./i18n"
 import { PixelRatio } from "react-native"
+import Markdown from "./Markdown"
 
 export AVATAR_SIZE_HUGE = 128 * PixelRatio.get()
 export AVATAR_SIZE = 64 * PixelRatio.get()
@@ -125,11 +126,21 @@ export findPendingEventInRoom = (client, roomId, eventId) ->
 
 # Functions for sending different types of events
 export sendMessage = (client, roomId, text) ->
-  # TODO: implement Markdown parsing
   # TODO: how do we handle at-ing users
-  client.sendEvent roomId, "m.room.message",
-    msgtype: 'm.text'
-    body: text
+  mkdn = new Markdown text
+
+  if mkdn.isPlainText()
+    content =
+      msgtype: 'm.text'
+      body: text
+  else
+    content =
+      msgtype: 'm.text'
+      format: 'org.matrix.custom.html'
+      body: mkdn.toPlaintext()
+      formatted_body: mkdn.toHTML()
+
+  client.sendEvent roomId, "m.room.message", content
 
 export sendReaction = (client, roomId, origId, emoji) ->
   client.sendEvent roomId, 'm.reaction',
