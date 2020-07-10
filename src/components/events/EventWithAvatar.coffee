@@ -19,7 +19,7 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
     <TouchableWithoutFeedback
       onLongPress={->
         performHapticFeedback()
-        onMessageSelected ev if onMessageSelected?
+        onMessageSelected ev if onMessageSelected? and not ev.unknown # "unknown" = not decrypted yet
       }>
       <View style={if ev.self then styles.styleChildWrapperReverse else styles.styleChildWrapper}>
       {

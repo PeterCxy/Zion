@@ -137,9 +137,11 @@ messageEvent = (client, content) ->
     when "m.bad.encrypted"
       ret.type = 'msg_text'
       ret.body = translate 'room_msg_bad_encryption'
+      ret.unknown = true
     else
       ret.type = 'unknown'
       ret.ev_type = "msg_#{content.msgtype}"
+      ret.unknown = true
 
   # Whatever event it is, the content always has a body that
   # describes the content
@@ -161,6 +163,7 @@ stickerEvent = (client, content) ->
 encryptedEvent = (ev) ->
     type: 'msg_text' # Pretend it's a message and show a placeholder
     body: translate 'room_msg_encrypted_placeholder'
+    unknown: true
 
 stateEvent = (ev) ->
     type: 'room_state'
@@ -169,3 +172,4 @@ stateEvent = (ev) ->
 unknownEvent = (ev) ->
     type: 'unknown'
     ev_type: ev.getType()
+    unknown: true
