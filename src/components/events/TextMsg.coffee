@@ -73,6 +73,7 @@ export default TextMsg = ({ev}) ->
             }}
             tagsStyles={{
               code: styles.styleCodeText
+              a: if ev.self then styles.styleMsgLinkReverse else styles.styleMsgLink
             }}
             renderers={htmlRenderers}
             style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
@@ -157,6 +158,10 @@ buildStyles = (theme) ->
     styleCodeText:
       fontFamily: 'monospace'
       color: theme.COLOR_CHAT_INLINE_CODE
+    styleMsgLink:
+      color: theme.COLOR_CHAT_LINK
+    styleMsgLinkReverse:
+      color: theme.COLOR_CHAT_LINK_ON_BACKGROUND
     styleReactionWrapper:
       width: '100%'
       flexDirection: 'row'
