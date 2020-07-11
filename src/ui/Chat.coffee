@@ -188,6 +188,28 @@ renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeRepl
     }
     {
       if msg?.self
+        # Allow editing messages from self
+        # we don't merge this and redaction with a fragment
+        # because that messes with the height calculation of BottomSheet
+        <BottomSheetItem
+          icon="pencil"
+          title={translate "msg_ops_edit"}
+          onPress={->
+            onDismiss()
+            try
+              # Use the same composer as when we are replying
+              # TODO: set initial text?
+              newText = await invokeReplyComposer
+                title: translate "msg_ops_edit"
+                origMsg: msg
+              await mext.sendEdit client, roomId, msg, newText
+            catch err
+              console.log "Failed to edit message, error:"
+              console.log err
+          }/>
+    }
+    {
+      if msg?.self
         # Only allow redacting messages from self
         <BottomSheetItem
           icon="delete"

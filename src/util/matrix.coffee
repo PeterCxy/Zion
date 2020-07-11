@@ -197,6 +197,34 @@ export sendMessage = (client, roomId, text, replyTo) ->
 
   client.sendEvent roomId, "m.room.message", content
 
+# `origMsg` must be the message object returned by `transformEvents`
+export sendEdit = (client, roomId, origMsg, newText) ->
+  # If the original message is a reply, we extract its header first
+  # otherwise this will simply be null
+  origReplyBlock = extractMxReplyHeader origMsg.body
+
+  content =
+    msgtype: 'm.text'
+    body: '* ' + newText
+    'm.new_content':
+      msgtype: 'm.text'
+      body: newText
+    'm.relates_to':
+      'rel_type': 'm.replace'
+      'event_id': origMsg.key
+
+  newRichText = renderHtmlIfNeeded newText, origReplyBlock? # if it were a rich reply, force HTML
+  if newRichText?
+    content = Object.assign {}, content,
+      format: 'org.matrix.custom.html'
+      formatted_body: (origReplyBlock ? '') + '* ' + newRichText
+    # Object.assign is not recursive
+    content['m.new_content'] = Object.assign {}, content['m.new_content'],
+      format: 'org.matrix.custom.html'
+      formatted_body: newRichText
+
+  client.sendEvent roomId, "m.room.message", content
+
 export sendReaction = (client, roomId, origId, emoji) ->
   client.sendEvent roomId, 'm.reaction',
     'm.relates_to':
