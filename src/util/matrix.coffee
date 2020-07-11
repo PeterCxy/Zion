@@ -119,6 +119,15 @@ STATE_EVENTS = [
 
 export isStateEvent = (ev) -> ev.getType() in STATE_EVENTS
 
+# Extract the <mx-reply>...</mx-reply> header of a Matrix message content
+# falsy if none is found
+export extractMxReplyHeader = (richBody) ->
+  replyStartPos = richBody.indexOf "<mx-reply>"
+  replyEndPos = richBody.indexOf "</mx-reply>"
+
+  if replyStartPos >= 0 and replyEndPos > replyStartPos
+    richBody[replyStartPos...replyEndPos + "</mx-reply>".length]
+
 export findPendingEventInRoom = (client, roomId, eventId) ->
   for ev in client.getRoom(roomId).getPendingEvents()
     if ev.getId() == eventId

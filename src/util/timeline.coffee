@@ -122,11 +122,8 @@ messageEvent = (client, content) ->
             # <mx-reply> block
             # (edits to reply messages will always be `org.matrix.custom.html`, but
             #  may not include the <mx-reply> header, just like Riot)
-            replyStartPos = content.orig.formatted_body.indexOf "<mx-reply>"
-            replyEndPos = content.orig.formatted_body.indexOf "</mx-reply>"
-            if replyStartPos >= 0 and replyEndPos >= 0
-              replyBlock = content.orig.formatted_body[replyStartPos...replyEndPos + "</mx-reply>".length]
-              ret.body = replyBlock + ret.body
+            replyBlock = mext.extractMxReplyHeader content.orig.formatted_body
+            ret.body = replyBlock + ret.body if replyBlock?
         else
           ret.type = 'msg_text'
           ret.body = content.body
