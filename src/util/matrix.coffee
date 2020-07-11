@@ -174,7 +174,7 @@ export sendMessage = (client, roomId, text, replyTo) ->
       <mx-reply>
         <blockquote>
           <a href="https://matrix.to/#/#{roomId}/#{replyTo.key}">In reply to</a> 
-          <a href="https://matrix.to/#/#{replyTo.sender.id}">#{replyTo.sender.id}</a>
+          <a href="https://matrix.to/#/#{replyTo.sender.id}">#{replyTo.sender.name}</a>
           <br/>
           #{
             if replyTo.type is 'msg_text'
