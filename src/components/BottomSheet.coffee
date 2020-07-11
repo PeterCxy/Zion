@@ -48,6 +48,7 @@ export BottomSheet = (_props) ->
 
   <RBSheet
     ref={refRBSheet}
+    animationType="fade"
     {...props}>
     <View style={styles.styleItemsWrapper}>
       {
