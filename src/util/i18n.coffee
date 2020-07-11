@@ -26,9 +26,13 @@ export translate = (key, args...) ->
   if not args or args.length == 0
     str
   else
-    # TODO: bring back the escape character for % (\%)
-    #       lookbehind is not supported on JSC
-    str.replace /%([a-z]?)/g, (match) ->
+    str.replace /%([a-z]?)/g, (match, p1, offset) ->
+      # There's no lookbehind on JSC / Hermes
+      # so we use this as our "lookbehind"
+      # (use "%%" to escape "%")
+      return "" if str.charAt(offset + 1) is '%'
+      return match if offset > 0 and str.charAt(offset - 1) is '%'
+
       if match == "%"
         args[0]
       else
