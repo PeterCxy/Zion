@@ -46,7 +46,7 @@ transformEvent = (client, ev, replaced, reactions) ->
   content = ev.getContent()
   # Handle replacement (edits)
   if replaced[ev.getId()]
-    content = Object.assign {}, replaced[ev.getId()].newContent
+    content = Object.assign {}, { orig: content }, replaced[ev.getId()].newContent
     content.edited = true
   if ev.isRelation 'm.replace'
     origId = ev.getAssociatedId()
@@ -115,6 +115,18 @@ messageEvent = (client, content) ->
         when 'org.matrix.custom.html'
           ret.type = 'msg_html'
           ret.body = content.formatted_body
+          if (not ret.body.startsWith "<mx-reply>") and content.orig?.formatted_body?
+            # If the event is an edited message without "<mx-reply>"
+            # (which is what Riot does even when editing messages that are replies)
+            # and if the original message is a rich reply, we prepend the original
+            # <mx-reply> block
+            # (edits to reply messages will always be `org.matrix.custom.html`, but
+            #  may not include the <mx-reply> header, just like Riot)
+            replyStartPos = content.orig.formatted_body.indexOf "<mx-reply>"
+            replyEndPos = content.orig.formatted_body.indexOf "</mx-reply>"
+            if replyStartPos >= 0 and replyEndPos >= 0
+              replyBlock = content.orig.formatted_body[replyStartPos...replyEndPos + "</mx-reply>".length]
+              ret.body = replyBlock + ret.body
         else
           ret.type = 'msg_text'
           ret.body = content.body
