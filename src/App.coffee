@@ -1,5 +1,5 @@
 import React, { useCallback, useMemo, useState, useEffect } from "react"
-import { YellowBox } from "react-native"
+import { LogBox } from "react-native"
 import { DefaultTheme, Provider as PaperProvider } from 'react-native-paper'
 import AsyncStorage from '@react-native-community/async-storage'
 import ThemeContext from "./theme"
@@ -16,7 +16,7 @@ import { createMatrixClient, MatrixClientContext } from "./util/client"
 # API returns 429 or something
 console.reportErrorsAsExceptions = false
 
-YellowBox.ignoreWarnings [
+LogBox.ignoreLogs [
   # matrix-js-sdk sets long timers.
   # We need to sort this out at some point,
   # but for now just mute them
