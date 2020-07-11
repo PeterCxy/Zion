@@ -26,7 +26,9 @@ export translate = (key, args...) ->
   if not args or args.length == 0
     str
   else
-    str.replace /(?<!\\)%([a-z]?)/g, (match) ->
+    # TODO: bring back the escape character for % (\%)
+    #       lookbehind is not supported on JSC
+    str.replace /%([a-z]?)/g, (match) ->
       if match == "%"
         args[0]
       else
