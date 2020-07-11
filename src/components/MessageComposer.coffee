@@ -23,6 +23,7 @@ export default MessageComposer = ({onSendClicked}) ->
   <>
     <View style={styles.styleWrapper}>
       <TextInput
+        multiline
         placeholder={translate "chat_placeholder"}
         value={text}
         onChangeText={setText}
@@ -51,7 +52,8 @@ buildStyles = (theme) ->
       alignItems: "center"
       backgroundColor: theme.COLOR_CHAT_COMPOSER
       elevation: 5
-      height: 48
+      minHeight: 48
+      maxHeight: 96
       padding: 4
     styleTextInput:
       flex: 1
