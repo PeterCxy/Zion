@@ -174,7 +174,9 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, onMessageSelected, style, fo
 
     onEventDecrypted = (ev) ->
       return if roomId != ev.getRoomId()
-      loadUntilLatest()
+      # When an event is decrypted, the event object itself is mutated
+      # so we just call updateEvents() to re-load our copy from the TimelineWindow
+      updateEvents()
 
     client.on 'Room.timeline', onTimelineUpdate
     client.on 'Room.localEchoUpdated', onTimelineUpdate # For message sent status
