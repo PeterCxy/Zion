@@ -22,8 +22,8 @@ FS_TEMP_PATH = "#{RNFS.DocumentDirectoryPath}/temp"
 fsCachePath = (url) ->
   "#{FS_CACHE_PATH}/#{await sha1 url}"
 
-fsTempPath = (url) ->
-  "#{FS_TEMP_PATH}/#{await sha1 url}"
+fsTempPath = ->
+  "#{FS_TEMP_PATH}/#{util.randomId 16}"
 
 # Fetch only from memory cache
 export fetchMemCache = (url) ->
@@ -125,7 +125,7 @@ class CachedDownload
       return fsCacheRes
 
     # No cache found, fetch
-    tmpPath = await fsTempPath @url
+    tmpPath = fsTempPath()
     resp = await RNFetchBlob.config
       fileCache: true
       path: tmpPath

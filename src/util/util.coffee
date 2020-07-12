@@ -5,6 +5,15 @@ import { translate } from "./i18n"
 # From react-native-paper
 export DEFAULT_APPBAR_HEIGHT = 56
 
+# Generate a random string, used for internal IDs for temporary files
+# NOT CRYPTOGRAPHYCALLY SECURE
+DICTIONARY = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+export randomId = (len) ->
+  res = ''
+  for i in [0..len]
+    res += DICTIONARY.charAt Math.floor Math.random() * DICTIONARY.length
+  return res
+
 # Compare if two timestamps (in ms) are exactly the same day
 # in the local time zone, while ignoring hours / minutes
 export tsSameDay = (ts1, ts2) ->
