@@ -9,6 +9,7 @@ import java.io.File;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.nio.file.StandardOpenOption;
 import java.util.Base64;
 
@@ -86,6 +87,21 @@ public class AsyncFileOps extends ReactContextBaseJavaModule {
                     StandardOpenOption.WRITE,
                     StandardOpenOption.TRUNCATE_EXISTING
                 );
+                promise.resolve(null);
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
+    }
+
+    // Copy file from src to dst, replacing existing
+    // The caller is responsible for making sure the path exists
+    @ReactMethod
+    public void copyFile(String src, String dst, Promise promise) {
+        new Thread(() -> {
+            try {
+                Files.copy(new File(src).toPath(), new File(dst).toPath(),
+                    StandardCopyOption.REPLACE_EXISTING);
                 promise.resolve(null);
             } catch (Exception e) {
                 promise.reject(e.getMessage());

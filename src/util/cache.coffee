@@ -32,15 +32,36 @@ export fetchMemCache = (url) ->
   else
     null
 
-# Fetch as data URL
+# Fetch a remote file if needed
+# returns [mime, path], where path is the path
+# to the local cache of the file
 # Also supports decrypting encrypted remote data
 # via "EncryptedAttachment" native module
 # When decryption is needed, mime and cryptoInfo must
 # not be null
-export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
+export cachedFetch = (url, mime, cryptoInfo, onProgress) ->
   (await CachedDownload.getInstance url, mime, cryptoInfo)
     .registerProgressListener onProgress
     .fetch()
+
+# Fetch as data URL
+# Also adds a layer of in-memory LRU cache for small files
+export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
+  # Check the memory cache first
+  if memCache.has url
+    return Promise.resolve memCache.get url
+
+  # Not found in mem cache, fetch the file or get fs cache path
+  [mimeType, file] = await cachedFetch url, mime, cryptoInfo, onProgress
+
+  # Read as data URL
+  dUrl = "data:#{mimeType};base64,#{await AsyncFileOps.readAsBase64 file}"
+
+  # Write to both mem cache
+  if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
+    memCache.set url, dUrl
+
+  dUrl
 
 # Handles deduplication of requests
 # so that we don't fire a lot of requests for the
@@ -94,20 +115,14 @@ class CachedDownload
     @promise
 
   _doFetch: =>
-    # Check the memory cache first
-    if memCache.has @url
-      return Promise.resolve memCache.get @url
     # Ensure FS dir exists
     await RNFS.mkdir FS_CACHE_PATH
     await RNFS.mkdir FS_TEMP_PATH
     # Then check fs cache
-    dUrl = await @_tryReadFromFsCache()
-    if dUrl?
+    fsCacheRes = await @_tryDetectFsCache()
+    if fsCacheRes?
       # FS cache found
-      if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
-        # Also set memory cache
-        memCache.set @url, dUrl
-      return dUrl
+      return fsCacheRes
 
     # No cache found, fetch
     tmpPath = await fsTempPath @url
@@ -126,27 +141,26 @@ class CachedDownload
     mimeType = @mime ? info.headers["content-type"].split(";")[0].trim()
     # Handle decryption here
     if @cryptoInfo?
-      data = await EncryptedAttachment.decryptAttachmentToBase64 tmpPath, @cryptoInfo
-    else
-      data = await AsyncFileOps.readAsBase64 tmpPath
+      tmpPath = await EncryptedAttachment.decryptAttachment tmpPath, @cryptoInfo
 
-    dUrl = @_base64ToDataUrl mimeType, data
+    outPath = await @_copyToFsCache mimeType, tmpPath
+
     resp.flush()
 
-    # Write to both mem and fs cache
-    if dUrl.length < MEM_CACHE_MAX_FILE_SIZE
-      memCache.set @url, dUrl
-    await @_writeToFsCache mimeType, data
+    if @cryptoInfo?
+      # We need to clean up the temporary decrypted file
+      await RNFS.unlink tmpPath
 
-    return dUrl
+    return [mimeType, outPath]
 
-  _writeToFsCache: (mimeType, data) =>
+  _copyToFsCache: (mimeType, path) =>
     basePath = await fsCachePath @url
     await RNFS.mkdir basePath
     filePath = "#{basePath}/file.#{mimeUtils.extension mimeType}"
-    await AsyncFileOps.writeBase64 filePath, data
+    await AsyncFileOps.copyFile path, filePath
+    filePath
 
-  _tryReadFromFsCache: =>
+  _tryDetectFsCache: =>
     basePath = await fsCachePath @url
     items = null
     try
@@ -157,11 +171,7 @@ class CachedDownload
       return null
     file = items[0].path
     mimeType = mimeUtils.lookup file
-    return @_base64ToDataUrl mimeType,
-      await AsyncFileOps.readAsBase64 file
-
-  _base64ToDataUrl: (mimeType, data) =>
-    "data:" + mimeType + ";base64," + data
+    return [mimeType, file]
 
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null

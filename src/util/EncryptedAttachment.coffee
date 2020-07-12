@@ -1,10 +1,10 @@
 import { NativeModules } from "react-native"
-import * as RNFS from 'react-native-fs'
-import AsyncFileOps from './AsyncFileOps'
 
 Native = NativeModules.EncryptedAttachment
 
-export decryptAttachmentToBase64 = (srcPath, cryptoInfo) ->
+# Returns a temporary file with decoded content
+# The caller is responsible for cleaning up the temp file
+export decryptAttachment = (srcPath, cryptoInfo) ->
   if cryptoInfo.v != "v2"
     return Promise.reject "Unknown version #{cryptoInfo.v}"
   iv = cryptoInfo.iv
@@ -14,7 +14,4 @@ export decryptAttachmentToBase64 = (srcPath, cryptoInfo) ->
     return Promise.reject "Must have sha256 hash"
   dstPath = srcPath + "_decrypted"
   await Native.decrypt srcPath, dstPath, iv, key, hash
-  #res = await RNFS.readFile dstPath, 'base64'
-  res = await AsyncFileOps.readAsBase64 dstPath
-  await RNFS.unlink dstPath
-  return res
+  return dstPath
