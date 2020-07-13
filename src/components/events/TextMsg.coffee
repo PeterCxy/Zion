@@ -63,6 +63,8 @@ export default TextMsg = ({ev}) ->
     return if previewLink?
 
     for node in nodes
+      continue if node.name == 'mx-reply' # Do not preview links in reply
+      
       if node.name == 'a'
         arr.push node.attribs.href
       else if node.children?
