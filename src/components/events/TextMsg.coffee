@@ -1,9 +1,10 @@
-import React, { useMemo } from "react"
+import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
 import { View, Text } from "react-native"
 import linkifyHtml from 'linkifyjs/html'
 import linkifyStr from 'linkifyjs/string'
 import HTML from "react-native-render-html"
 import { useStyles } from "../../theme"
+import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import * as util from "../../util/util"
 
@@ -24,6 +25,7 @@ fixHtml = (html) ->
 
 # A text (or formatted text, i.e. HTML) message
 export default TextMsg = ({ev}) ->
+  client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
 
   styles = if ev.self then styles.reverse else styles
@@ -53,6 +55,39 @@ export default TextMsg = ({ev}) ->
     fixHtml html
   , [ev.body]
 
+  # The link to show preview for
+  [previewLink, setPreviewLink] = useState null
+  [previewInfo, setPreviewInfo] = useState null
+
+  findLink = useCallback (nodes, arr = []) ->
+    return if previewLink?
+
+    for node in nodes
+      if node.name == 'a'
+        arr.push node.attribs.href
+      else if node.children?
+        findLink node.children, arr
+    arr = arr.filter (link) -> not link.startsWith 'https://matrix.to'
+    return if arr.length is 0
+    setPreviewLink arr[0]
+  , [previewLink]
+
+  # Fetch link if it was found for the first time
+  useEffect ->
+    return unless previewLink?
+    unmounted = false
+    
+    do ->
+      try
+        info = await client.getUrlPreview previewLink, new Date().getTime()
+        setPreviewInfo info unless unmounted
+      catch err
+        console.log err
+
+    return ->
+      unmounted = true
+  , [previewLink]
+
   <View style={styles.styleMsgBubbleWrapper}>
     <View
       style={bubbleStyle}>
@@ -77,7 +112,8 @@ export default TextMsg = ({ev}) ->
             }}
             renderers={htmlRenderers}
             style={styles.styleMsgText}
-            baseFontStyle={styles.styleMsgText}/>
+            baseFontStyle={styles.styleMsgText}
+            onParsed={(parsed) -> findLink parsed}/>
       }
       {
         if ev.reactions?
@@ -98,6 +134,34 @@ export default TextMsg = ({ev}) ->
             style={styles.styleMsgTime}>
             {translate 'room_msg_edited'}
           </Text>
+      }
+      {
+        if previewInfo?
+          <View style={Object.assign {}, styles.styleMsgQuoteWrapper, { marginTop: 5, marginBottom: 0 }}>
+            <View style={styles.styleMsgQuoteLine}/>
+            <View style={styles.styleMsgQuoteContent}>
+              <View style={styles.styleUrlPreviewWrapper}>
+                {
+                  if previewInfo['og:title']?
+                    <Text style={styles.styleUrlPreviewTitle} numberOfLines={1}>
+                      {previewInfo['og:title']}
+                    </Text>
+                }
+                {
+                  if previewInfo['og:site_name']?
+                    <Text style={styles.styleUrlPreviewSite} numberOfLines={1}>
+                      {previewInfo['og:site_name']}
+                    </Text>
+                }
+                {
+                  if previewInfo['og:description']?
+                    <Text style={styles.styleUrlPreviewDesc}>
+                      {previewInfo['og:description'].replace /\n/g, ' '}
+                    </Text>
+                }
+              </View>
+            </View>
+          </View>
       }
       <Text
         style={styles.styleMsgTime}>
@@ -177,6 +241,26 @@ buildStyles = (theme) ->
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
     styleReactionReverse:
       color: theme.COLOR_TEXT_PRIMARY
+    styleUrlPreviewWrapper:
+      flexDirection: 'column'
+    styleUrlPreviewTitle:
+      color: theme.COLOR_CHAT_LINK
+      fontWeight: 'bold'
+      textDecorationLine: 'underline'
+      fontSize: 14
+    styleUrlPreviewTitleReverse:
+      color: theme.COLOR_CHAT_LINK_ON_BACKGROUND
+    styleUrlPreviewSite:
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+      fontSize: 13
+      marginBottom: 3
+    styleUrlPreviewSiteReverse:
+      color: theme.COLOR_TEXT_PRIMARY
+    styleUrlPreviewDesc:
+      fontSize: 14
+      color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleUrlPreviewDescReverse:
+      color: theme.COLOR_TEXT_PRIMARY
   
   styles.reverse = Object.assign {}, styles,
     styleMsgBubble: Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
@@ -187,5 +271,8 @@ buildStyles = (theme) ->
     styleMsgQuoteLine: Object.assign {}, styles.styleMsgQuoteLine, styles.styleMsgQuoteLineReverse
     # Failed is always reverse
     styleMsgBubbleReverseFailed: Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
+    styleUrlPreviewTitle: Object.assign {}, styles.styleUrlPreviewTitle, styles.styleUrlPreviewTitleReverse
+    styleUrlPreviewSite: Object.assign {}, styles.styleUrlPreviewSite, styles.styleUrlPreviewSiteReverse
+    styleUrlPreviewDesc: Object.assign {}, styles.styleUrlPreviewDesc, styles.styleUrlPreviewDescReverse
 
   styles
