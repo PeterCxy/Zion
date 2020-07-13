@@ -69,6 +69,7 @@ export default TextMsg = ({ev}) ->
         findLink node.children, arr
     arr = arr.filter (link) -> not link.startsWith 'https://matrix.to'
     return if arr.length is 0
+    return unless arr[0].startsWith 'http'
     setPreviewLink arr[0]
   , [previewLink]
 
