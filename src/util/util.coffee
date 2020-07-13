@@ -24,6 +24,10 @@ export tsSameDay = (ts1, ts2) ->
   
   d1 == d2
 
+# Return true if the URL is an externel web address
+export isWebAddr = (url) ->
+  (url.startsWith('http:') or url.startsWith('https:')) and not (url.startsWith('https://matrix.to'))
+
 # Run a function after the current interaction finishes
 # and return a promise that resolves after the callback
 # has been run with its return value

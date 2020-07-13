@@ -1,5 +1,5 @@
 import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { View, Text } from "react-native"
+import { View, Text, TouchableWithoutFeedback } from "react-native"
 import linkifyHtml from 'linkifyjs/html'
 import linkifyStr from 'linkifyjs/string'
 import HTML from "react-native-render-html"
@@ -7,6 +7,7 @@ import { useStyles } from "../../theme"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import * as util from "../../util/util"
+import NativeUtils from "../../util/NativeUtils"
 
 htmlRenderers =
   blockquote: (_, children, __, passProps) ->
@@ -64,14 +65,13 @@ export default TextMsg = ({ev}) ->
 
     for node in nodes
       continue if node.name == 'mx-reply' # Do not preview links in reply
-      
+
       if node.name == 'a'
         arr.push node.attribs.href
       else if node.children?
         findLink node.children, arr
-    arr = arr.filter (link) -> not link.startsWith 'https://matrix.to'
+    arr = arr.filter (link) -> util.isWebAddr link
     return if arr.length is 0
-    return unless arr[0].startsWith 'http'
     setPreviewLink arr[0]
   , [previewLink]
 
@@ -117,7 +117,10 @@ export default TextMsg = ({ev}) ->
             renderers={htmlRenderers}
             style={styles.styleMsgText}
             baseFontStyle={styles.styleMsgText}
-            onParsed={(parsed) -> findLink parsed}/>
+            onParsed={(parsed) -> findLink parsed}
+            onLinkPress={(ev, href) ->
+              NativeUtils.openURL href if util.isWebAddr href
+            }/>
       }
       {
         if ev.reactions?
@@ -147,9 +150,12 @@ export default TextMsg = ({ev}) ->
               <View style={styles.styleUrlPreviewWrapper}>
                 {
                   if previewInfo['og:title']?
-                    <Text style={styles.styleUrlPreviewTitle} numberOfLines={1}>
-                      {previewInfo['og:title']}
-                    </Text>
+                    <TouchableWithoutFeedback
+                      onPress={-> NativeUtils.openURL previewLink}>
+                      <Text style={styles.styleUrlPreviewTitle} numberOfLines={1}>
+                        {previewInfo['og:title']}
+                      </Text>
+                    </TouchableWithoutFeedback>
                 }
                 {
                   if previewInfo['og:site_name']?
