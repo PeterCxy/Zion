@@ -80,6 +80,7 @@ export default TextMsg = ({ev}) ->
     do ->
       try
         info = await client.getUrlPreview previewLink, new Date().getTime()
+        info['og:description'] = info['og:description']?.replace /\n/g, ' '
         setPreviewInfo info unless unmounted
       catch err
         console.log err
@@ -156,7 +157,7 @@ export default TextMsg = ({ev}) ->
                 {
                   if previewInfo['og:description']?
                     <Text style={styles.styleUrlPreviewDesc}>
-                      {previewInfo['og:description'].replace /\n/g, ' '}
+                      {previewInfo['og:description']}
                     </Text>
                 }
               </View>
