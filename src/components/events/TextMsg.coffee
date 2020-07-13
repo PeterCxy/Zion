@@ -152,6 +152,9 @@ buildStyles = (theme) ->
       width: 2
       height: '100%'
       backgroundColor: theme.COLOR_CHAT_QUOTE_LINE
+    styleMsgQuoteLineReverse:
+      opacity: 0.7
+      backgroundColor: theme.COLOR_TEXT_PRIMARY
     styleMsgQuoteContent:
       marginStart: 10
       opacity: 0.5
@@ -181,6 +184,7 @@ buildStyles = (theme) ->
     styleMsgTime: Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
     styleReaction: Object.assign {}, styles.styleReaction, styles.styleReactionReverse
     styleMsgLink: Object.assign {}, styles.styleMsgLink, styles.styleMsgLinkReverse
+    styleMsgQuoteLine: Object.assign {}, styles.styleMsgQuoteLine, styles.styleMsgQuoteLineReverse
     # Failed is always reverse
     styleMsgBubbleReverseFailed: Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
 
