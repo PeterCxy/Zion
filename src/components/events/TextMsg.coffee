@@ -25,17 +25,17 @@ fixHtml = (html) ->
 # A text (or formatted text, i.e. HTML) message
 export default TextMsg = ({ev}) ->
   [theme, styles] = useStyles buildStyles
+
+  styles = if ev.self then styles.reverse else styles
+
   date = useMemo ->
     new Date ev.ts
   , [ev.ts]
 
-  bubbleStyle = if ev.self
-    if not ev.failed
-      styles.styleMsgBubbleReverse
-    else
-      styles.styleMsgBubbleReverseFailed
-  else
+  bubbleStyle = if not ev.failed
     styles.styleMsgBubble
+  else
+    styles.styleMsgBubbleReverseFailed
 
   if ev.type == 'msg_html' and ev.body.indexOf('<li>') != -1
     # There is a weird bug about lists in react-native-render-html
@@ -73,11 +73,11 @@ export default TextMsg = ({ev}) ->
             }}
             tagsStyles={{
               code: styles.styleCodeText
-              a: if ev.self then styles.styleMsgLinkReverse else styles.styleMsgLink
+              a: styles.styleMsgLink
             }}
             renderers={htmlRenderers}
-            style={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}
-            baseFontStyle={if ev.self then styles.styleMsgTextReverse else styles.styleMsgText}/>
+            style={styles.styleMsgText}
+            baseFontStyle={styles.styleMsgText}/>
       }
       {
         if ev.reactions?
@@ -85,7 +85,7 @@ export default TextMsg = ({ev}) ->
             {
               Object.entries(ev.reactions).map ([key, value]) ->
                 <Text
-                  style={if ev.self then styles.styleReactionReverse else styles.styleReaction}
+                  style={styles.styleReaction}
                   key={key}>
                   {key} {value}
                 </Text>
@@ -95,12 +95,12 @@ export default TextMsg = ({ev}) ->
       {
         if ev.edited
           <Text
-            style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
+            style={styles.styleMsgTime}>
             {translate 'room_msg_edited'}
           </Text>
       }
       <Text
-        style={if ev.self then styles.styleMsgTimeReverse else styles.styleMsgTime}>
+        style={styles.styleMsgTime}>
         {util.formatTime date}
       </Text>
     </View>
@@ -174,16 +174,14 @@ buildStyles = (theme) ->
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
     styleReactionReverse:
       color: theme.COLOR_TEXT_PRIMARY
-
-  styles.styleMsgBubbleReverse =
-    Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
-  styles.styleMsgBubbleReverseFailed =
-    Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
-  styles.styleMsgTextReverse =
-    Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
-  styles.styleMsgTimeReverse =
-    Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
-  styles.styleReactionReverse =
-    Object.assign {}, styles.styleReaction, styles.styleReactionReverse
+  
+  styles.reverse = Object.assign {}, styles,
+    styleMsgBubble: Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
+    styleMsgText: Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
+    styleMsgTime: Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
+    styleReaction: Object.assign {}, styles.styleReaction, styles.styleReactionReverse
+    styleMsgLink: Object.assign {}, styles.styleMsgLink, styles.styleMsgLinkReverse
+    # Failed is always reverse
+    styleMsgBubbleReverseFailed: Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
 
   styles

@@ -11,9 +11,11 @@ import { performHapticFeedback } from "../../util/util"
 export default EventWithAvatar = ({ev, onMessageSelected}) ->
   [theme, styles] = useStyles buildStyles
 
+  styles = if ev.self then styles.reverse else styles
+
   <>
     <Avatar
-      style={if ev.self then styles.styleMsgAvatarReverse else styles.styleMsgAvatar}
+      style={styles.styleMsgAvatar}
       name={ev.sender.name}
       url={ev.sender.avatar}/>
     <TouchableWithoutFeedback
@@ -21,7 +23,7 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
         performHapticFeedback()
         onMessageSelected ev if onMessageSelected? and not ev.unknown # "unknown" = not decrypted yet
       }>
-      <View style={if ev.self then styles.styleChildWrapperReverse else styles.styleChildWrapper}>
+      <View style={styles.styleChildWrapper}>
       {
         switch ev.type
           when 'msg_text', 'msg_html'
@@ -52,9 +54,8 @@ buildStyles = (theme) ->
     styleChildWrapperReverse:
       flexDirection: 'row-reverse'
 
-  ret.styleMsgAvatarReverse =
-    Object.assign {}, ret.styleMsgAvatar, ret.styleMsgAvatarReverse
-  ret.styleChildWrapperReverse =
-    Object.assign {}, ret.styleChildWrapper, ret.styleChildWrapperReverse
+  ret.reverse = Object.assign {}, ret,
+    styleMsgAvatar: Object.assign {}, ret.styleMsgAvatar, ret.styleMsgAvatarReverse
+    styleChildWrapper: Object.assign {}, ret.styleChildWrapper, ret.styleChildWrapperReverse
 
   ret

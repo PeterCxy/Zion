@@ -10,14 +10,16 @@ import { useStyles } from "../../theme"
 export default RoomState = ({ev}) ->
   [theme, styles] = useStyles buildStyles
 
+  styles = if ev.self then styles.reverse else styles
+
   <>
     <Avatar
-      style={if ev.self then styles.styleAvatarReverse else styles.styleAvatar}
+      style={styles.styleAvatar}
       name={ev.sender.name}
       url={ev.sender.tinyAvatar}/>
     <View
       style={styles.styleTextWrapper}>
-      <Text style={if ev.self then styles.styleTextReverse else styles.styleText}>
+      <Text style={styles.styleText}>
         {ev.body}
       </Text>
     </View>
@@ -42,9 +44,8 @@ buildStyles = (theme) ->
     styleTextReverse:
       alignSelf: 'flex-end'
 
-  ret.styleAvatarReverse =
-    Object.assign {}, ret.styleAvatar, ret.styleAvatarReverse
-  ret.styleTextReverse =
-    Object.assign {}, ret.styleText, ret.styleTextReverse
+  ret.reverse = Object.assign {}, ret,
+    styleAvatar: Object.assign {}, ret.styleAvatar, ret.styleAvatarReverse
+    styleText: Object.assign {}, ret.styleText, ret.styleTextReverse
 
   ret
