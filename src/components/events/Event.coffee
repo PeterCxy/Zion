@@ -24,7 +24,7 @@ export default Event = React.memo ({ev, onMessageSelected}) ->
       style={wrapperStyle}>
       {
         switch ev.type
-          when 'msg_text', 'msg_html', 'msg_sticker', 'msg_image'
+          when 'msg_text', 'msg_html', 'msg_sticker', 'msg_image', 'msg_attachment'
             <EventWithAvatar ev={ev} onMessageSelected={onMessageSelected}/>
           when 'room_state'
             <RoomState ev={ev}/>

@@ -143,6 +143,15 @@ messageEvent = (client, content) ->
           cryptoInfo: content.info.thumbnail_file
       else
         Object.assign {}, ret.info
+    when "m.file", "m.audio", "m.video"
+      # General attachments
+      ret.type = 'msg_attachment'
+      ret.info =
+        title: content.filename ? content.body
+        url: content.url
+        mime: content.info.mimetype
+        size: content.info.size
+        cryptoInfo: content.file
     when "m.bad.encrypted"
       ret.type = 'msg_text'
       ret.body = translate 'room_msg_bad_encryption'

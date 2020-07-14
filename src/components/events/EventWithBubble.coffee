@@ -1,6 +1,7 @@
 import React from "react"
 import { View } from "react-native"
 import { useStyles } from "../../theme"
+import Attachment from "./Attachment"
 import Image from "./Image"
 import TextMsg from "./TextMsg"
 
@@ -28,6 +29,8 @@ export default EventWithBubble = ({ev}) ->
             <TextMsg ev={ev}/>
           when 'msg_image'
             <Image ev={ev}/>
+          when 'msg_attachment'
+            <Attachment ev={ev}/>
       }
     </View>
   </View>

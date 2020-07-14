@@ -25,7 +25,7 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
       <View style={styles.styleChildWrapper}>
       {
         switch ev.type
-          when 'msg_text', 'msg_html', 'msg_image'
+          when 'msg_text', 'msg_html', 'msg_image', 'msg_attachment'
             <EventWithBubble ev={ev}/>
           when 'msg_sticker'
             <Sticker ev={ev}/>
