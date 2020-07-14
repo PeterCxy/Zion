@@ -72,6 +72,9 @@ messageToDescription = (content) ->
   switch content.msgtype
     when "m.text", "m.notice" then content.body
     when "m.image" then translate 'room_event_image'
+    when "m.file" then translate 'room_event_file'
+    when "m.audio" then translate 'room_event_audio'
+    when "m.video" then translate 'room_event_video'
     when "m.bad.encrypted" then translate 'room_msg_bad_encryption'
     else translate "room_msg_unknown", content.msgtype
 
