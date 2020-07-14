@@ -52,7 +52,9 @@ export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
     return Promise.resolve memCache.get url
 
   # Not found in mem cache, fetch the file or get fs cache path
-  [mimeType, file] = await cachedFetch url, mime, cryptoInfo, onProgress
+  [mimeType, file] = (await cachedFetch url, mime, cryptoInfo, onProgress) ? [null, null]
+
+  return unless mimeType? and file?
 
   # Read as data URL
   dUrl = "data:#{mimeType};base64,#{await AsyncFileOps.readAsBase64 file}"
