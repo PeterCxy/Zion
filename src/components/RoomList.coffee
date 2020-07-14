@@ -5,6 +5,7 @@ import { SharedElement } from "react-navigation-shared-element"
 import { useNavigation } from '@react-navigation/native'
 import Avatar from "./Avatar"
 import AvatarBadgeWrapper from "./AvatarBadgeWrapper"
+import Icon from "react-native-vector-icons/MaterialCommunityIcons"
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import * as mext from "../util/matrix"
@@ -29,7 +30,15 @@ transformRooms = (client, rooms) ->
         summary: desc
         timestamp: ts
         encrypted: client.isRoomEncrypted room.roomId
-    .sort (x, y) -> y.timestamp - x.timestamp
+        favorite: room.tags['m.favourite']? # we don't follow the "order" as in Riot Web
+    .sort (x, y) ->
+      # Prioritize favorite rooms
+      if x.favorite and not y.favorite
+        -1
+      else if not x.favorite and y.favorite
+        1
+      else
+        y.timestamp - x.timestamp
 
 getLatestMessage = (room) ->
   events = room.getLiveTimeline().getEvents()
@@ -85,6 +94,15 @@ RoomComponent = React.memo ({theme, styles, item}) ->
           }
         </Text>
       </View>
+      {
+        if item.favorite
+          <View style={styles.styleFavoriteWrapper}>
+            <Icon
+              name="star"
+              size={18}
+              color={theme.COLOR_ACCENT}/>
+          </View>
+      }
     </View>
   </TouchableRipple>
 , (x, y) -> JSON.stringify(x.item) == JSON.stringify(y.item)
@@ -160,3 +178,7 @@ buildStyles = (theme) ->
       fontSize: 13
       marginTop: 8
       color: theme.COLOR_TEXT_SECONDARY_ON_BACKGROUND
+    styleFavoriteWrapper:
+      justifyContent: 'center'
+      alignItems: 'center'
+      padding: 10
