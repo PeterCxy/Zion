@@ -1,5 +1,5 @@
-import React, { useCallback, useState } from "react"
-import { InteractionManager, Vibration } from "react-native"
+import React, { useCallback, useMemo, useState } from "react"
+import { useWindowDimensions, InteractionManager, Vibration } from "react-native"
 import { translate } from "./i18n"
 
 # From react-native-paper
@@ -53,6 +53,34 @@ export formatTime = (date) ->
   translate "time_format_hour_minute",
     ('' + date.getHours()).padStart(2, '0'),
     ('' + date.getMinutes()).padStart(2, '0')
+
+# Fit an image inside the window, considering both
+# the original dimensions and the window size
+export useFitImageDimensions = (origWidth, origHeight) ->
+  windowWidth = useWindowDimensions().width
+  windowHeight = useWindowDimensions().height
+  windowScale = useWindowDimensions().scale
+
+  # The memo value does NOT depend on windowHeight
+  # because it might change when keyboard is shown
+  # we don't want UI to completely change
+  # just because the keyboard is shown
+  useMemo ->
+    w = origWidth / windowScale
+    if w > windowWidth * 0.6
+      w = 0.6 * windowWidth
+    if w < 50 * windowScale
+      w = 50 * windowScale
+    h = origHeight / origWidth * w
+    if h > windowHeight * 0.9
+      h = windowHeight * 0.9
+    if h < 20 * windowScale
+      h = 20 * windowScale
+      w = origWidth / origHeight * h
+      if w > windowWidth * 0.6
+        w = windowWidth * 0.6
+    [w, h]
+  , [ windowWidth, windowScale, origWidth, origHeight ]
 
 # A React hook that provides a means to
 # invoke a dialog (or dialog-like) modal component and wait for its result

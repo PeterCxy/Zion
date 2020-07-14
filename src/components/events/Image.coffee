@@ -4,6 +4,7 @@ import ImageThumbnail from "../ImageThumbnail"
 import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import { useStyles } from "../../theme"
+import * as util from "../../util/util"
 import { useNavigation } from '@react-navigation/native'
 import { TouchableRipple } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
@@ -13,26 +14,8 @@ export default Image = ({ev}) ->
   navigation = useNavigation()
   refDataUrl = useRef null # when thumbnail loaded, this will be set
   [theme, styles] = useStyles buildStyles
-  windowWidth = useWindowDimensions().width
-  windowHeight = useWindowDimensions().height
   windowScale = useWindowDimensions().scale
-
-  [width, height] = useMemo ->
-    w = ev.info.thumbnail.width / windowScale
-    if w > windowWidth * 0.6
-      w = 0.6 * windowWidth
-    if w < 50 * windowScale
-      w = 50 * windowScale
-    h = ev.info.thumbnail.height / ev.info.thumbnail.width * w
-    if h > windowHeight * 0.9
-      h = windowHeight * 0.9
-    if h < 20 * windowScale
-      h = 20 * windowScale
-      w = ev.info.thumbnail.width / ev.info.thumbnail.height * h
-      if w > windowWidth * 0.6
-        w = windowWidth * 0.6
-    [w, h]
-  , [ windowWidth, windowScale ]
+  [width, height] = util.useFitImageDimensions ev.info.thumbnail.width, ev.info.thumbnail.height
 
   httpUrl = useMemo ->
     if ev.info.thumbnail.url
