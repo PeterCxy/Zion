@@ -68,14 +68,11 @@ export default Image = ({ev}) ->
 
 buildStyles = (theme) ->
     styleWrapperWrapper:
-      borderRadius: 8
-      overflow: 'hidden'
-      padding: 4
-      backgroundColor: theme.COLOR_CHAT_BUBBLE
+      flexDirection: 'column'
+      margin: 4
     styleWrapper:
       borderRadius: 6
       overflow: 'hidden'
-      backgroundColor: theme.COLOR_CHAT_BUBBLE
     styleTextWrapper:
       position: 'absolute'
       right: 5

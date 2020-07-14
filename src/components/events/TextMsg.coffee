@@ -41,17 +41,6 @@ export default TextMsg = ({ev}) ->
     new Date ev.ts
   , [ev.ts]
 
-  bubbleStyle = if not ev.failed
-    styles.styleMsgBubble
-  else
-    styles.styleMsgBubbleReverseFailed
-
-  if ev.type == 'msg_html' and ev.body.indexOf('<li>') != -1
-    # There is a weird bug about lists in react-native-render-html
-    # that causes the view, when in auto width, wrapping at each character
-    # for now, let's fix it by making the width constant
-    bubbleStyle = Object.assign {}, bubbleStyle, { width: '80%' }
-
   fixedHtml = useMemo ->
     return null if not ev.body or ev.body == ""
     # Linkify both string and html to always produce html
@@ -109,136 +98,120 @@ export default TextMsg = ({ev}) ->
       unmounted = true
   , [previewLink]
 
-  <View style={styles.styleMsgBubbleWrapper}>
-    <View
-      style={bubbleStyle}>
-      {
-        if not ev.self
-          <Text
-            numberOfLines={1}
-            style={styles.styleMsgSender}>
-            {ev.sender.name}
-          </Text>
-      }
-      {
-        if fixedHtml?
-          <HTML
-            html={fixedHtml}
-            renderersProps={{
-              styles: styles
-            }}
-            tagsStyles={{
-              code: styles.styleCodeText
-              a: styles.styleMsgLink
-            }}
-            renderers={htmlRenderers}
-            style={styles.styleMsgText}
-            baseFontStyle={styles.styleMsgText}
-            onParsed={(parsed) -> findLink parsed}
-            onLinkPress={(ev, href) ->
-              NativeUtils.openURL href if util.isWebAddr href
-            }/>
-      }
-      {
-        if ev.reactions?
-          <View style={styles.styleReactionWrapper}>
-            {
-              Object.entries(ev.reactions).map ([key, value]) ->
-                <Text
-                  style={styles.styleReaction}
-                  key={key}>
-                  {key} {value}
-                </Text>
-            }
-          </View>
-      }
-      {
-        if ev.edited
-          <Text
-            style={styles.styleMsgTime}>
-            {translate 'room_msg_edited'}
-          </Text>
-      }
-      {
-        if previewInfo?
-          <View style={Object.assign {}, styles.styleMsgQuoteWrapper, { marginTop: 5, marginBottom: 0 }}>
-            <View style={styles.styleMsgQuoteLine}/>
-            <View style={styles.styleMsgQuoteContent}>
-              <View style={styles.styleUrlPreviewWrapper}>
-                {
-                  if previewInfo['og:title']?
-                    <TouchableWithoutFeedback
-                      onPress={-> NativeUtils.openURL previewLink}>
-                      <Text style={styles.styleUrlPreviewTitle} numberOfLines={1}>
-                        {previewInfo['og:title']}
-                      </Text>
-                    </TouchableWithoutFeedback>
-                }
-                {
-                  if previewInfo['og:site_name']?
-                    <Text style={styles.styleUrlPreviewSite} numberOfLines={1}>
-                      {previewInfo['og:site_name']}
+  <View style={styles.styleWrapper}>
+    {
+      if not ev.self
+        <Text
+          numberOfLines={1}
+          style={styles.styleMsgSender}>
+          {ev.sender.name}
+        </Text>
+    }
+    {
+      if fixedHtml?
+        <HTML
+          html={fixedHtml}
+          renderersProps={{
+            styles: styles
+          }}
+          tagsStyles={{
+            code: styles.styleCodeText
+            a: styles.styleMsgLink
+          }}
+          renderers={htmlRenderers}
+          style={styles.styleMsgText}
+          baseFontStyle={styles.styleMsgText}
+          onParsed={(parsed) -> findLink parsed}
+          onLinkPress={(ev, href) ->
+            NativeUtils.openURL href if util.isWebAddr href
+          }/>
+    }
+    {
+      if ev.reactions?
+        <View style={styles.styleReactionWrapper}>
+          {
+            Object.entries(ev.reactions).map ([key, value]) ->
+              <Text
+                style={styles.styleReaction}
+                key={key}>
+                {key} {value}
+              </Text>
+          }
+        </View>
+    }
+    {
+      if ev.edited
+        <Text
+          style={styles.styleMsgTime}>
+          {translate 'room_msg_edited'}
+        </Text>
+    }
+    {
+      if previewInfo?
+        <View style={Object.assign {}, styles.styleMsgQuoteWrapper, { marginTop: 5, marginBottom: 0 }}>
+          <View style={styles.styleMsgQuoteLine}/>
+          <View style={styles.styleMsgQuoteContent}>
+            <View style={styles.styleUrlPreviewWrapper}>
+              {
+                if previewInfo['og:title']?
+                  <TouchableWithoutFeedback
+                    onPress={-> NativeUtils.openURL previewLink}>
+                    <Text style={styles.styleUrlPreviewTitle} numberOfLines={1}>
+                      {previewInfo['og:title']}
                     </Text>
-                }
-                {
-                  if previewInfo['og:description']?
-                    <Text style={styles.styleUrlPreviewDesc}>
-                      {previewInfo['og:description']}
-                    </Text>
-                }
-              </View>
+                  </TouchableWithoutFeedback>
+              }
+              {
+                if previewInfo['og:site_name']?
+                  <Text style={styles.styleUrlPreviewSite} numberOfLines={1}>
+                    {previewInfo['og:site_name']}
+                  </Text>
+              }
+              {
+                if previewInfo['og:description']?
+                  <Text style={styles.styleUrlPreviewDesc}>
+                    {previewInfo['og:description']}
+                  </Text>
+              }
             </View>
           </View>
-      }
-      {
-        if previewImgUrl? and not (previewInfo['og:title']? or previewInfo['og:site_name']? or previewInfo['og:description']?)
-          # Show content of pure-picture URLs (e.g. Imgur) directly
-          <TouchableRipple
-            onPress={->
-              if previewImgDataRef.current?
-                navigation.navigate "ImageViewerScreen",
-                  thumbnailUrl: previewImgUrl,
-                  thumbnailDataUrl: previewImgDataRef.current
-                  # Fake an "info" object just like in the image type
-                  info:
-                    url: previewInfo['og:image']
-            }>
-            <SharedElement id={"image.thumbnail.#{previewImgUrl}"}>
-              <ImageThumbnail
-                width={previewImgWidth}
-                height={previewImgHeight}
-                url={previewImgUrl}
-                refDataUrl={previewImgDataRef}/>
-            </SharedElement>
-          </TouchableRipple>
-      }
-      <Text
-        style={styles.styleMsgTime}>
-        {util.formatTime date}
-      </Text>
-    </View>
+        </View>
+    }
+    {
+      if previewImgUrl? and not (previewInfo['og:title']? or previewInfo['og:site_name']? or previewInfo['og:description']?)
+        # Show content of pure-picture URLs (e.g. Imgur) directly
+        <TouchableRipple
+          onPress={->
+            if previewImgDataRef.current?
+              navigation.navigate "ImageViewerScreen",
+                thumbnailUrl: previewImgUrl,
+                thumbnailDataUrl: previewImgDataRef.current
+                # Fake an "info" object just like in the image type
+                info:
+                  url: previewInfo['og:image']
+          }>
+          <SharedElement id={"image.thumbnail.#{previewImgUrl}"}>
+            <ImageThumbnail
+              width={previewImgWidth}
+              height={previewImgHeight}
+              url={previewImgUrl}
+              refDataUrl={previewImgDataRef}/>
+          </SharedElement>
+        </TouchableRipple>
+    }
+    <Text
+      style={styles.styleMsgTime}>
+      {util.formatTime date}
+    </Text>
   </View>
 
 buildStyles = (theme) ->
   styles =
-    styleMsgBubbleWrapper:
-      # Make the wrapper width fill the rest of the flexbox
-      # Without wrapper, the max width of the bubble is
-      # relative to the entire list, not the rest of flex
-      flex: 1
-    styleMsgBubble:
-      alignSelf: 'flex-start' # Wrap-Content
-      backgroundColor: theme.COLOR_CHAT_BUBBLE
-      maxWidth: '90%'
-      paddingStart: 10
-      paddingEnd: 10
-      borderRadius: 8
-    styleMsgBubbleReverse:
-      alignSelf: 'flex-end'
-      paddingTop: 5
-      backgroundColor: theme.COLOR_PRIMARY
-    styleMsgBubbleReverseFailed:
-      backgroundColor: theme.COLOR_CHAT_BUBBLE_FAILED
+    styleWrapper:
+      marginStart: 10
+      marginEnd: 10
+    styleWrapperReverse:
+      marginTop: 5
     styleMsgText:
       fontSize: 14
       color: theme.COLOR_CHAT_TEXT
@@ -312,14 +285,12 @@ buildStyles = (theme) ->
       color: theme.COLOR_TEXT_PRIMARY
   
   styles.reverse = Object.assign {}, styles,
-    styleMsgBubble: Object.assign {}, styles.styleMsgBubble, styles.styleMsgBubbleReverse
+    styleWrapper: Object.assign {}, styles.styleWrapper, styles.styleWrapperReverse
     styleMsgText: Object.assign {}, styles.styleMsgText, styles.styleMsgTextReverse
     styleMsgTime: Object.assign {}, styles.styleMsgTime, styles.styleMsgTimeReverse
     styleReaction: Object.assign {}, styles.styleReaction, styles.styleReactionReverse
     styleMsgLink: Object.assign {}, styles.styleMsgLink, styles.styleMsgLinkReverse
     styleMsgQuoteLine: Object.assign {}, styles.styleMsgQuoteLine, styles.styleMsgQuoteLineReverse
-    # Failed is always reverse
-    styleMsgBubbleReverseFailed: Object.assign {}, styles.styleMsgBubbleReverse, styles.styleMsgBubbleReverseFailed
     styleUrlPreviewTitle: Object.assign {}, styles.styleUrlPreviewTitle, styles.styleUrlPreviewTitleReverse
     styleUrlPreviewSite: Object.assign {}, styles.styleUrlPreviewSite, styles.styleUrlPreviewSiteReverse
     styleUrlPreviewDesc: Object.assign {}, styles.styleUrlPreviewDesc, styles.styleUrlPreviewDescReverse

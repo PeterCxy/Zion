@@ -1,9 +1,8 @@
 import React from "react"
 import { TouchableWithoutFeedback, View } from "react-native"
 import Avatar from "../Avatar"
-import TextMsg from "./TextMsg"
+import EventWithBubble from "./EventWithBubble"
 import Sticker from "./Sticker"
-import Image from "./Image"
 import { useStyles } from "../../theme"
 import { performHapticFeedback } from "../../util/util"
 
@@ -26,12 +25,10 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
       <View style={styles.styleChildWrapper}>
       {
         switch ev.type
-          when 'msg_text', 'msg_html'
-            <TextMsg ev={ev}/>
+          when 'msg_text', 'msg_html', 'msg_image'
+            <EventWithBubble ev={ev}/>
           when 'msg_sticker'
             <Sticker ev={ev}/>
-          when 'msg_image'
-            <Image ev={ev}/>
       }
       </View>
     </TouchableWithoutFeedback>
