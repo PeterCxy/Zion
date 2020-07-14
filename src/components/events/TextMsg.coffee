@@ -1,5 +1,5 @@
-import React, { useCallback, useContext, useEffect, useMemo, useState } from "react"
-import { View, Text, TouchableWithoutFeedback } from "react-native"
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from "react"
+import { View, Text, TouchableWithoutFeedback, useWindowDimensions } from "react-native"
 import linkifyHtml from 'linkifyjs/html'
 import linkifyStr from 'linkifyjs/string'
 import HTML from "react-native-render-html"
@@ -8,6 +8,10 @@ import { MatrixClientContext } from "../../util/client"
 import { translate } from "../../util/i18n"
 import * as util from "../../util/util"
 import NativeUtils from "../../util/NativeUtils"
+import ImageThumbnail from "../ImageThumbnail"
+import { useNavigation } from "@react-navigation/native"
+import { TouchableRipple } from "react-native-paper"
+import { SharedElement } from "react-navigation-shared-element"
 
 htmlRenderers =
   blockquote: (_, children, __, passProps) ->
@@ -28,6 +32,8 @@ fixHtml = (html) ->
 export default TextMsg = ({ev}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
+  windowScale = useWindowDimensions().scale
+  navigation = useNavigation()
 
   styles = if ev.self then styles.reverse else styles
 
@@ -59,6 +65,17 @@ export default TextMsg = ({ev}) ->
   # The link to show preview for
   [previewLink, setPreviewLink] = useState null
   [previewInfo, setPreviewInfo] = useState null
+  [previewImgWidth, previewImgHeight] =
+    util.useFitImageDimensions previewInfo?['og:image:width'], previewInfo?['og:image:height']
+  previewImgUrl = useMemo ->
+    return unless previewInfo? and previewInfo['og:image'] and previewImgWidth? and previewImgHeight?
+
+    url = client.mxcUrlToHttp previewInfo['og:image'],
+      previewImgWidth * windowScale, previewImgHeight * windowScale, 'scale'
+
+    return url
+  , [previewInfo, previewImgWidth, previewImgHeight]
+  previewImgDataRef = useRef null
 
   findLink = useCallback (nodes, arr = []) ->
     return if previewLink?
@@ -172,6 +189,28 @@ export default TextMsg = ({ev}) ->
               </View>
             </View>
           </View>
+      }
+      {
+        if previewImgUrl? and not (previewInfo['og:title']? or previewInfo['og:site_name']? or previewInfo['og:description']?)
+          # Show content of pure-picture URLs (e.g. Imgur) directly
+          <TouchableRipple
+            onPress={->
+              if previewImgDataRef.current?
+                navigation.navigate "ImageViewerScreen",
+                  thumbnailUrl: previewImgUrl,
+                  thumbnailDataUrl: previewImgDataRef.current
+                  # Fake an "info" object just like in the image type
+                  info:
+                    url: previewInfo['og:image']
+            }>
+            <SharedElement id={"image.thumbnail.#{previewImgUrl}"}>
+              <ImageThumbnail
+                width={previewImgWidth}
+                height={previewImgHeight}
+                url={previewImgUrl}
+                refDataUrl={previewImgDataRef}/>
+            </SharedElement>
+          </TouchableRipple>
       }
       <Text
         style={styles.styleMsgTime}>

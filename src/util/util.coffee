@@ -66,6 +66,7 @@ export useFitImageDimensions = (origWidth, origHeight) ->
   # we don't want UI to completely change
   # just because the keyboard is shown
   useMemo ->
+    return [null, null] unless origWidth? and origHeight?
     w = origWidth / windowScale
     if w > windowWidth * 0.6
       w = 0.6 * windowWidth
