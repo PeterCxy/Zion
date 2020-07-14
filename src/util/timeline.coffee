@@ -130,14 +130,14 @@ messageEvent = (client, content) ->
     when "m.image"
       ret.type = 'msg_image'
       ret.info =
-        width: content.info.w
-        height: content.info.h
+        width: content.info.w ? 512
+        height: content.info.h ? 512
         url: content.url
         mime: content.info.mimetype
         cryptoInfo: content.file
       ret.info.thumbnail = if content.info.thumbnail_info?
-          width: content.info.thumbnail_info.w
-          height: content.info.thumbnail_info.h
+          width: content.info.thumbnail_info.w ? 512
+          height: content.info.thumbnail_info.h ? 512
           url: content.info.thumbnail_url
           mime: content.info.thumbnail_info.mimetype
           cryptoInfo: content.info.thumbnail_file
