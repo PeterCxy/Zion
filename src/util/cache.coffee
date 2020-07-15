@@ -44,6 +44,36 @@ export cachedFetch = (url, mime, cryptoInfo, onProgress) ->
     .registerProgressListener onProgress
     .fetch()
 
+# Check if a remote URL is currently being downloaded
+# If so, return the ongoing promise and register the onProgress listener
+# Otherwise, returns null
+export checkOngoingFetch = (url, onProgress) ->
+  # We don't care about mime and cryptoInfo when checking
+  # because we don't expect one URL to be supplied with different
+  # MIMEs and cryptoInfos
+  dl = await CachedDownload.getInstance url, null, null, false
+  return null unless dl?
+  dl.registerProgressListener onProgress
+  # We have to do this because if we just return
+  # a promise, it will be flattend automatically
+  return
+    promise: dl.fetch()
+
+# Check if a remote URL has already been downloaded to local cache
+# if so, return [mime, path]
+export checkCache = (url) ->
+  basePath = await fsCachePath url
+  items = null
+  try
+    items = await RNFS.readDir basePath
+  catch err
+    # treat as items = null
+  if not items? or items.length == 0
+    return null
+  file = items[0].path
+  mimeType = mimeUtils.lookup file
+  return [mimeType, file]
+
 # Fetch as data URL
 # Also adds a layer of in-memory LRU cache for small files
 export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
@@ -72,15 +102,12 @@ export cachedFetchAsDataURL = (url, mime, cryptoInfo, onProgress) ->
 class CachedDownload
   @instances: {}
 
-  @calculateInstanceHash: (url, mime, cryptoInfo) ->
-    await sha1 JSON.stringify
-      url: url
-      mime: mime
-      cryptoInfo: cryptoInfo
+  @calculateInstanceHash: (url) ->
+    await sha1 url
 
-  @getInstance: (url, mime, cryptoInfo) ->
-    hash = await @calculateInstanceHash url, mime, cryptoInfo
-    if not @instances[hash]
+  @getInstance: (url, mime, cryptoInfo, createNew = true) ->
+    hash = await @calculateInstanceHash url
+    if not @instances[hash] and createNew
       @instances[hash] = new CachedDownload url, mime, cryptoInfo
     @instances[hash]
 
@@ -95,7 +122,7 @@ class CachedDownload
 
   deleteSelf: =>
     # Delete ourselves from the instance list
-    hash = await CachedDownload.calculateInstanceHash @url, @mime, @cryptoInfo
+    hash = await CachedDownload.calculateInstanceHash @url
     delete CachedDownload.instances[hash]
 
   fetch: =>
@@ -121,7 +148,7 @@ class CachedDownload
     await RNFS.mkdir FS_CACHE_PATH
     await RNFS.mkdir FS_TEMP_PATH
     # Then check fs cache
-    fsCacheRes = await @_tryDetectFsCache()
+    fsCacheRes = await checkCache @url
     if fsCacheRes?
       # FS cache found
       return fsCacheRes
@@ -161,19 +188,6 @@ class CachedDownload
     filePath = "#{basePath}/file.#{mimeUtils.extension mimeType}"
     await AsyncFileOps.copyFile path, filePath
     filePath
-
-  _tryDetectFsCache: =>
-    basePath = await fsCachePath @url
-    items = null
-    try
-      items = await RNFS.readDir basePath
-    catch err
-      # treat as items = null
-    if not items? or items.length == 0
-      return null
-    file = items[0].path
-    mimeType = mimeUtils.lookup file
-    return [mimeType, file]
 
 # A React hook for using cached dataURL
 # When decryption is needed, mime and cryptoInfo must not be null
