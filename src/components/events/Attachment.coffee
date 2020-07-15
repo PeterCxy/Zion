@@ -40,6 +40,8 @@ export default Attachment = ({ev, onExtraInfoChange}) ->
     setState STATE_DOWNLOADED
     onExtraInfoChange
       savable: true
+      save: ->
+        NativeUtils.saveFileToExternal path, ev.info.title, mime
   , []
 
   handleFetchPromise = useCallback (promise) ->

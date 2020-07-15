@@ -108,8 +108,9 @@ export default Chat = ({route, navigation}) ->
         style={styles.styleTimeline}
         roomId={roomId}
         onMessageSelected={(msg, extraInfo) ->
-          setSelectedMsg msg unless msg.redacted or (not msg.sent and not msg.failed)
-          setSelectedMsgExtraInfo extraInfo
+          unless msg.redacted or (not msg.sent and not msg.failed)
+            setSelectedMsgExtraInfo extraInfo
+            setSelectedMsg msg
         }
         onLoadingStateChange={setLoading}/>
       <ProgressBar
@@ -222,7 +223,15 @@ renderNormalMessageOpsMenu = (client, msg, extraInfo, roomId, invokeEmojiPicker,
       if extraInfo?.savable
         <BottomSheetItem
           icon="download"
-          title={translate "msg_ops_save"}/>
+          title={translate "msg_ops_save"}
+          onPress={->
+            onDismiss()
+            try
+              await extraInfo.save()
+            catch err
+              console.log "Failed to save message, error:"
+              console.log err
+          }/>
     }
     {
       if msg?.self
