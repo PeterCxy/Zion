@@ -5,7 +5,7 @@ import Attachment from "./Attachment"
 import Image from "./Image"
 import TextMsg from "./TextMsg"
 
-export default EventWithBubble = ({ev}) ->
+export default EventWithBubble = ({ev, onExtraInfoChange}) ->
   [theme, styles] = useStyles buildStyles
 
   styles = if ev.self then styles.reverse else styles
@@ -30,7 +30,7 @@ export default EventWithBubble = ({ev}) ->
           when 'msg_image'
             <Image ev={ev}/>
           when 'msg_attachment'
-            <Attachment ev={ev}/>
+            <Attachment ev={ev} onExtraInfoChange={onExtraInfoChange}/>
       }
     </View>
   </View>

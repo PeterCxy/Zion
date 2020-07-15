@@ -1,4 +1,4 @@
-import React from "react"
+import React, { useState } from "react"
 import { TouchableWithoutFeedback, View } from "react-native"
 import Avatar from "../Avatar"
 import EventWithBubble from "./EventWithBubble"
@@ -9,6 +9,11 @@ import { performHapticFeedback } from "../../util/util"
 # An event that needs to show an avatar (normal-sized)
 export default EventWithAvatar = ({ev, onMessageSelected}) ->
   [theme, styles] = useStyles buildStyles
+  # Extra information that will be passed to onMessageSelected()
+  # For now, the information includes:
+  #  - savabale: set to true if the event can be saved (e.g. an attachment)
+  #  - save: actually do save the event when savable
+  [extraInfo, setExtraInfo] = useState null
 
   styles = if ev.self then styles.reverse else styles
 
@@ -20,13 +25,13 @@ export default EventWithAvatar = ({ev, onMessageSelected}) ->
     <TouchableWithoutFeedback
       onLongPress={->
         performHapticFeedback()
-        onMessageSelected ev if onMessageSelected? and not ev.unknown # "unknown" = not decrypted yet
+        onMessageSelected ev, extraInfo if onMessageSelected? and not ev.unknown # "unknown" = not decrypted yet
       }>
       <View style={styles.styleChildWrapper}>
       {
         switch ev.type
           when 'msg_text', 'msg_html', 'msg_image', 'msg_attachment'
-            <EventWithBubble ev={ev}/>
+            <EventWithBubble ev={ev} onExtraInfoChange={setExtraInfo}/>
           when 'msg_sticker'
             <Sticker ev={ev}/>
       }

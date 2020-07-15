@@ -19,7 +19,7 @@ FILE_SIZE_OPTIONS =
 
 # Note: we do NOT expect the content of ev.info to change
 #       during the lifetime of this component.
-export default Attachment = ({ev}) ->
+export default Attachment = ({ev, onExtraInfoChange}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [state, setState] = useState STATE_INITIAL
@@ -34,13 +34,19 @@ export default Attachment = ({ev}) ->
     client.mxcUrlToHttp ev.info.url ? ev.info.cryptoInfo.url
   , []
 
+  handleDownloadedFile = useCallback (mime, path) ->
+    setDownloadedMime mime
+    setDownloadedPath path
+    setState STATE_DOWNLOADED
+    onExtraInfoChange
+      savable: true
+  , []
+
   handleFetchPromise = useCallback (promise) ->
     try
       [mime, path] = await promise
       console.log "Downloaded #{mime} to #{path}"
-      setDownloadedMime mime
-      setDownloadedPath path
-      setState STATE_DOWNLOADED
+      handleDownloadedFile mime, path
     catch err
       console.log err
       setState STATE_INITIAL
@@ -57,9 +63,7 @@ export default Attachment = ({ev}) ->
     do ->
       try
         [mime, path] = await cache.checkCache url
-        setDownloadedMime mime
-        setDownloadedPath path
-        setState STATE_DOWNLOADED
+        handleDownloadedFile mime, path
         return
       catch err
         # When there is no cache, the above operation will fail

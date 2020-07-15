@@ -39,6 +39,9 @@ export default Chat = ({route, navigation}) ->
   # the selectedMsg should be a transformed event as defined in
   # ../util/timeline.coffee
   [selectedMsg, setSelectedMsg] = useState null
+  # Extra information associated with the selected message
+  # see EventWithAvatar for details
+  [selectedMsgExtraInfo, setSelectedMsgExtraInfo] = useState null
 
   [emojiPickerComponent, invokeEmojiPicker] = useEmojiPicker()
   [replyComposerComponent, invokeReplyComposer] =
@@ -104,8 +107,10 @@ export default Chat = ({route, navigation}) ->
       <RoomTimeline
         style={styles.styleTimeline}
         roomId={roomId}
-        onMessageSelected={(msg) ->
-          setSelectedMsg msg unless msg.redacted or (not msg.sent and not msg.failed)}
+        onMessageSelected={(msg, extraInfo) ->
+          setSelectedMsg msg unless msg.redacted or (not msg.sent and not msg.failed)
+          setSelectedMsgExtraInfo extraInfo
+        }
         onLoadingStateChange={setLoading}/>
       <ProgressBar
         style={styles.styleProgress}
@@ -124,11 +129,15 @@ export default Chat = ({route, navigation}) ->
       }/>
     <MessageOpsMenu
       roomId={roomId}
-      onDismiss={-> setSelectedMsg null}
+      onDismiss={->
+        setSelectedMsg null
+        setSelectedMsgExtraInfo null
+      }
       invokeEmojiPicker={invokeEmojiPicker}
       invokeReplyComposer={invokeReplyComposer}
       show={selectedMsg?}
-      msg={selectedMsg}/>
+      msg={selectedMsg}
+      extraInfo={selectedMsgExtraInfo}/>
     {emojiPickerComponent}
     {replyComposerComponent}
   </>
@@ -139,7 +148,7 @@ Chat.sharedElements = (route, otherRoute, showing) ->
   if otherRoute.name == "HomeRoomList" or otherRoute.name == "RoomDetails"
     ["room.#{route.params.roomId}.avatar"]
 
-MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss}) ->
+MessageOpsMenu = ({show, msg, extraInfo, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss}) ->
   client = useContext MatrixClientContext
 
   <BottomSheet
@@ -148,13 +157,14 @@ MessageOpsMenu = ({show, msg, roomId, invokeEmojiPicker, invokeReplyComposer, on
     onClose={onDismiss}>
     {
       if not msg?.failed
-        renderNormalMessageOpsMenu client, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss
+        renderNormalMessageOpsMenu client, msg, extraInfo,
+          roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss
       else
         renderFailedMessageOpsMenu client, msg, roomId, onDismiss
     }
   </BottomSheet>
 
-renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss) ->
+renderNormalMessageOpsMenu = (client, msg, extraInfo, roomId, invokeEmojiPicker, invokeReplyComposer, onDismiss) ->
   <>
     <BottomSheetItem
       icon="reply"
@@ -207,6 +217,12 @@ renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeRepl
               console.log "Failed to edit message, error:"
               console.log err
           }/>
+    }
+    {
+      if extraInfo?.savable
+        <BottomSheetItem
+          icon="download"
+          title={translate "msg_ops_save"}/>
     }
     {
       if msg?.self
