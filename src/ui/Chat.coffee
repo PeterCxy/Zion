@@ -187,7 +187,7 @@ renderNormalMessageOpsMenu = (client, msg, roomId, invokeEmojiPicker, invokeRepl
           }/>
     }
     {
-      if msg?.self
+      if msg?.self and msg?.type isnt 'msg_attachment'
         # Allow editing messages from self
         # we don't merge this and redaction with a fragment
         # because that messes with the height calculation of BottomSheet
