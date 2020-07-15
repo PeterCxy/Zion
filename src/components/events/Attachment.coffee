@@ -38,6 +38,7 @@ export default Attachment = ({ev, onExtraInfoChange}) ->
     setDownloadedMime mime
     setDownloadedPath path
     setState STATE_DOWNLOADED
+    # For use in Chat.coffee to determine whether to show the save icon
     onExtraInfoChange
       savable: true
       save: ->
