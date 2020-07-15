@@ -1,13 +1,21 @@
-import React from "react"
+import React, { useMemo } from "react"
 import { Text, View } from "react-native"
 import { useStyles } from "../../theme"
 import Icon from "react-native-vector-icons/MaterialCommunityIcons"
+import filesize from "filesize"
 
 export default Attachment = ({ev}) ->
   [theme, styles] = useStyles buildStyles
 
   styles = if ev.self then styles.reverse else styles
   iconColor = if ev.self then theme.COLOR_TEXT_PRIMARY else theme.COLOR_TEXT_ON_BACKGROUND
+
+  readableSize = useMemo ->
+    filesize ev.info.size,
+      base: 2
+      locale: true
+      round: 2
+  , [ev.info.size]
 
   <View style={styles.styleWrapper}>
     <View style={styles.styleActionIconWrapper}>
@@ -21,7 +29,7 @@ export default Attachment = ({ev}) ->
         {ev.info.title}
       </Text>
       <Text style={styles.styleInfoSize} numberOfLines={1}>
-        {ev.info.size}
+        {readableSize}
       </Text>
     </View>
   </View>
