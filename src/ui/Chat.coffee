@@ -234,6 +234,16 @@ renderNormalMessageOpsMenu = (client, msg, extraInfo, roomId, invokeEmojiPicker,
           }/>
     }
     {
+      if extraInfo?.shareable
+        <BottomSheetItem
+          icon="share"
+          title={translate "msg_ops_share"}
+          onPress={->
+            onDismiss()
+            extraInfo.share()
+          }/>
+    }
+    {
       if msg?.self
         # Only allow redacting messages from self
         <BottomSheetItem

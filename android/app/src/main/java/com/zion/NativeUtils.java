@@ -2,6 +2,7 @@ package com.zion;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 
@@ -56,5 +57,25 @@ public class NativeUtils extends ReactContextBaseJavaModule {
         } else {
             promise.reject("No activity found");
         }
+    }
+
+    // Share a file in internal cache to other applications
+    @ReactMethod
+    public void shareFile(String path, String name, String mime, String chooserTitle) {
+        Intent intent = new Intent(Intent.ACTION_SEND);
+        Uri uri = FileProvider.getUriForFile(mContext,
+            "im.angry.zion.fileprovider", new File(path));
+        intent.setClipData(new ClipData(
+            name, new String[]{mime},
+            new ClipData.Item(uri)));
+        intent.putExtra(Intent.EXTRA_STREAM, uri);
+        intent.setType(mime);
+        intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+
+        // The chooser must be started from a real activity
+        final Activity activity = getCurrentActivity();
+
+        if (activity != null)
+            activity.startActivity(Intent.createChooser(intent, chooserTitle));
     }
 }

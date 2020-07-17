@@ -7,6 +7,7 @@ import { useStyles } from "../../theme"
 import { MatrixClientContext } from "../../util/client"
 import * as cache from "../../util/cache"
 import NativeUtils from "../../util/NativeUtils"
+import { translate } from "../../util/i18n"
 
 STATE_INITIAL = 0
 STATE_DOWNLOADING = 1
@@ -43,6 +44,9 @@ export default Attachment = ({ev, onExtraInfoChange}) ->
       savable: true
       save: ->
         NativeUtils.saveFileToExternal path, ev.info.title, mime
+      shareable: true
+      share: ->
+        NativeUtils.shareFile path, ev.info.title, mime, translate "msg_ops_share"
   , []
 
   handleFetchPromise = useCallback (promise) ->
