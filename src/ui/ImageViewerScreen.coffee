@@ -1,11 +1,14 @@
 import React, { useContext, useEffect, useState } from "react"
-import { Easing, Image, View } from "react-native"
+import { Easing, Image, TouchableWithoutFeedback, View } from "react-native"
 import { ProgressBar } from "react-native-paper"
 import { SharedElement } from "react-navigation-shared-element"
 import ImageViewer from "react-native-image-zoom-viewer"
+import { BottomSheet, BottomSheetItem } from "../components/BottomSheet"
 import { MatrixClientContext } from "../util/client"
 import * as cache from "../util/cache"
 import * as util from "../util/util"
+import { translate } from "../util/i18n"
+import NativeUtils from "../util/NativeUtils"
 import { useStyles } from "../theme"
 
 export default ImageViewerScreen = ({route}) ->
@@ -20,6 +23,7 @@ export default ImageViewerScreen = ({route}) ->
   [loading, setLoading] = useState true
   [dataUrl, setDataUrl] = useState thumbnailDataUrl
   [progress, setProgress] = useState -1
+  [showMenu, setShowMenu] = useState false
 
   largeUrl = client.mxcUrlToHttp info.url ? info.cryptoInfo.url
   [largeDataUrl, _] = cache.useCachedFetch largeUrl, info.mime,
@@ -38,23 +42,56 @@ export default ImageViewerScreen = ({route}) ->
     return
   , [largeDataUrl?]
 
-  <ImageViewer
-    imageUrls={[{ url: dataUrl }]}
-    saveToLocalByLongPress={false} # TODO: too ugly. implement this ourselves.
-    renderHeader={->
-      <ProgressBar
-        style={styles.styleProgress}
-        indeterminate={progress == -1}
-        progress={progress}
-        color={theme.COLOR_ACCENT}
-        visible={loading}/>
-    }
-    renderImage={(props) ->
-      # TODO: handle multiple images (how to set the IDs?)
-      <SharedElement id={"image.thumbnail.#{thumbnailUrl}"}>
-        <Image {...props}/>
-      </SharedElement>
-    }/>
+  <>
+    <ImageViewer
+      imageUrls={[{ url: dataUrl }]}
+      saveToLocalByLongPress={false} # TODO: too ugly. implement this ourselves.
+      renderHeader={->
+        <ProgressBar
+          style={styles.styleProgress}
+          indeterminate={progress == -1}
+          progress={progress}
+          color={theme.COLOR_ACCENT}
+          visible={loading}/>
+      }
+      renderImage={(props) ->
+        # TODO: handle multiple images (how to set the IDs?)
+        <TouchableWithoutFeedback
+          onLongPress={->
+            util.performHapticFeedback()
+            return if loading or not largeDataUrl?
+            setShowMenu true
+          }>
+          <SharedElement id={"image.thumbnail.#{thumbnailUrl}"}>
+            <Image {...props}/>
+          </SharedElement>
+        </TouchableWithoutFeedback>
+      }/>
+    <BottomSheet
+      show={showMenu}
+      title={translate "image_ops"}
+      onClose={-> setShowMenu false}>
+      <BottomSheetItem
+        icon="download"
+        title={translate "msg_ops_save"}
+        onPress={->
+          setShowMenu false
+          [mime, path] = await cache.checkCache largeUrl
+          try
+            await NativeUtils.saveFileToExternal path, info.title, mime
+          catch err
+            console.log err
+        }/>
+      <BottomSheetItem
+        icon="share"
+        title={translate "msg_ops_share"}
+        onPress={->
+          setShowMenu false
+          [mime, path] = await cache.checkCache largeUrl
+          NativeUtils.shareFile path, info.title, mime, translate "msg_ops_share"
+        }/>
+    </BottomSheet>
+  </>
 
 ImageViewerScreen.sharedElements = (route, otherRoute, showing) ->
   # Only use the animation when coming FROM the Chat UI

@@ -130,6 +130,7 @@ messageEvent = (client, content) ->
     when "m.image"
       ret.type = 'msg_image'
       ret.info =
+        title: content.filename ? content.body
         width: content.info.w ? 512
         height: content.info.h ? 512
         url: content.url
