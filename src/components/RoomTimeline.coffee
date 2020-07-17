@@ -99,6 +99,15 @@ RoomTimelineInner = ({roomId, onLoadingStateChange, onMessageSelected, style, fo
     # So let's wait until that finishes before we load
     util.asyncRunAfterInteractions ->
       await getTlWindow().load()
+      # Ensure we always load some historical events to
+      # fill at least one page in the list
+      # Otherwise, onEndReached might be called right on
+      # load which is not a good user experience, and
+      # if the content in live timeline renders to less
+      # than the height of the list, onEndReached may fail
+      # to execute, making the timeline unscrollable
+      if getTlWindow().canPaginate EventTimeline.BACKWARDS
+        await getTlWindow().paginate EventTimeline.BACKWARDS, 20
       updateEvents()
       updateReadReceipt()
       setInitialized true
