@@ -54,6 +54,12 @@ export formatTime = (date) ->
     ('' + date.getHours()).padStart(2, '0'),
     ('' + date.getMinutes()).padStart(2, '0')
 
+# Extract file name from a URL
+export extractUrlFileName = (url) ->
+  if url.endsWith '/'
+    url = url[0...url.length - 1]
+  url[url.lastIndexOf('/') + 1...]
+
 # Fit an image inside the window, considering both
 # the original dimensions and the window size
 export useFitImageDimensions = (origWidth, origHeight) ->

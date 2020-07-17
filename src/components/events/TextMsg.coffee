@@ -188,6 +188,7 @@ export default TextMsg = ({ev}) ->
                 thumbnailDataUrl: previewImgDataRef.current
                 # Fake an "info" object just like in the image type
                 info:
+                  title: util.extractUrlFileName previewLink
                   url: previewInfo['og:image']
           }>
           <SharedElement id={"image.thumbnail.#{previewImgUrl}"}>
