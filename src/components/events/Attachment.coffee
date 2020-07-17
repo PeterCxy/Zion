@@ -109,7 +109,7 @@ export default Attachment = ({ev, onExtraInfoChange}) ->
       when STATE_INITIAL
         setState STATE_DOWNLOADING
       when STATE_DOWNLOADED
-        NativeUtils.openFile downloadedPath
+        NativeUtils.openFile downloadedPath, ev.info.title
   , [state, downloadedPath]
 
   <View style={styles.styleWrapper}>

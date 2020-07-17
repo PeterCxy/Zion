@@ -6,8 +6,6 @@ import android.content.ClipData;
 import android.content.Intent;
 import android.net.Uri;
 
-import androidx.core.content.FileProvider;
-
 import com.facebook.react.bridge.ReactApplicationContext;
 import com.facebook.react.bridge.ReactContextBaseJavaModule;
 import com.facebook.react.bridge.ReactMethod;
@@ -36,12 +34,14 @@ public class NativeUtils extends ReactContextBaseJavaModule {
     }
 
     // Open a file in internal cache path (FS_CACHE_PATH) in other applications
+    // Since our internal cached files do not keep the original name, the name
+    // must be passed via the second argument
     @ReactMethod
-    public void openFile(String path) {
+    public void openFile(String path, String name) {
         Intent intent = new Intent(Intent.ACTION_VIEW);
         intent.setData(
-            FileProvider.getUriForFile(mContext,
-                "im.angry.zion.fileprovider", new File(path)));
+            RemapFileProvider.getUriForFileRename(mContext,
+                "im.angry.zion.fileprovider", new File(path), name));
         intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
         intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         mContext.startActivity(intent);
@@ -63,8 +63,8 @@ public class NativeUtils extends ReactContextBaseJavaModule {
     @ReactMethod
     public void shareFile(String path, String name, String mime, String chooserTitle) {
         Intent intent = new Intent(Intent.ACTION_SEND);
-        Uri uri = FileProvider.getUriForFile(mContext,
-            "im.angry.zion.fileprovider", new File(path));
+        Uri uri = RemapFileProvider.getUriForFileRename(mContext,
+            "im.angry.zion.fileprovider", new File(path), name);
         intent.setClipData(new ClipData(
             name, new String[]{mime},
             new ClipData.Item(uri)));
