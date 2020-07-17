@@ -246,3 +246,10 @@ export cancelEvent = (client, roomId, eventId) ->
 export resendEvent = (client, roomId, eventId) ->
   ev = findPendingEventInRoom client, roomId, eventId
   client.resendEvent ev, client.getRoom roomId if ev?
+
+export setRoomFavorite = (client, roomId) ->
+  client.setRoomTag roomId, 'm.favourite',
+    order: 1
+
+export unsetRoomFavorite = (client, roomId) ->
+  client.deleteRoomTag roomId, 'm.favourite'

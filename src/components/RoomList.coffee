@@ -45,14 +45,15 @@ getLatestMessage = (room) ->
   latest = events[events.length - 1]
   [latest.getTs(), mext.eventToDescription(latest)]
 
-renderRoom = (theme, styles, {item}) ->
+renderRoom = (theme, styles, onRoomSelected, {item}) ->
   <RoomComponent
     theme={theme}
     styles={styles}
+    onRoomSelected={onRoomSelected}
     item={item}/>
 
 # Use a standalone component to prevent excessive re-rendering
-RoomComponent = React.memo ({theme, styles, item}) ->
+RoomComponent = React.memo ({theme, styles, onRoomSelected, item}) ->
   navigation = useNavigation()
   avatarDataRef = useRef null
 
@@ -61,6 +62,10 @@ RoomComponent = React.memo ({theme, styles, item}) ->
       navigation.navigate "Chat",
         roomId: item.key
         avatarPlaceholder: avatarDataRef.current
+    }
+    onLongPress={->
+      util.performHapticFeedback()
+      onRoomSelected item
     }
     rippleColor={theme.COLOR_RIPPLE}
     style={styles.styleRoomItem}>
@@ -107,7 +112,7 @@ RoomComponent = React.memo ({theme, styles, item}) ->
   </TouchableRipple>
 , (x, y) -> JSON.stringify(x.item) == JSON.stringify(y.item)
 
-export default RoomList = () ->
+export default RoomList = ({onRoomSelected}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [rooms, setRooms] = useState []
@@ -139,7 +144,7 @@ export default RoomList = () ->
   <>
     <FlatList
       data={rooms}
-      renderItem={(data) -> renderRoom theme, styles, data}/>
+      renderItem={(data) -> renderRoom theme, styles, onRoomSelected, data}/>
   </>
 
 buildStyles = (theme) ->

@@ -2,8 +2,10 @@ import React, { useContext, useEffect, useMemo, useState } from "react"
 import { View } from "react-native"
 import { Appbar } from "react-native-paper"
 import RoomList from "../components/RoomList"
+import { BottomSheet, BottomSheetItem } from "../components/BottomSheet"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
+import * as mext from "../util/matrix"
 
 STATE_ERROR = -1
 STATE_SYNCING = 0
@@ -23,6 +25,9 @@ export default HomeRoomList = ({navigation}) ->
 
   # Use our own sync states to accomodate for possible API changes
   [syncState, setSyncState] = useState STATE_CONNECTING
+  # Saves the current room object (as defined in RoomList.coffee)
+  # selected via long-ress (short-press is handled in RoomList directly via navigation)
+  [selectedRoom, setSelectedRoom] = useState null
 
   # Listen for connection state changes
   useEffect ->
@@ -52,5 +57,37 @@ export default HomeRoomList = ({navigation}) ->
         title={translate "app_name"}
         subtitle={stateMessages[syncState]}/>
     </Appbar.Header>
-    <RoomList/>
+    <RoomList
+      onRoomSelected={setSelectedRoom}/>
+    <BottomSheet
+      title={translate "room_ops"}
+      show={selectedRoom?}
+      onClose={-> setSelectedRoom null}>
+      {
+        if not selectedRoom?.favorite
+          <BottomSheetItem
+            icon="star-outline"
+            title={translate "room_ops_favorite"}
+            onPress={->
+              setSelectedRoom null
+              try
+                await mext.setRoomFavorite client, selectedRoom.key
+              catch err
+                console.log "cannot set room favorite"
+                console.log err
+            }/>
+        else
+          <BottomSheetItem
+            icon="star"
+            title={translate "room_ops_unfavorite"}
+            onPress={->
+              setSelectedRoom null
+              try
+                await mext.unsetRoomFavorite client, selectedRoom.key
+              catch err
+                console.log "cannot remove room favorite"
+                console.log err
+            }/>
+      }
+    </BottomSheet>
   </>
