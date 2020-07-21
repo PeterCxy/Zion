@@ -238,6 +238,14 @@ export sendReaction = (client, roomId, origId, emoji) ->
 export sendRedaction = (client, roomId, origId) ->
   client.redactEvent roomId, origId
 
+# The `info` object should be prepared by the integration manager
+# refer to Matrix docs and `../components/StickerPicker` on what `info` should contain
+export sendSticker = (client, roomId, url, desc, info) ->
+  client.sendEvent roomId, 'm.sticker',
+    url: url
+    body: desc
+    info: info
+
 export cancelEvent = (client, roomId, eventId) ->
   ev = findPendingEventInRoom client, roomId, eventId
   # Don't throw an exception if not found because it must have succeeded or been cancelled somewhere else

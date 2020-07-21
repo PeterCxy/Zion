@@ -127,6 +127,14 @@ export default Chat = ({route, navigation}) ->
           # Get rid of yellow box on this...
           console.log "Failed to send message, error:"
           console.log err
+      }
+      onSendSticker={(stickerInfo) ->
+        try
+          await mext.sendSticker client, roomId, stickerInfo.content.url,
+            stickerInfo.content.description, stickerInfo.content.info
+        catch err
+          console.log "Failed to send sticker, error:"
+          console.log err
       }/>
     <MessageOpsMenu
       roomId={roomId}
