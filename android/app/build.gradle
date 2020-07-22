@@ -190,6 +190,11 @@ android {
         }
     }
 
+    packagingOptions {
+        exclude "**/libjsc.so"
+
+    }
+
     // applicationVariants are e.g. debug, release
     applicationVariants.all { variant ->
         variant.outputs.each { output ->
@@ -221,6 +226,8 @@ dependencies {
     implementation 'com.facebook.fresco:webpsupport:2.0.+' 
     
     compile project(":olm-sdk")
+
+    implementation 'org.chromium:v8-android:+'
 
     debugImplementation("com.facebook.flipper:flipper:${FLIPPER_VERSION}") {
       exclude group:'com.facebook.fbjni'
