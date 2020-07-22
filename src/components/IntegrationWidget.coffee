@@ -1,4 +1,4 @@
-import React, { useCallback, useContext, useMemo, useRef } from "react"
+import React, { useCallback, useContext, useEffect, useState, useRef } from "react"
 import { WebView } from "react-native-webview"
 import { MatrixClientContext } from "../util/client"
 import * as integrations from "../util/integrations"
@@ -10,15 +10,31 @@ WIDGET_API_VERSIONS = [
 ]
 
 # TODO: implement more Scalar APIs
-# TODO: implement `scalar_token` for legacy IMs like Scalar
-#       but only append the parameter when the widget
-#       URL is the same as the IM
 export default IntegrationWidget = ({widget, onSendSticker}) ->
   client = useContext MatrixClientContext
+  imm = useContext integrations.IntegrationManagerManagerContext
   webviewRef = useRef null
   reqIdPromiseMap = useRef {}
-  widgetURL = useMemo -> 
+  [widgetURL, setWidgetURL] = useState -> 
     integrations.getWidgetURL widget
+
+  # Fetch scalar_token if needed for legacy IMs
+  useEffect ->
+    im = imm.isScalarUrl widget.content.url
+    unless im?
+      console.log "Refusing to add scalar_token because no matching IM found"
+      return
+
+    do ->
+      try
+        token = await im.getScalarToken()
+        return unless token?
+        setWidgetURL integrations.getWidgetURL widget, token
+      catch err
+        console.log err
+    
+    return
+  , [widget]
 
   sendMessageToWebview = useCallback (msg) ->
     webviewRef.current.injectJavaScript """
@@ -87,15 +103,28 @@ export default IntegrationWidget = ({widget, onSendSticker}) ->
 
   onLoadStart = useCallback ->
     console.log "onLoadStart"
-    webviewRef.current.injectJavaScript "window.opener = {}; window.opener.postMessage = function(data) { window.ReactNativeWebView.postMessage(JSON.stringify(data)); };"
+    webviewRef.current.injectJavaScript """
+      (function() {
+        window.opener = {};
+        postMessage = function(data) {
+          window.ReactNativeWebView.postMessage(JSON.stringify(data));
+        };
+        window.opener.postMessage = postMessage;
+        window.postMessage = postMessage;
+      })();
+    """
     #webviewRef.current.injectJavaScript "console.log = function (msg) { window.ReactNativeWebView.postMessage(msg); };"
   , []
 
   onLoad = useCallback ->
-    console.log "Sending capabilities request to widget"
-    {capabilities} = await requestWidget 'capabilities'
-    console.log "widget capabilities:"
-    console.log capabilities # TODO: what should we do with these?
+    try
+      console.log "Sending capabilities request to widget"
+      {capabilities} = await requestWidget 'capabilities'
+      console.log "widget capabilities:"
+      console.log capabilities # TODO: what should we do with these?
+    catch err
+      console.log err
+  , []
 
   onMessage = useCallback (msg) ->
     #console.log msg

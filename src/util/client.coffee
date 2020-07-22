@@ -58,6 +58,7 @@ export createMatrixClient = (baseUrl, token, uid, deviceId, getSecretStorageKey)
   await client.initCrypto()
   await client.startClient
     pendingEventOrdering: 'detached'
+    clientWellKnownPollPeriod: 60 * 60
   # TODO: remove this (force users to verify everyone in room before sending?)
   client.setGlobalErrorOnUnknownDevices false
   client

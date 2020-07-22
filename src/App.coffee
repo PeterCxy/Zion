@@ -10,6 +10,7 @@ import Home from "./ui/Home"
 import useSecretStorageKeyHandler from "./components/SecretStorageKeyHandler"
 import { reloadI18n } from "./util/i18n"
 import { createMatrixClient, MatrixClientContext } from "./util/client"
+import { IntegrationManagerManagerContext, IntegrationManagerManager } from "./util/integrations"
 
 # matrix-js-sdk uses console.error extensively
 # I don't want a red screen every time the sync
@@ -31,6 +32,10 @@ export default App = () ->
   [client, setClient] = useState null
   [curTheme, setCurTheme] = useState defTheme
   [secretKeyAccessDialog, getSecretStorageKey] = useSecretStorageKeyHandler()
+
+  # Integration Manager Manager
+  [imm, setIMM] = useState null
+
   setCurTheme = useCallback setCurTheme, []
 
   paperTheme = useMemo ->
@@ -69,6 +74,19 @@ export default App = () ->
     return
   , []
 
+  # Handle integration managers
+  useEffect ->
+    return unless client?
+
+    # Integration managers
+    _imm = new IntegrationManagerManager client
+    _imm.startListening()
+    setIMM _imm
+
+    return ->
+      _imm.stopListening()
+  , [client]
+
   <ThemeContext.Provider value={{ theme: curTheme, setTheme: setCurTheme }}>
     <PaperProvider theme={paperTheme}>
       {
@@ -81,7 +99,10 @@ export default App = () ->
         else
           <MatrixClientContext.Provider
             value={client}>
-            <Home/>
+            <IntegrationManagerManagerContext.Provider
+              value={imm}>
+              <Home/>
+            </IntegrationManagerManagerContext.Provider>
           </MatrixClientContext.Provider>
       }
       {secretKeyAccessDialog}
