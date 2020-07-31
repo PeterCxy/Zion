@@ -13,9 +13,12 @@ import java.nio.file.Files;
 
 public class MainActivity extends ReactActivity {
     private static final int REQUEST_SAVE_FILE = 0x1234;
+    private static final int REQUEST_OPEN_FILE = 0x1235;
 
     private String mFileToSave = null;
     private Promise mSaveFilePromise = null;
+
+    private Promise mOpenFilePromise = null;
 
     /**
      * Returns the name of the main component registered from JavaScript. This is used to schedule
@@ -40,6 +43,16 @@ public class MainActivity extends ReactActivity {
             }
             mFileToSave = null;
             mSaveFilePromise = null;
+        } else if (requestCode == REQUEST_OPEN_FILE) {
+            if (resultCode == Activity.RESULT_OK) {
+                if (resultData != null) {
+                    Uri uri = resultData.getData();
+                    mOpenFilePromise.resolve(uri.toString());
+                }
+            } else {
+                mOpenFilePromise.reject("The user cancelled the opening action");
+            }
+            mOpenFilePromise = null;
         }
     }
 
@@ -69,5 +82,18 @@ public class MainActivity extends ReactActivity {
         intent.setType(mime);
         intent.putExtra(Intent.EXTRA_TITLE, title);
         startActivityForResult(intent, REQUEST_SAVE_FILE);
+    }
+
+    void openDocument(Promise promise) {
+        if (mOpenFilePromise != null) {
+            promise.reject("Cannot execute multiple requests at once");
+            return;
+        }
+
+        mOpenFilePromise = promise;
+
+        Intent intent = new Intent(Intent.ACTION_OPEN_DOCUMENT);
+        intent.setType("*/*");
+        startActivityForResult(intent, REQUEST_OPEN_FILE);
     }
 }

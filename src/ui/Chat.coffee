@@ -12,6 +12,7 @@ import { useAssociatedMessageComposer } from "../components/AssociatedMessageCom
 import { useStyles } from "../theme"
 import { MatrixClientContext } from "../util/client"
 import { translate } from "../util/i18n"
+import NativeUtils from "../util/NativeUtils"
 import * as mext from "../util/matrix"
 
 export default Chat = ({route, navigation}) ->
@@ -42,6 +43,10 @@ export default Chat = ({route, navigation}) ->
   # Extra information associated with the selected message
   # see EventWithAvatar for details
   [selectedMsgExtraInfo, setSelectedMsgExtraInfo] = useState null
+
+  # For content uploading
+  [attachmentUploading, setAttachmentUploading] = useState false
+  [attachmentUploadProgress, setAttachmentUploadProgress] = useState -1
 
   [emojiPickerComponent, invokeEmojiPicker] = useEmojiPicker()
   [replyComposerComponent, invokeReplyComposer] =
@@ -119,6 +124,12 @@ export default Chat = ({route, navigation}) ->
         color={theme.COLOR_ACCENT}
         visible={loading}/>
     </View>
+    <ProgressBar
+      style={styles.styleProgress}
+      indeterminate={attachmentUploadProgress <= 0}
+      progress={attachmentUploadProgress}
+      color={theme.COLOR_ACCENT}
+      visible={attachmentUploading}/>
     <MessageComposer
       onSendClicked={(text) ->
         try
@@ -135,6 +146,20 @@ export default Chat = ({route, navigation}) ->
         catch err
           console.log "Failed to send sticker, error:"
           console.log err
+      }
+      allowSelectAttachment={not attachmentUploading}
+      onSendAttachment={(uri) ->
+        setAttachmentUploading true
+        setAttachmentUploadProgress -1
+        try
+          mxcUrl = await NativeUtils.uploadContentUri client, uri, (uploaded, total) ->
+            setAttachmentUploadProgress uploaded / total
+          console.log mxcUrl
+          # TODO: complete this
+        catch err
+          console.log "Failed to upload content, error:"
+          console.log err
+        setAttachmentUploading false
       }/>
     <MessageOpsMenu
       roomId={roomId}
@@ -295,6 +320,7 @@ buildStyles = (theme) ->
       flex: 1
       flexDirection: 'column-reverse' # To make sure ProgressBar always appear on top
       alignSelf: 'stretch'
+      marginBottom: -2 # Make the bottom progress bar (attachment uploading progress bar) overlay the timeline
     styleAvatarWrapper:
       width: 40
       height: 40

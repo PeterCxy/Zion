@@ -5,8 +5,9 @@ import { useStickerPicker } from "./StickerPicker"
 import { useStyles } from "../theme"
 import { translate } from "../util/i18n"
 import { MatrixClientContext } from "../util/client"
+import NativeUtils from "../util/NativeUtils"
 
-export default MessageComposer = ({onSendClicked, onSendSticker}) ->
+export default MessageComposer = ({onSendClicked, onSendSticker, onSendAttachment, allowSelectAttachment}) ->
   client = useContext MatrixClientContext
   [theme, styles] = useStyles buildStyles
   [text, setText] = useState ""
@@ -30,6 +31,20 @@ export default MessageComposer = ({onSendClicked, onSendSticker}) ->
         value={text}
         onChangeText={setText}
         style={styles.styleTextInput}/>
+      {
+        if onSendAttachment?
+          <IconButton
+            icon="attachment"
+            color={theme.COLOR_PRIMARY}
+            onPress={->
+              return unless allowSelectAttachment
+              try
+                uri = await NativeUtils.openDocument()
+                onSendAttachment uri
+              catch err
+                console.log err
+            }/>
+      }
       {
         if onSendSticker?
           <IconButton
