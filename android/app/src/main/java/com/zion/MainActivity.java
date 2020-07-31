@@ -37,6 +37,8 @@ public class MainActivity extends ReactActivity {
                 if (resultData != null) {
                     uri = resultData.getData();
                     doSaveFile(mFileToSave, uri, mSaveFilePromise);
+                } else {
+                    mSaveFilePromise.reject("Unknown error");
                 }
             } else {
                 mSaveFilePromise.reject("The user did not choose a location to save");
@@ -48,6 +50,8 @@ public class MainActivity extends ReactActivity {
                 if (resultData != null) {
                     Uri uri = resultData.getData();
                     mOpenFilePromise.resolve(uri.toString());
+                } else {
+                    mOpenFilePromise.reject("Unknown error");
                 }
             } else {
                 mOpenFilePromise.reject("The user cancelled the opening action");
@@ -72,6 +76,7 @@ public class MainActivity extends ReactActivity {
     void saveFileToExternal(String path, String title, String mime, Promise promise) {
         if (mFileToSave != null) {
             promise.reject("The last save was not completed");
+            return;
         }
 
         mFileToSave = path;
