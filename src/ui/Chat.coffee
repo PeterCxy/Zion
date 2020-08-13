@@ -152,10 +152,8 @@ export default Chat = ({route, navigation}) ->
         setAttachmentUploading true
         setAttachmentUploadProgress -1
         try
-          mxcUrl = await NativeUtils.uploadContentUri client, uri, (uploaded, total) ->
-            setAttachmentUploadProgress uploaded / total
-          console.log mxcUrl
-          # TODO: complete this
+          await mext.sendAttachment client, roomId, uri, (progress) ->
+            setAttachmentUploadProgress progress
         catch err
           console.log "Failed to upload content, error:"
           console.log err

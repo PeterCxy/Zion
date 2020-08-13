@@ -5,7 +5,11 @@ import android.content.Context;
 import android.content.ClipData;
 import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.media.ExifInterface;
 import android.net.Uri;
+import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
@@ -137,6 +141,52 @@ public class NativeUtils extends ReactContextBaseJavaModule {
                     promise.resolve(result);
                 else
                     promise.reject("unknown error");
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void getContentUriName(String uri, Promise promise) {
+        promise.resolve(getContentUriName(Uri.parse(uri)));
+    }
+
+    @ReactMethod
+    public void getContentUriSize(String uri, Promise promise) {
+        promise.resolve(getContentUriSize(Uri.parse(uri)));
+    }
+
+    @ReactMethod
+    public void getContentUriMime(String uri, Promise promise) {
+        promise.resolve(getContentUriMime(Uri.parse(uri)));
+    }
+
+    @ReactMethod
+    public void getImageDimensions(String contentUri, Promise promise) {
+        new Thread(() -> {
+            Uri uri = Uri.parse(contentUri);
+
+            try (
+                ParcelFileDescriptor pFd = mContext.getContentResolver().openFileDescriptor(uri, "r");
+            ) {
+                BitmapFactory.Options options = new BitmapFactory.Options();
+                options.inJustDecodeBounds = true;
+                BitmapFactory.decodeFileDescriptor(pFd.getFileDescriptor(), null, options);
+                
+                ExifInterface exif = new ExifInterface(pFd.getFileDescriptor());
+                int orientation = exif.getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_NORMAL);
+
+                WritableMap ret = Arguments.createMap();
+                if (orientation == ExifInterface.ORIENTATION_ROTATE_90
+                        || orientation == ExifInterface.ORIENTATION_ROTATE_270) {
+                    ret.putInt("width", options.outHeight);
+                    ret.putInt("height", options.outWidth);
+                } else {
+                    ret.putInt("width", options.outWidth);
+                    ret.putInt("height", options.outHeight);
+                }
+                promise.resolve(ret);
             } catch (Exception e) {
                 promise.reject(e.getMessage());
             }

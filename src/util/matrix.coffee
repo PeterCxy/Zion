@@ -3,6 +3,7 @@
 import { translate } from "./i18n"
 import { PixelRatio } from "react-native"
 import Markdown from "./Markdown"
+import NativeUtils from "./NativeUtils"
 import escape from 'lodash/escape'
 
 export AVATAR_SIZE_HUGE = 128 * PixelRatio.get()
@@ -245,6 +246,39 @@ export sendSticker = (client, roomId, url, desc, info) ->
     url: url
     body: desc
     info: info
+
+export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
+  # TODO: encrypted attachments, and encrypted thumbnails
+  mxcUrl = await NativeUtils.uploadContentUri client, localFileUri, (uploaded, total) ->
+    progressCallback uploaded / total
+
+  # Build attachment info
+  # We don't worry about if localFileUri can be resolved because
+  # if not, the previous call to `uploadContentUri` would have thrown
+  info =
+    mimetype: await NativeUtils.getContentUriMime localFileUri
+    size: await NativeUtils.getContentUriSize localFileUri
+  
+  if info.mimetype.startsWith 'image/'
+    # We can get dimensions of an image
+    dimensions = await NativeUtils.getImageDimensions localFileUri
+    info.w = dimensions.width
+    info.h = dimensions.height
+  # TODO: detailed info for other MIME types
+
+  # Build the event content
+  content =
+    body: await NativeUtils.getContentUriName localFileUri
+    url: mxcUrl
+    info: info
+    msgtype: switch info.mimetype.split('/')[0]
+      when 'image' then 'm.image'
+      when 'audio' then 'm.audio'
+      when 'video' then 'm.video'
+      else 'm.file'
+
+  client.sendEvent roomId, 'm.room.message', content
+
 
 export cancelEvent = (client, roomId, eventId) ->
   ev = findPendingEventInRoom client, roomId, eventId
