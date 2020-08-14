@@ -15,4 +15,8 @@ NativeModules.NativeUtils.uploadContentUri = (client, uri, progressCallback) ->
   finally
     eventEmitter.removeListener "onProgress_#{uri}", progressListener
 
+_uploadContentThumbnail = NativeModules.NativeUtils.uploadContentThumbnail
+NativeModules.NativeUtils.uploadContentThumbnail = (client, uri, size) ->
+  _uploadContentThumbnail client.getHomeserverUrl(), client.getAccessToken(), uri, size
+
 export default NativeModules.NativeUtils

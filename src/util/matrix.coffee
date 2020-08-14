@@ -270,6 +270,17 @@ export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
     info.h = dimensions.height 
   # TODO: detailed info for other MIME types
 
+  # In some cases we also need to generate thumbnails
+  # TODO: add the case for encrypted rooms here
+  if info.mimetype.startsWith 'video/'
+    thumbnail = await NativeUtils.uploadContentThumbnail client, localFileUri, 512
+    info.thumbnail_url = thumbnail.url
+    info.thumbnail_info =
+      mimetype: thumbnail.mime
+      w: thumbnail.width
+      h: thumbnail.height
+      size: thumbnail.size
+
   # Build the event content
   content =
     body: await NativeUtils.getContentUriName localFileUri

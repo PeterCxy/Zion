@@ -12,6 +12,7 @@ import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
+import android.util.Size;
 
 import com.facebook.react.modules.core.DeviceEventManagerModule;
 import com.facebook.react.bridge.Arguments;
@@ -25,6 +26,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -225,6 +228,32 @@ public class NativeUtils extends ReactContextBaseJavaModule {
         }).start();
     }
 
+    // Uploads unencrypted thumbnail of a content URI
+    // Note that the content URI MUST be 
+    @ReactMethod
+    public void uploadContentThumbnail(String baseUrl, String token,
+            String contentUri, int size, Promise promise) {
+        new Thread(() -> {
+            Uri uri = Uri.parse(contentUri);
+            int[] outSize = new int[3];
+
+            try (
+                InputStream thumbStream = extractThumbnail(uri, size, outSize);
+            ) {
+                String mxcUrl = uploadMedia(baseUrl, token, "thumbnail.png", "image/png", thumbStream, null);
+                WritableMap ret = Arguments.createMap();
+                ret.putString("url", mxcUrl);
+                ret.putString("mime", "image/png");
+                ret.putInt("size", outSize[2]);
+                ret.putInt("width", outSize[0]);
+                ret.putInt("height", outSize[1]);
+                promise.resolve(ret);
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
+    }
+
     private String getContentUriName(Uri uri) {
         Cursor cursor = mContext.getContentResolver().query(uri, null, null, null, null);
         try {
@@ -253,6 +282,26 @@ public class NativeUtils extends ReactContextBaseJavaModule {
 
     private String getContentUriMime(Uri uri) {
         return mContext.getContentResolver().getType(uri);
+    }
+
+    // Extract a thumbnail image from a content uri
+    // with a hinted size (only a hint, and does not distinguish
+    // width and height -- any dimension larger than this may
+    // trigger a downscaling, but the output dimensions may not
+    // be the same as this parameter -- it will be close enough)
+    // The returned InputStream ALWAYS contains data in PNG format
+    private InputStream extractThumbnail(Uri uri, int size, int[] outSize) throws IOException {
+        Bitmap bmp = mContext.getContentResolver().loadThumbnail(uri,
+            new Size(size, size), null);
+        ByteArrayOutputStream os = new ByteArrayOutputStream();
+        bmp.compress(Bitmap.CompressFormat.PNG, 0, os);
+        byte[] data = os.toByteArray();
+        if (outSize != null && outSize.length == 3) {
+            outSize[0] = bmp.getWidth();
+            outSize[1] = bmp.getHeight();
+            outSize[2] = data.length;
+        }
+        return new ByteArrayInputStream(data);
     }
 
     interface UploadProgressListener {
