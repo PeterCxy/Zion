@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.ExifInterface;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.ParcelFileDescriptor;
 import android.provider.OpenableColumns;
@@ -185,6 +186,37 @@ public class NativeUtils extends ReactContextBaseJavaModule {
                 } else {
                     ret.putInt("width", options.outWidth);
                     ret.putInt("height", options.outHeight);
+                }
+                promise.resolve(ret);
+            } catch (Exception e) {
+                promise.reject(e.getMessage());
+            }
+        }).start();
+    }
+
+    @ReactMethod
+    public void getVideoDimensions(String contentUri, Promise promise) {
+        new Thread(() -> {
+            Uri uri = Uri.parse(contentUri);
+
+            try (
+                ParcelFileDescriptor pFd = mContext.getContentResolver().openFileDescriptor(uri, "r");
+            ) {
+                MediaMetadataRetriever retriever = new MediaMetadataRetriever();
+                retriever.setDataSource(pFd.getFileDescriptor());
+                int orientation = Integer.parseInt(
+                    retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_ROTATION));
+                WritableMap ret = Arguments.createMap();
+                if (orientation == 90 || orientation == 270) {
+                    ret.putInt("width", Integer.parseInt(
+                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)));
+                    ret.putInt("height", Integer.parseInt(
+                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)));
+                } else {
+                    ret.putInt("width", Integer.parseInt(
+                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_WIDTH)));
+                    ret.putInt("height", Integer.parseInt(
+                        retriever.extractMetadata(MediaMetadataRetriever.METADATA_KEY_VIDEO_HEIGHT)));
                 }
                 promise.resolve(ret);
             } catch (Exception e) {

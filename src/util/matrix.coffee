@@ -264,6 +264,10 @@ export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
     dimensions = await NativeUtils.getImageDimensions localFileUri
     info.w = dimensions.width
     info.h = dimensions.height
+  else if info.mimetype.startsWith 'video/'
+    dimensions = await NativeUtils.getVideoDimensions localFileUri
+    info.w = dimensions.width
+    info.h = dimensions.height 
   # TODO: detailed info for other MIME types
 
   # Build the event content
