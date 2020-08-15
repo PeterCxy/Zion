@@ -248,8 +248,8 @@ export sendSticker = (client, roomId, url, desc, info) ->
     info: info
 
 export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
-  # TODO: encrypted attachments, and encrypted thumbnails
-  mxcUrl = await NativeUtils.uploadContentUri client, localFileUri, (uploaded, total) ->
+  encrypt = client.isRoomEncrypted roomId
+  mxcInfo = await NativeUtils.uploadContentUri client, localFileUri, encrypt, (uploaded, total) ->
     progressCallback uploaded / total
 
   # Build attachment info
@@ -271,10 +271,12 @@ export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
   # TODO: detailed info for other MIME types
 
   # In some cases we also need to generate thumbnails
-  # TODO: add the case for encrypted rooms here
-  if info.mimetype.startsWith 'video/'
-    thumbnail = await NativeUtils.uploadContentThumbnail client, localFileUri, 512
-    info.thumbnail_url = thumbnail.url
+  if info.mimetype.startsWith('video/') or (encrypt and info.mimetype.startsWith('image/'))
+    thumbnail = await NativeUtils.uploadContentThumbnail client, localFileUri, 512, encrypt
+    unless encrypt
+      info.thumbnail_url = thumbnail.url
+    else
+      info.thumbnail_file = buildEncryptedFileInfo thumbnail.url, thumbnail.crypto
     info.thumbnail_info =
       mimetype: thumbnail.mime
       w: thumbnail.width
@@ -284,7 +286,6 @@ export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
   # Build the event content
   content =
     body: await NativeUtils.getContentUriName localFileUri
-    url: mxcUrl
     info: info
     msgtype: switch info.mimetype.split('/')[0]
       when 'image' then 'm.image'
@@ -292,7 +293,28 @@ export sendAttachment = (client, roomId, localFileUri, progressCallback) ->
       when 'video' then 'm.video'
       else 'm.file'
 
+  unless encrypt
+    content.url = mxcInfo.url
+  else
+    # EncryptedFile
+    content.file = buildEncryptedFileInfo mxcInfo.url, mxcInfo.crypto
+
   client.sendEvent roomId, 'm.room.message', content
+
+buildEncryptedFileInfo = (url, {encodedKey, encodedIv, encodedSha256}) ->
+  return
+    url: url
+    key:
+      # JSON Web Key
+      kty: 'oct'
+      key_ops: ['encrypt', 'decrypt']
+      alg: 'A256CTR' # Only supported alg
+      k: encodedKey
+      ext: true
+    iv: encodedIv
+    hashes:
+      sha256: encodedSha256
+    v: 'v2'
 
 
 export cancelEvent = (client, roomId, eventId) ->

@@ -116,9 +116,12 @@ public class NativeUtils extends ReactContextBaseJavaModule {
     }
 
     // Upload a content Uri opened by openDocument() to a matrix media repository,
-    // returning the mxc:// url
+    // returning an object containing the mxc:// url in the "url field"
+    // If encrypt is true, then the uploaded file will be encrypted whose parameters
+    // will be generated and placed in the "crypto" field of the returned object
     @ReactMethod
-    public void uploadContentUri(String baseUrl, String token, String contentUri, Promise promise) {
+    public void uploadContentUri(String baseUrl, String token, String contentUri,
+            boolean encrypt, Promise promise) {
         Uri uri = Uri.parse(contentUri);
         String name = getContentUriName(uri);
         String mime = getContentUriMime(uri);
@@ -135,16 +138,27 @@ public class NativeUtils extends ReactContextBaseJavaModule {
             try (
                 InputStream is = mContext.getContentResolver().openInputStream(uri);
             ) {
-                String result = uploadMedia(baseUrl, token, name, mime, is, (uploaded) -> {
-                    WritableMap params = Arguments.createMap();
-                    params.putInt("total", size);
-                    params.putInt("uploaded", uploaded);
-                    emitter.emit("onProgress_" + contentUri, params);
-                });
-                if (result != null)
-                    promise.resolve(result);
-                else
+                EncryptedAttachment.EncryptionParameters encParams =
+                    new EncryptedAttachment.EncryptionParameters();
+                String result = uploadMedia(baseUrl, token,
+                    encrypt ? "encrypted.bin" : name,
+                    encrypt ? "application/octet-stream" : mime,
+                    encrypt ? EncryptedAttachment.encryptAndDigestStream(is, encParams) : is,
+                    (uploaded) -> {
+                        WritableMap params = Arguments.createMap();
+                        params.putInt("total", size);
+                        params.putInt("uploaded", uploaded);
+                        emitter.emit("onProgress_" + contentUri, params);
+                    });
+                if (result != null) {
+                    WritableMap ret = Arguments.createMap();
+                    ret.putString("url", result);
+                    if (encrypt)
+                        ret.putMap("crypto", EncryptedAttachment.buildEncryptedAttachmentInfo(encParams));
+                    promise.resolve(ret);
+                } else {
                     promise.reject("unknown error");
+                }
             } catch (Exception e) {
                 promise.reject(e.getMessage());
             }
@@ -228,11 +242,13 @@ public class NativeUtils extends ReactContextBaseJavaModule {
         }).start();
     }
 
-    // Uploads unencrypted thumbnail of a content URI
-    // Note that the content URI MUST be 
+    // Uploads (optionally encrypted) thumbnail of a content URI
+    // Note that the content URI MUST be an image or a video
+    // If encrypt = true, the parameters used for encryption will be
+    // filled into the "crypto" field of the returned object
     @ReactMethod
     public void uploadContentThumbnail(String baseUrl, String token,
-            String contentUri, int size, Promise promise) {
+            String contentUri, int size, boolean encrypt, Promise promise) {
         new Thread(() -> {
             Uri uri = Uri.parse(contentUri);
             int[] outSize = new int[3];
@@ -240,13 +256,22 @@ public class NativeUtils extends ReactContextBaseJavaModule {
             try (
                 InputStream thumbStream = extractThumbnail(uri, size, outSize);
             ) {
-                String mxcUrl = uploadMedia(baseUrl, token, "thumbnail.png", "image/png", thumbStream, null);
+                EncryptedAttachment.EncryptionParameters encParams =
+                    new EncryptedAttachment.EncryptionParameters();
+                String mxcUrl = uploadMedia(baseUrl, token,
+                    encrypt ? "encrypted_thumbnail.bin" : "thumbnail.png",
+                    encrypt ? "application/octet-stream" : "image/png",
+                    encrypt ?
+                        EncryptedAttachment.encryptAndDigestStream(thumbStream, encParams) : thumbStream,
+                    null);
                 WritableMap ret = Arguments.createMap();
                 ret.putString("url", mxcUrl);
                 ret.putString("mime", "image/png");
                 ret.putInt("size", outSize[2]);
                 ret.putInt("width", outSize[0]);
                 ret.putInt("height", outSize[1]);
+                if (encrypt)
+                    ret.putMap("crypto", EncryptedAttachment.buildEncryptedAttachmentInfo(encParams));
                 promise.resolve(ret);
             } catch (Exception e) {
                 promise.reject(e.getMessage());
